@@ -273,7 +273,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               GELİŞMİŞ SAAS ÖZELLİKLERİ
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-              Apsiyon Standardında, Tamamen Ücretsiz.
+              Kurumsal Standartlarda, Tamamen Ücretsiz.
             </h2>
             <p className="text-sm text-slate-300 font-medium">
               Profesyonel yönetim şirketlerinin ve site yöneticilerinin ihtiyaç duyduğu tüm araçlar eksiksiz ve kullanıma hazır.
