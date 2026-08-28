@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Building2, Users, Receipt, HandCoins,
   ShieldAlert, ArrowUpRight, Landmark, Handshake, PieChart,
   FileText, LifeBuoy, Bell, Wrench, UserCheck, ShieldCheck,
-  Gauge, Vote, Settings, ChevronDown, Check, LogOut,
+  Gauge, Vote, Settings, ChevronDown, Check, LogOut, LogIn,
   Search, Plus, Sparkles, User, HelpCircle, Layers, CheckCircle2,
   CalendarDays, Wallet, CreditCard, ArrowRightLeft, Eye, RefreshCcw
 } from "lucide-react";
@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppModule, UserRole } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
 import { toast } from "sonner";
+import LoginModal from "@/components/LoginModal";
 
 // Import all module views
 import DashboardView from "./modules/DashboardView";
@@ -44,7 +45,8 @@ export default function Home() {
 
   const {
     currentUser, activeRole, roleDef, switchRole,
-    allUsers, switchUser, canAccessModule, isResidentRole
+    allUsers, switchUser, canAccessModule, isResidentRole,
+    isLoginModalOpen, setIsLoginModalOpen, logout
   } = useAuth();
 
   const [activeModule, setActiveModule] = useState<AppModule>("DASHBOARD");
@@ -281,8 +283,8 @@ export default function Home() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* TOPBAR */}
         <header className="h-16 bg-white border-b border-[#e4eae3] px-6 flex items-center justify-between flex-shrink-0 z-10">
-          {/* Breadcrumb / Search */}
-          <div className="flex items-center gap-3">
+          {/* Breadcrumb / Slogans */}
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#7c8a87]">
               <span>{activeSite.name}</span>
               <span>/</span>
@@ -290,9 +292,17 @@ export default function Home() {
                 {navCategories.flatMap(c => c.items).find(i => i.id === activeModule)?.label || "Modül"}
               </span>
             </div>
+
+            {/* Slogans badge */}
+            <div className="hidden xl:flex items-center gap-2 text-[11px] text-[#556b66] bg-[#f4f6f2] px-3 py-1 rounded-full border border-[#e4eae3]">
+              <Sparkles size={13} className="text-emerald-700" />
+              <span>Aidattan Yönetime, Her Şey Tek Yerde.</span>
+              <span className="text-slate-300">·</span>
+              <span className="font-semibold text-emerald-800">Siteniz Kontrol Altında</span>
+            </div>
           </div>
 
-          {/* Quick Actions & Role Switcher Popover */}
+          {/* Quick Actions, Login & Role Switcher */}
           <div className="flex items-center gap-3">
             {/* Quick module action button */}
             {activeModule === "DASHBOARD" && (
@@ -303,6 +313,32 @@ export default function Home() {
                 <Plus size={14} /> Toplu Borçlandır
               </button>
             )}
+
+            {/* Google / E-Posta Giriş Butonu */}
+            <button
+              onClick={() => setIsLoginModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#d2dbd7] hover:border-slate-400 text-slate-800 text-xs font-bold transition shadow-xs"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                />
+              </svg>
+              Giriş / Hesap
+            </button>
 
             {/* Notification Bell */}
             <div className="relative">
@@ -386,7 +422,7 @@ export default function Home() {
                         >
                           <div>
                             <strong className="block text-xs">{user.name}</strong>
-                            <span className="text-[10px] text-slate-500">{user.siteName} · {user.role}</span>
+                            <span className="text-[10px] text-slate-500">{user.siteName || activeSite.name} · {user.role}</span>
                           </div>
                           {user.id === currentUser.id && <CheckCircle2 size={15} className="text-emerald-700" />}
                         </button>
@@ -398,6 +434,12 @@ export default function Home() {
             </div>
           </div>
         </header>
+
+        {/* Login Modal */}
+        <LoginModal
+          isOpen={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
+        />
 
         {/* SCROLLABLE MODULE VIEW CONTAINER */}
         <main className="flex-1 overflow-y-auto p-6 lg:p-8 scrollbar-thin">

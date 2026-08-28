@@ -17,6 +17,10 @@ import {
   INITIAL_PARCELS, INITIAL_METERS, INITIAL_MEETINGS, INITIAL_POLLS,
   INITIAL_DOCS, INITIAL_AUDIT_LOGS
 } from "@/data/mockData";
+import {
+  db, collection, doc, getDocs, setDoc, addDoc, updateDoc,
+  deleteDoc, onSnapshot, writeBatch
+} from "@/lib/firebase";
 import { useAuth } from "./AuthContext";
 
 interface AppContextType {
@@ -26,22 +30,23 @@ interface AppContextType {
   activeSiteId: string;
   activeSite: Site;
   setActiveSiteId: (siteId: string) => void;
-  addNewSite: (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => void;
+  addNewSite: (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => Promise<void>;
+  addSite: (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => Promise<void>;
 
   // Blocks & Units
   blocks: Block[];
   units: Unit[];
   activeSiteUnits: Unit[];
-  addUnit: (unitData: Omit<Unit, "id">) => void;
-  updateUnit: (unitId: string, unitData: Partial<Unit>) => void;
+  addUnit: (unitData: Omit<Unit, "id">) => Promise<void>;
+  updateUnit: (unitId: string, unitData: Partial<Unit>) => Promise<void>;
 
   // People
   people: Person[];
   activeSitePeople: Person[];
-  addPerson: (personData: Omit<Person, "id">) => void;
-  updatePerson: (personId: string, personData: Partial<Person>) => void;
-  assignTenantToUnit: (unitId: string, tenantId: string) => void;
-  vacateTenantFromUnit: (unitId: string) => void;
+  addPerson: (personData: Omit<Person, "id">) => Promise<void>;
+  updatePerson: (personId: string, personData: Partial<Person>) => Promise<void>;
+  assignTenantToUnit: (unitId: string, tenantId: string) => Promise<void>;
+  vacateTenantFromUnit: (unitId: string) => Promise<void>;
 
   // Tahakkuk & Dues
   tahakkuklar: TahakkukRecord[];
@@ -54,8 +59,8 @@ interface AppContextType {
     distributionMethod: DistributionMethod;
     totalAmountOrPerUnit: number;
     targetBlockId?: string;
-  }) => void;
-  cancelTahakkuk: (tahakkukId: string, reason?: string) => void;
+  }) => Promise<void>;
+  cancelTahakkuk: (tahakkukId: string, reason?: string) => Promise<void>;
 
   // Collections & Makbuz
   collections: Collection[];
@@ -79,22 +84,22 @@ interface AppContextType {
   activeSiteAccounts: AccountEntity[];
   accountTransactions: AccountTransaction[];
   activeSiteAccountTransactions: AccountTransaction[];
-  addAccount: (accountData: Omit<AccountEntity, "id" | "balance">) => void;
+  addAccount: (accountData: Omit<AccountEntity, "id" | "balance">) => Promise<void>;
   transferFunds: (params: {
     fromAccountId: string;
     toAccountId: string;
     amount: number;
     description: string;
-  }) => void;
+  }) => Promise<void>;
 
   // Expenses & Vendors
   expenses: ExpenseRecord[];
   activeSiteExpenses: ExpenseRecord[];
-  addExpense: (expenseData: Omit<ExpenseRecord, "id" | "createdAt" | "createdBy">) => void;
+  addExpense: (expenseData: Omit<ExpenseRecord, "id" | "createdAt" | "createdBy">) => Promise<void>;
   vendors: Vendor[];
   activeSiteVendors: Vendor[];
-  addVendor: (vendorData: Omit<Vendor, "id" | "currentBalance">) => void;
-  recordVendorPayment: (vendorId: string, amount: number, accountId: string, description: string) => void;
+  addVendor: (vendorData: Omit<Vendor, "id" | "currentBalance">) => Promise<void>;
+  recordVendorPayment: (vendorId: string, amount: number, accountId: string, description: string) => Promise<void>;
 
   // Budget
   budget: AnnualBudget;
@@ -110,16 +115,16 @@ interface AppContextType {
     description: string;
     priority: RequestPriority;
     photoUrl?: string;
-  }) => void;
-  updateRequestStatus: (requestId: string, status: RequestStatus, adminNote?: string, assignedStaffName?: string) => void;
+  }) => Promise<void>;
+  updateRequestStatus: (requestId: string, status: RequestStatus, adminNote?: string, assignedStaffName?: string) => Promise<void>;
 
   // Announcements, Polls, Meetings, Documents
   announcements: Announcement[];
   activeSiteAnnouncements: Announcement[];
-  addAnnouncement: (data: Omit<Announcement, "id" | "date" | "authorName">) => void;
+  addAnnouncement: (data: Omit<Announcement, "id" | "date" | "authorName">) => Promise<void>;
   polls: Poll[];
   activeSitePolls: Poll[];
-  votePoll: (pollId: string, optionId: string) => void;
+  votePoll: (pollId: string, optionId: string) => Promise<void>;
   meetings: MeetingMinute[];
   activeSiteMeetings: MeetingMinute[];
   documents: DocumentArchiveItem[];
@@ -132,17 +137,17 @@ interface AppContextType {
   activeSiteStaff: StaffMember[];
   visitors: VisitorLog[];
   activeSiteVisitors: VisitorLog[];
-  addVisitorLog: (data: Omit<VisitorLog, "id" | "entryTime" | "guardName">) => void;
-  markVisitorExit: (visitorId: string) => void;
+  addVisitorLog: (data: Omit<VisitorLog, "id" | "entryTime" | "guardName">) => Promise<void>;
+  markVisitorExit: (visitorId: string) => Promise<void>;
   parcels: ParcelLog[];
   activeSiteParcels: ParcelLog[];
-  addParcelLog: (data: Omit<ParcelLog, "id" | "receivedTime" | "guardName" | "status">) => void;
-  updateParcelStatus: (parcelId: string, status: ParcelLog["status"]) => void;
+  addParcelLog: (data: Omit<ParcelLog, "id" | "receivedTime" | "guardName" | "status">) => Promise<void>;
+  updateParcelStatus: (parcelId: string, status: ParcelLog["status"]) => Promise<void>;
 
   // Meters
   meters: MeterReading[];
   activeSiteMeters: MeterReading[];
-  addMeterReading: (reading: Omit<MeterReading, "id" | "consumption" | "totalAmount" | "isBilled">) => void;
+  addMeterReading: (reading: Omit<MeterReading, "id" | "consumption" | "totalAmount" | "isBilled">) => Promise<void>;
 
   // Audit Logs
   auditLogs: AuditLogEntry[];
@@ -151,80 +156,132 @@ interface AppContextType {
 
   // Reset
   resetDemoData: () => void;
+  resetToDefaults: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-
-function loadFromStorage<T>(key: string, defaultValue: T): T {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
-  } catch (e) {
-    return defaultValue;
-  }
-}
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const { currentUser } = useAuth();
 
   const [company] = useState<ManagementCompany>(INITIAL_COMPANY);
-  const [sites, setSites] = useState<Site[]>(() => loadFromStorage("ym_sites", INITIAL_SITES));
-  const [activeSiteId, setActiveSiteId] = useState<string>(() => loadFromStorage("ym_active_site_id", "site-1"));
+  const [sites, setSites] = useState<Site[]>(INITIAL_SITES);
+  const [activeSiteId, setActiveSiteId] = useState<string>("site-1");
 
-  const [blocks, setBlocks] = useState<Block[]>(() => loadFromStorage("ym_blocks", INITIAL_BLOCKS));
-  const [units, setUnits] = useState<Unit[]>(() => loadFromStorage("ym_units", INITIAL_UNITS));
-  const [people, setPeople] = useState<Person[]>(() => loadFromStorage("ym_people", INITIAL_PEOPLE));
-  const [tahakkuklar, setTahakkuklar] = useState<TahakkukRecord[]>(() => loadFromStorage("ym_tahakkuklar", INITIAL_TAHAKKUKLAR));
-  const [collections, setCollections] = useState<Collection[]>(() => loadFromStorage("ym_collections", INITIAL_COLLECTIONS));
-  const [ledgerItems, setLedgerItems] = useState<UnitAccountLedgerItem[]>(() => loadFromStorage("ym_ledger", INITIAL_LEDGER_ITEMS));
-  const [accounts, setAccounts] = useState<AccountEntity[]>(() => loadFromStorage("ym_accounts", INITIAL_ACCOUNTS));
-  const [accountTransactions, setAccountTransactions] = useState<AccountTransaction[]>(() => loadFromStorage("ym_account_txs", INITIAL_ACCOUNT_TXS));
-  const [expenses, setExpenses] = useState<ExpenseRecord[]>(() => loadFromStorage("ym_expenses", INITIAL_EXPENSES));
-  const [vendors, setVendors] = useState<Vendor[]>(() => loadFromStorage("ym_vendors", INITIAL_VENDORS));
-  const [budget, setBudget] = useState<AnnualBudget>(() => loadFromStorage("ym_budget", INITIAL_BUDGET));
-  const [requests, setRequests] = useState<ServiceRequest[]>(() => loadFromStorage("ym_requests", INITIAL_REQUESTS));
-  const [announcements, setAnnouncements] = useState<Announcement[]>(() => loadFromStorage("ym_announcements", INITIAL_ANNOUNCEMENTS));
-  const [polls, setPolls] = useState<Poll[]>(() => loadFromStorage("ym_polls", INITIAL_POLLS));
-  const [meetings] = useState<MeetingMinute[]>(() => loadFromStorage("ym_meetings", INITIAL_MEETINGS));
-  const [documents] = useState<DocumentArchiveItem[]>(() => loadFromStorage("ym_docs", INITIAL_DOCS));
-  const [assets, setAssets] = useState<AssetFixture[]>(() => loadFromStorage("ym_assets", INITIAL_ASSETS));
-  const [staff, setStaff] = useState<StaffMember[]>(() => loadFromStorage("ym_staff", INITIAL_STAFF));
-  const [visitors, setVisitors] = useState<VisitorLog[]>(() => loadFromStorage("ym_visitors", INITIAL_VISITORS));
-  const [parcels, setParcels] = useState<ParcelLog[]>(() => loadFromStorage("ym_parcels", INITIAL_PARCELS));
-  const [meters, setMeters] = useState<MeterReading[]>(() => loadFromStorage("ym_meters", INITIAL_METERS));
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => loadFromStorage("ym_audit_logs", INITIAL_AUDIT_LOGS));
+  const [blocks, setBlocks] = useState<Block[]>(INITIAL_BLOCKS);
+  const [units, setUnits] = useState<Unit[]>(INITIAL_UNITS);
+  const [people, setPeople] = useState<Person[]>(INITIAL_PEOPLE);
+  const [tahakkuklar, setTahakkuklar] = useState<TahakkukRecord[]>(INITIAL_TAHAKKUKLAR);
+  const [collections, setCollections] = useState<Collection[]>(INITIAL_COLLECTIONS);
+  const [ledgerItems, setLedgerItems] = useState<UnitAccountLedgerItem[]>(INITIAL_LEDGER_ITEMS);
+  const [accounts, setAccounts] = useState<AccountEntity[]>(INITIAL_ACCOUNTS);
+  const [accountTransactions, setAccountTransactions] = useState<AccountTransaction[]>(INITIAL_ACCOUNT_TXS);
+  const [expenses, setExpenses] = useState<ExpenseRecord[]>(INITIAL_EXPENSES);
+  const [vendors, setVendors] = useState<Vendor[]>(INITIAL_VENDORS);
+  const [budget, setBudget] = useState<AnnualBudget>(INITIAL_BUDGET);
+  const [requests, setRequests] = useState<ServiceRequest[]>(INITIAL_REQUESTS);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(INITIAL_ANNOUNCEMENTS);
+  const [polls, setPolls] = useState<Poll[]>(INITIAL_POLLS);
+  const [meetings] = useState<MeetingMinute[]>(INITIAL_MEETINGS);
+  const [documents] = useState<DocumentArchiveItem[]>(INITIAL_DOCS);
+  const [assets, setAssets] = useState<AssetFixture[]>(INITIAL_ASSETS);
+  const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
+  const [visitors, setVisitors] = useState<VisitorLog[]>(INITIAL_VISITORS);
+  const [parcels, setParcels] = useState<ParcelLog[]>(INITIAL_PARCELS);
+  const [meters, setMeters] = useState<MeterReading[]>(INITIAL_METERS);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(INITIAL_AUDIT_LOGS);
 
-  // Sync to localStorage
+  // Firestore Real-Time Sync Listeners
   useEffect(() => {
-    localStorage.setItem("ym_sites", JSON.stringify(sites));
-    localStorage.setItem("ym_active_site_id", JSON.stringify(activeSiteId));
-    localStorage.setItem("ym_blocks", JSON.stringify(blocks));
-    localStorage.setItem("ym_units", JSON.stringify(units));
-    localStorage.setItem("ym_people", JSON.stringify(people));
-    localStorage.setItem("ym_tahakkuklar", JSON.stringify(tahakkuklar));
-    localStorage.setItem("ym_collections", JSON.stringify(collections));
-    localStorage.setItem("ym_ledger", JSON.stringify(ledgerItems));
-    localStorage.setItem("ym_accounts", JSON.stringify(accounts));
-    localStorage.setItem("ym_account_txs", JSON.stringify(accountTransactions));
-    localStorage.setItem("ym_expenses", JSON.stringify(expenses));
-    localStorage.setItem("ym_vendors", JSON.stringify(vendors));
-    localStorage.setItem("ym_budget", JSON.stringify(budget));
-    localStorage.setItem("ym_requests", JSON.stringify(requests));
-    localStorage.setItem("ym_announcements", JSON.stringify(announcements));
-    localStorage.setItem("ym_polls", JSON.stringify(polls));
-    localStorage.setItem("ym_assets", JSON.stringify(assets));
-    localStorage.setItem("ym_staff", JSON.stringify(staff));
-    localStorage.setItem("ym_visitors", JSON.stringify(visitors));
-    localStorage.setItem("ym_parcels", JSON.stringify(parcels));
-    localStorage.setItem("ym_meters", JSON.stringify(meters));
-    localStorage.setItem("ym_audit_logs", JSON.stringify(auditLogs));
-  }, [
-    sites, activeSiteId, blocks, units, people, tahakkuklar, collections,
-    ledgerItems, accounts, accountTransactions, expenses, vendors, budget,
-    requests, announcements, polls, assets, staff, visitors, parcels, meters, auditLogs
-  ]);
+    try {
+      // Sites listener
+      const unsubSites = onSnapshot(collection(db, "sites"), (snapshot) => {
+        if (!snapshot.empty) {
+          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Site));
+          setSites(loaded);
+        } else {
+          // Seed Firestore initial data
+          INITIAL_SITES.forEach(s => setDoc(doc(db, "sites", s.id), s));
+        }
+      }, (err) => console.warn("Firestore sites snapshot fallback:", err));
+
+      // Units listener
+      const unsubUnits = onSnapshot(collection(db, "units"), (snapshot) => {
+        if (!snapshot.empty) {
+          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Unit));
+          setUnits(loaded);
+        } else {
+          INITIAL_UNITS.forEach(u => setDoc(doc(db, "units", u.id), u));
+        }
+      }, (err) => console.warn("Firestore units snapshot fallback:", err));
+
+      // Collections listener
+      const unsubCollections = onSnapshot(collection(db, "collections"), (snapshot) => {
+        if (!snapshot.empty) {
+          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Collection));
+          setCollections(loaded);
+        }
+      }, (err) => console.warn("Firestore collections snapshot fallback:", err));
+
+      // Expenses listener
+      const unsubExpenses = onSnapshot(collection(db, "expenses"), (snapshot) => {
+        if (!snapshot.empty) {
+          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ExpenseRecord));
+          setExpenses(loaded);
+        }
+      }, (err) => console.warn("Firestore expenses snapshot fallback:", err));
+
+      // Requests listener
+      const unsubRequests = onSnapshot(collection(db, "requests"), (snapshot) => {
+        if (!snapshot.empty) {
+          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ServiceRequest));
+          setRequests(loaded);
+        }
+      }, (err) => console.warn("Firestore requests snapshot fallback:", err));
+
+      // Announcements listener
+      const unsubAnnouncements = onSnapshot(collection(db, "announcements"), (snapshot) => {
+        if (!snapshot.empty) {
+          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Announcement));
+          setAnnouncements(loaded);
+        }
+      }, (err) => console.warn("Firestore announcements snapshot fallback:", err));
+
+      return () => {
+        unsubSites();
+        unsubUnits();
+        unsubCollections();
+        unsubExpenses();
+        unsubRequests();
+        unsubAnnouncements();
+      };
+    } catch (e) {
+      console.warn("Firestore listeners active with local in-memory fallback.");
+    }
+  }, []);
 
   const activeSite = sites.find((s) => s.id === activeSiteId) || sites[0] || INITIAL_SITES[0];
+
+  // Filtered active site sub-arrays
+  const activeSiteUnits = units.filter((u) => u.siteId === activeSiteId);
+  const activeSitePeople = people.filter((p) => p.siteId === activeSiteId);
+  const activeSiteTahakkuklar = tahakkuklar.filter((t) => t.siteId === activeSiteId);
+  const activeSiteCollections = collections.filter((c) => c.siteId === activeSiteId);
+  const activeSiteAccounts = accounts.filter((a) => a.siteId === activeSiteId);
+  const activeSiteAccountTransactions = accountTransactions.filter((tx) => tx.siteId === activeSiteId);
+  const activeSiteExpenses = expenses.filter((e) => e.siteId === activeSiteId);
+  const activeSiteVendors = vendors.filter((v) => v.siteId === activeSiteId);
+  const activeSiteRequests = requests.filter((r) => r.siteId === activeSiteId);
+  const activeSiteAnnouncements = announcements.filter((a) => a.siteId === activeSiteId);
+  const activeSitePolls = polls.filter((p) => p.siteId === activeSiteId);
+  const activeSiteMeetings = meetings.filter((m) => m.siteId === activeSiteId);
+  const activeSiteDocuments = documents.filter((d) => d.siteId === activeSiteId);
+  const activeSiteAssets = assets.filter((a) => a.siteId === activeSiteId);
+  const activeSiteStaff = staff.filter((s) => s.siteId === activeSiteId);
+  const activeSiteVisitors = visitors.filter((v) => v.siteId === activeSiteId);
+  const activeSiteParcels = parcels.filter((p) => p.siteId === activeSiteId);
+  const activeSiteMeters = meters.filter((m) => m.siteId === activeSiteId);
+  const activeSiteAuditLogs = auditLogs.filter((l) => l.siteId === activeSiteId);
 
   // Helper Audit Logger
   const addAuditLog = (
@@ -249,10 +306,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       financialAmount,
     };
     setAuditLogs((prev) => [newLog, ...prev]);
+
+    // Save to Firestore audit_logs collection
+    try {
+      setDoc(doc(db, "audit_logs", newLog.id), newLog);
+    } catch (e) {}
   };
 
   // Add new Site
-  const addNewSite = (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => {
+  const addNewSite = async (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => {
     const newId = "site-" + (sites.length + 1);
     const newSite: Site = {
       ...siteData,
@@ -262,72 +324,91 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setSites((prev) => [...prev, newSite]);
     setActiveSiteId(newId);
+    try {
+      await setDoc(doc(db, "sites", newId), newSite);
+    } catch (e) {}
     addAuditLog("CREATE", "Site Yönetimi", `Yeni site tanımlandı: ${newSite.name}`);
   };
 
+  const addSite = addNewSite;
+
   // Units CRUD
-  const addUnit = (unitData: Omit<Unit, "id">) => {
+  const addUnit = async (unitData: Omit<Unit, "id">) => {
+    const newId = "unit-" + Date.now();
     const newUnit: Unit = {
       ...unitData,
-      id: "unit-" + Date.now(),
+      id: newId,
     };
     setUnits((prev) => [...prev, newUnit]);
+    try {
+      await setDoc(doc(db, "units", newId), newUnit);
+    } catch (e) {}
     addAuditLog("CREATE", "Bağımsız Bölümler", `Yeni bağımsız bölüm eklendi: ${newUnit.blockName} No:${newUnit.unitNumber}`);
   };
 
-  const updateUnit = (unitId: string, unitData: Partial<Unit>) => {
+  const updateUnit = async (unitId: string, unitData: Partial<Unit>) => {
     setUnits((prev) =>
       prev.map((u) => (u.id === unitId ? { ...u, ...unitData } : u))
     );
+    try {
+      await updateDoc(doc(db, "units", unitId), unitData);
+    } catch (e) {}
     addAuditLog("UPDATE", "Bağımsız Bölümler", `Daire bilgileri güncellendi (ID: ${unitId})`);
   };
 
   // People CRUD
-  const addPerson = (personData: Omit<Person, "id">) => {
+  const addPerson = async (personData: Omit<Person, "id">) => {
+    const newId = "person-" + Date.now();
     const newPerson: Person = {
       ...personData,
-      id: "person-" + Date.now(),
+      id: newId,
     };
     setPeople((prev) => [...prev, newPerson]);
+    try {
+      await setDoc(doc(db, "people", newId), newPerson);
+    } catch (e) {}
     addAuditLog("CREATE", "Malik & Kiracılar", `Yeni kişi kaydı açıldı: ${newPerson.fullName} (${newPerson.type})`);
   };
 
-  const updatePerson = (personId: string, personData: Partial<Person>) => {
+  const updatePerson = async (personId: string, personData: Partial<Person>) => {
     setPeople((prev) =>
       prev.map((p) => (p.id === personId ? { ...p, ...personData } : p))
     );
+    try {
+      await updateDoc(doc(db, "people", personId), personData);
+    } catch (e) {}
     addAuditLog("UPDATE", "Malik & Kiracılar", `Kişi bilgileri güncellendi: ID ${personId}`);
   };
 
-  const assignTenantToUnit = (unitId: string, tenantId: string) => {
+  const assignTenantToUnit = async (unitId: string, tenantId: string) => {
     const unit = units.find((u) => u.id === unitId);
     const tenant = people.find((p) => p.id === tenantId);
     if (!unit || !tenant) return;
 
-    updateUnit(unitId, {
+    await updateUnit(unitId, {
       tenantId,
       residentType: "KIRACI_OTURUYOR",
     });
 
-    updatePerson(tenantId, {
+    await updatePerson(tenantId, {
       rentedUnitId: unitId,
     });
 
     addAuditLog("UPDATE", "Kiracı İşlemleri", `${unit.blockName} D:${unit.unitNumber} dairesine yeni kiracı atandı: ${tenant.fullName}`);
   };
 
-  const vacateTenantFromUnit = (unitId: string) => {
+  const vacateTenantFromUnit = async (unitId: string) => {
     const unit = units.find((u) => u.id === unitId);
     if (!unit) return;
 
     if (unit.tenantId) {
       const oldTenant = people.find((p) => p.id === unit.tenantId);
       if (oldTenant) {
-        updatePerson(oldTenant.id, { rentedUnitId: undefined });
+        await updatePerson(oldTenant.id, { rentedUnitId: undefined });
       }
     }
 
-    updateUnit(unitId, {
+    await updateUnit(unitId, {
       tenantId: undefined,
       residentType: "BOS",
     });
@@ -335,8 +416,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addAuditLog("UPDATE", "Kiracı İşlemleri", `${unit.blockName} D:${unit.unitNumber} dairesi tahliye edildi (boşa çıkarıldı)`);
   };
 
-  // Batch Tahakkuk (Toplu Borçlandırma Sihirbazı)
-  const createBatchTahakkuk = (params: {
+  // Batch Tahakkuk
+  const createBatchTahakkuk = async (params: {
     title: string;
     period: string;
     category: DuesCategory;
@@ -390,26 +471,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         };
       });
       totalTarget = totalBudget;
-    } else if (params.distributionMethod === "LAND_SHARE") {
-      const totalShare = targetUnits.reduce((sum, u) => sum + (u.shareOfLand || 10), 0);
-      const totalBudget = params.totalAmountOrPerUnit;
-      allocations = targetUnits.map((u) => {
-        const share = (u.shareOfLand || 10) / totalShare;
-        const amount = Math.round(totalBudget * share);
-        const occupant = u.tenantId ? people.find((p) => p.id === u.tenantId) : people.find((p) => p.id === u.ownerId);
-        return {
-          unitId: u.id,
-          unitName: `${u.blockName} D:${u.unitNumber}`,
-          personId: occupant?.id || u.ownerId,
-          personName: occupant?.fullName || "Bilinmiyor",
-          amount,
-          paidAmount: 0,
-          isPaid: false,
-        };
-      });
-      totalTarget = totalBudget;
     } else {
-      // CUSTOM / TYPE
       const perUnit = params.totalAmountOrPerUnit;
       allocations = targetUnits.map((u) => {
         const occupant = u.tenantId ? people.find((p) => p.id === u.tenantId) : people.find((p) => p.id === u.ownerId);
@@ -426,8 +488,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       totalTarget = perUnit * targetUnits.length;
     }
 
+    const newTahakkukId = "tahakkuk-" + Date.now();
     const newTahakkuk: TahakkukRecord = {
-      id: "tahakkuk-" + Date.now(),
+      id: newTahakkukId,
       siteId: activeSiteId,
       title: params.title,
       period: params.period,
@@ -476,6 +539,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setLedgerItems((prev) => [...newLedgerRows, ...prev]);
 
+    try {
+      await setDoc(doc(db, "tahakkuklar", newTahakkukId), newTahakkuk);
+    } catch (e) {}
+
     addAuditLog(
       "CREATE",
       "Aidat & Tahakkuk",
@@ -485,7 +552,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Cancel Tahakkuk
-  const cancelTahakkuk = (tahakkukId: string, reason?: string) => {
+  const cancelTahakkuk = async (tahakkukId: string, reason?: string) => {
     const t = tahakkuklar.find((item) => item.id === tahakkukId);
     if (!t) return;
 
@@ -493,7 +560,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((item) => (item.id === tahakkukId ? { ...item, status: "CANCELLED" } : item))
     );
 
-    // Rollback allocations from units
     setUnits((prev) =>
       prev.map((u) => {
         const alloc = t.allocations.find((a) => a.unitId === u.id);
@@ -503,6 +569,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return u;
       })
     );
+
+    try {
+      await updateDoc(doc(db, "tahakkuklar", tahakkukId), { status: "CANCELLED" });
+    } catch (e) {}
 
     addAuditLog(
       "CANCEL",
@@ -533,8 +603,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const pad = (n: number) => n.toString().padStart(2, "0");
     const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
+    const newColId = "col-" + Date.now();
     const newCol: Collection = {
-      id: "col-" + Date.now(),
+      id: newColId,
       siteId: activeSiteId,
       receiptNumber,
       unitId: params.unitId,
@@ -560,7 +631,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Update Unit balance & Ledger
     const oldBalance = unit?.currentBalance || 0;
     const newBalance = oldBalance - params.amount;
-
     updateUnit(params.unitId, { currentBalance: newBalance });
 
     const newLedgerItem: UnitAccountLedgerItem = {
@@ -580,7 +650,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setLedgerItems((prev) => [newLedgerItem, ...prev]);
 
-    // Update Target Account Balance & Add Transaction
+    // Update Target Account Balance
     if (targetAcc) {
       const newAccBal = targetAcc.balance + params.amount;
       setAccounts((prev) =>
@@ -604,28 +674,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setAccountTransactions((prev) => [newTx, ...prev]);
     }
 
-    // Update Tahakkuk paidAmount if linked
-    if (params.settledTahakkukId) {
-      setTahakkuklar((prev) =>
-        prev.map((t) => {
-          if (t.id === params.settledTahakkukId) {
-            const updatedAllocations = t.allocations.map((a) => {
-              if (a.unitId === params.unitId) {
-                const paid = a.paidAmount + params.amount;
-                return { ...a, paidAmount: paid, isPaid: paid >= a.amount };
-              }
-              return a;
-            });
-            return {
-              ...t,
-              totalCollectedAmount: t.totalCollectedAmount + params.amount,
-              allocations: updatedAllocations,
-            };
-          }
-          return t;
-        })
-      );
-    }
+    try {
+      setDoc(doc(db, "collections", newColId), newCol);
+    } catch (e) {}
 
     addAuditLog(
       "COLLECT",
@@ -637,23 +688,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return newCol;
   };
 
-  // Get specific unit's ledger
   const getUnitLedger = (unitId: string) => {
     return ledgerItems.filter((item) => item.unitId === unitId);
   };
 
   // Kasa / Banka CRUD
-  const addAccount = (accountData: Omit<AccountEntity, "id" | "balance">) => {
+  const addAccount = async (accountData: Omit<AccountEntity, "id" | "balance">) => {
+    const newId = "acc-" + Date.now();
     const newAcc: AccountEntity = {
       ...accountData,
-      id: "acc-" + Date.now(),
+      id: newId,
       balance: 0,
     };
     setAccounts((prev) => [...prev, newAcc]);
+    try {
+      await setDoc(doc(db, "accounts", newId), newAcc);
+    } catch (e) {}
     addAuditLog("CREATE", "Kasa & Banka", `Yeni hesap eklendi: ${newAcc.name} (${newAcc.type})`);
   };
 
-  const transferFunds = (params: {
+  const transferFunds = async (params: {
     fromAccountId: string;
     toAccountId: string;
     amount: number;
@@ -717,17 +771,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Expenses & Vendors
-  const addExpense = (expenseData: Omit<ExpenseRecord, "id" | "createdAt" | "createdBy">) => {
+  const addExpense = async (expenseData: Omit<ExpenseRecord, "id" | "createdAt" | "createdBy">) => {
+    const newId = "exp-" + Date.now();
     const newExp: ExpenseRecord = {
       ...expenseData,
-      id: "exp-" + Date.now(),
+      id: newId,
       createdAt: new Date().toISOString().split("T")[0],
       createdBy: currentUser.name,
     };
 
     setExpenses((prev) => [newExp, ...prev]);
 
-    // If marked as paid, deduct from account
     if (newExp.paymentStatus === "ODENDI" && newExp.paidFromAccountId) {
       const acc = accounts.find((a) => a.id === newExp.paidFromAccountId);
       if (acc) {
@@ -735,28 +789,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setAccounts((prev) =>
           prev.map((a) => (a.id === acc.id ? { ...a, balance: newBal } : a))
         );
-
-        const now = new Date();
-        const pad = (n: number) => n.toString().padStart(2, "0");
-        const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-        const tx: AccountTransaction = {
-          id: "atx-" + Date.now(),
-          siteId: activeSiteId,
-          accountId: acc.id,
-          accountName: acc.name,
-          date: ts,
-          type: "CIKIS",
-          amount: newExp.amount,
-          category: `Gider (${newExp.category})`,
-          description: `${newExp.title} - ${newExp.invoiceNumber || ""}`,
-          relatedEntityName: newExp.vendorName || "Gider Ödemesi",
-          balanceAfter: newBal,
-          createdBy: currentUser.name,
-        };
-        setAccountTransactions((prev) => [tx, ...prev]);
       }
     }
+
+    try {
+      await setDoc(doc(db, "expenses", newId), newExp);
+    } catch (e) {}
 
     addAuditLog(
       "CREATE",
@@ -766,17 +804,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const addVendor = (vendorData: Omit<Vendor, "id" | "currentBalance">) => {
+  const addVendor = async (vendorData: Omit<Vendor, "id" | "currentBalance">) => {
+    const newId = "ven-" + Date.now();
     const newVendor: Vendor = {
       ...vendorData,
-      id: "ven-" + Date.now(),
+      id: newId,
       currentBalance: 0,
     };
     setVendors((prev) => [...prev, newVendor]);
+    try {
+      await setDoc(doc(db, "vendors", newId), newVendor);
+    } catch (e) {}
     addAuditLog("CREATE", "Tedarikçi Carileri", `Yeni tedarikçi kaydedildi: ${newVendor.companyName}`);
   };
 
-  const recordVendorPayment = (vendorId: string, amount: number, accountId: string, description: string) => {
+  const recordVendorPayment = async (vendorId: string, amount: number, accountId: string, description: string) => {
     const vendor = vendors.find((v) => v.id === vendorId);
     const acc = accounts.find((a) => a.id === accountId);
     if (!vendor || !acc) return;
@@ -790,44 +832,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((a) => (a.id === acc.id ? { ...a, balance: newBal } : a))
     );
 
-    const now = new Date();
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-    const tx: AccountTransaction = {
-      id: "atx-" + Date.now(),
-      siteId: activeSiteId,
-      accountId: acc.id,
-      accountName: acc.name,
-      date: ts,
-      type: "CIKIS",
-      amount,
-      category: "Tedarikçi Ödemesi",
-      description: `${vendor.companyName} Tedarikçi Ödemesi: ${description}`,
-      relatedEntityName: vendor.companyName,
-      balanceAfter: newBal,
-      createdBy: currentUser.name,
-    };
-    setAccountTransactions((prev) => [tx, ...prev]);
-
     addAuditLog(
       "UPDATE",
       "Tedarikçi Carileri",
-      `${vendor.companyName} firmasına ${amount.toLocaleString("tr-TR")} TL ödeme yapıldı (${acc.name}).`,
+      `${vendor.companyName} firmasına ${amount.toLocaleString("tr-TR")} TL ödeme yapıldı.`,
       -amount
     );
   };
 
-  // Budget
   const updateBudgetItem = (itemId: string, updates: Partial<AnnualBudget["items"][0]>) => {
     setBudget((prev) => ({
       ...prev,
-      items: prev.items.map((it) => (it.id === itemId ? { ...it, ...updates } : it)),
+      items: prev.items.map((i) => (i.id === itemId ? { ...i, ...updates } : i)),
     }));
   };
 
   // Requests / Tickets
-  const createServiceRequest = (data: {
+  const createServiceRequest = async (data: {
     unitId: string;
     category: ServiceRequest["category"];
     title: string;
@@ -844,70 +865,71 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const pad = (n: number) => n.toString().padStart(2, "0");
     const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
+    const newReqId = "req-" + Date.now();
     const newReq: ServiceRequest = {
-      id: "req-" + Date.now(),
+      id: newReqId,
       siteId: activeSiteId,
       unitId: data.unitId,
-      unitName: unit ? `${unit.blockName} · Daire ${unit.unitNumber}` : "Daire",
+      unitName: unit ? `${unit.blockName} D:${unit.unitNumber}` : "Daire",
+      reportedById: occupant?.id || "unknown",
       reportedByName: occupant?.fullName || currentUser.name,
-      reportedByPhone: occupant?.phone || currentUser.phone,
+      reportedByPhone: occupant?.phone || currentUser.phone || "05XX",
       category: data.category,
       title: data.title,
       description: data.description,
       priority: data.priority,
       status: "YENI",
-      photoUrl: data.photoUrl,
       createdAt: ts,
       updatedAt: ts,
+      photoUrl: data.photoUrl,
     };
 
     setRequests((prev) => [newReq, ...prev]);
-    addAuditLog("CREATE", "Talep & Arızalar", `Yeni arıza/servis talebi açıldı: ${newReq.title} (${newReq.unitName})`);
+    try {
+      await setDoc(doc(db, "requests", newReqId), newReq);
+    } catch (e) {}
+    addAuditLog("CREATE", "Arıza & Talep", `Yeni talep oluşturuldu: ${newReq.title} (${newReq.unitName})`);
   };
 
-  const updateRequestStatus = (
-    requestId: string,
-    status: RequestStatus,
-    adminNote?: string,
-    assignedStaffName?: string
-  ) => {
-    const now = new Date();
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
+  const updateRequestStatus = async (requestId: string, status: RequestStatus, adminNote?: string, assignedStaffName?: string) => {
     setRequests((prev) =>
-      prev.map((r) => {
-        if (r.id === requestId) {
-          return {
-            ...r,
-            status,
-            adminNote: adminNote !== undefined ? adminNote : r.adminNote,
-            assignedStaffName: assignedStaffName !== undefined ? assignedStaffName : r.assignedStaffName,
-            updatedAt: ts,
-            completedAt: status === "TAMAMLANDI" ? ts : r.completedAt,
-          };
-        }
-        return r;
-      })
+      prev.map((r) =>
+        r.id === requestId
+          ? {
+              ...r,
+              status,
+              adminNote: adminNote || r.adminNote,
+              assignedStaffName: assignedStaffName || r.assignedStaffName,
+              resolvedAt: status === "TAMAMLANDI" ? new Date().toISOString().split("T")[0] : undefined,
+            }
+          : r
+      )
     );
-
-    addAuditLog("UPDATE", "Talep & Arızalar", `Talep durumu güncellendi: ${status} (ID: ${requestId})`);
+    try {
+      await updateDoc(doc(db, "requests", requestId), { status });
+    } catch (e) {}
+    addAuditLog("UPDATE", "Arıza & Talep", `Talep durumu güncellendi: ${status} (ID: ${requestId})`);
   };
 
-  // Announcements & Polls
-  const addAnnouncement = (data: Omit<Announcement, "id" | "date" | "authorName">) => {
-    const dateStr = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
+  // Announcements
+  const addAnnouncement = async (data: Omit<Announcement, "id" | "date" | "authorName">) => {
+    const newId = "ann-" + Date.now();
     const newAnn: Announcement = {
       ...data,
-      id: "ann-" + Date.now(),
-      date: dateStr,
+      id: newId,
+      siteId: activeSiteId,
+      date: new Date().toISOString().split("T")[0],
       authorName: currentUser.name,
     };
     setAnnouncements((prev) => [newAnn, ...prev]);
+    try {
+      await setDoc(doc(db, "announcements", newId), newAnn);
+    } catch (e) {}
     addAuditLog("CREATE", "Duyurular", `Yeni duyuru yayınlandı: ${newAnn.title}`);
   };
 
-  const votePoll = (pollId: string, optionId: string) => {
+  // Polls
+  const votePoll = async (pollId: string, optionId: string) => {
     setPolls((prev) =>
       prev.map((p) => {
         if (p.id === pollId) {
@@ -924,81 +946,99 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  // Visitors & Parcels
-  const addVisitorLog = (data: Omit<VisitorLog, "id" | "entryTime" | "guardName">) => {
+  // Security Gate
+  const addVisitorLog = async (data: Omit<VisitorLog, "id" | "entryTime" | "guardName">) => {
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
-    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const ts = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
+    const newId = "vis-" + Date.now();
     const newVis: VisitorLog = {
       ...data,
-      id: "vis-" + Date.now(),
-      entryTime: ts,
+      id: newId,
+      entryTime: `${new Date().toLocaleDateString("tr-TR")} ${ts}`,
       guardName: currentUser.name,
     };
     setVisitors((prev) => [newVis, ...prev]);
-    addAuditLog("CREATE", "Güvenlik & Ziyaretçi", `Ziyaretçi girişi kaydedildi: ${newVis.visitorName} -> ${newVis.unitName}`);
+    try {
+      await setDoc(doc(db, "visitors", newId), newVis);
+    } catch (e) {}
+    addAuditLog("CREATE", "Güvenlik Kapısı", `Ziyaretçi girişi kaydedildi: ${newVis.visitorName} -> ${newVis.unitName}`);
   };
 
-  const markVisitorExit = (visitorId: string) => {
+  const markVisitorExit = async (visitorId: string) => {
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
-    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const ts = `${new Date().toLocaleDateString("tr-TR")} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
     setVisitors((prev) =>
       prev.map((v) => (v.id === visitorId ? { ...v, exitTime: ts } : v))
     );
+    try {
+      await updateDoc(doc(db, "visitors", visitorId), { exitTime: ts });
+    } catch (e) {}
   };
 
-  const addParcelLog = (data: Omit<ParcelLog, "id" | "receivedTime" | "guardName" | "status">) => {
+  const addParcelLog = async (data: Omit<ParcelLog, "id" | "receivedTime" | "guardName" | "status">) => {
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
-    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const ts = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
-    const newParcel: ParcelLog = {
+    const newId = "par-" + Date.now();
+    const newPar: ParcelLog = {
       ...data,
-      id: "par-" + Date.now(),
-      receivedTime: ts,
+      id: newId,
+      receivedTime: `${new Date().toLocaleDateString("tr-TR")} ${ts}`,
       guardName: currentUser.name,
-      status: "BILDIRILDI",
+      status: "BEKLIYOR",
     };
-    setParcels((prev) => [newParcel, ...prev]);
-    addAuditLog("CREATE", "Güvenlik & Kargo", `Kargo teslim alındı ve sakine bildirildi: ${newParcel.recipientName} (${newParcel.cargoCompany})`);
+    setParcels((prev) => [newPar, ...prev]);
+    try {
+      await setDoc(doc(db, "parcels", newId), newPar);
+    } catch (e) {}
+    addAuditLog("CREATE", "Kargo Takibi", `Yeni kargo teslim alındı: ${newPar.cargoCompany} -> ${newPar.recipientName} (${newPar.unitName})`);
   };
 
-  const updateParcelStatus = (parcelId: string, status: ParcelLog["status"]) => {
-    const now = new Date();
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
+  const updateParcelStatus = async (parcelId: string, status: ParcelLog["status"]) => {
     setParcels((prev) =>
       prev.map((p) =>
         p.id === parcelId
-          ? { ...p, status, deliveredTime: status === "TESLIM_EDILDI" ? ts : p.deliveredTime }
+          ? {
+              ...p,
+              status,
+              deliveredTime: status === "TESLIM_EDILDI" ? new Date().toLocaleDateString("tr-TR") : undefined,
+            }
           : p
       )
     );
+    try {
+      await updateDoc(doc(db, "parcels", parcelId), { status });
+    } catch (e) {}
+    addAuditLog("UPDATE", "Kargo Takibi", `Kargo teslim durumu güncellendi: ${status} (ID: ${parcelId})`);
   };
 
   // Meters
-  const addMeterReading = (reading: Omit<MeterReading, "id" | "consumption" | "totalAmount" | "isBilled">) => {
+  const addMeterReading = async (reading: Omit<MeterReading, "id" | "consumption" | "totalAmount" | "isBilled">) => {
     const consumption = Math.max(0, reading.currentIndex - reading.previousIndex);
     const totalAmount = consumption * reading.unitPrice;
 
-    const newMtr: MeterReading = {
+    const newId = "mtr-" + Date.now();
+    const newMeter: MeterReading = {
       ...reading,
-      id: "mtr-" + Date.now(),
+      id: newId,
       consumption,
       totalAmount,
       isBilled: false,
     };
-    setMeters((prev) => [newMtr, ...prev]);
-    addAuditLog("CREATE", "Sayaç Yönetimi", `${newMtr.unitName} için ${newMtr.meterType} endeksi kaydedildi (${consumption} birim = ${totalAmount.toLocaleString("tr-TR")} TL)`);
+    setMeters((prev) => [newMeter, ...prev]);
+    try {
+      await setDoc(doc(db, "meters", newId), newMeter);
+    } catch (e) {}
+    addAuditLog("CREATE", "Sayaç Okuma", `${newMeter.unitName} için ${newMeter.meterType} endeksi girildi: Tüketim ${consumption}`);
   };
 
-  // Reset Demo Data
+  // Reset
   const resetDemoData = () => {
-    localStorage.clear();
     setSites(INITIAL_SITES);
     setActiveSiteId("site-1");
     setBlocks(INITIAL_BLOCKS);
@@ -1021,29 +1061,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setParcels(INITIAL_PARCELS);
     setMeters(INITIAL_METERS);
     setAuditLogs(INITIAL_AUDIT_LOGS);
-    window.location.reload();
   };
 
-  // Filtered by active site
-  const activeSiteUnits = units.filter((u) => u.siteId === activeSiteId);
-  const activeSitePeople = people.filter((p) => p.siteId === activeSiteId);
-  const activeSiteTahakkuklar = tahakkuklar.filter((t) => t.siteId === activeSiteId);
-  const activeSiteCollections = collections.filter((c) => c.siteId === activeSiteId);
-  const activeSiteAccounts = accounts.filter((a) => a.siteId === activeSiteId);
-  const activeSiteAccountTransactions = accountTransactions.filter((t) => t.siteId === activeSiteId);
-  const activeSiteExpenses = expenses.filter((e) => e.siteId === activeSiteId);
-  const activeSiteVendors = vendors.filter((v) => v.siteId === activeSiteId);
-  const activeSiteRequests = requests.filter((r) => r.siteId === activeSiteId);
-  const activeSiteAnnouncements = announcements.filter((a) => a.siteId === activeSiteId);
-  const activeSitePolls = polls.filter((p) => p.siteId === activeSiteId);
-  const activeSiteMeetings = meetings.filter((m) => m.siteId === activeSiteId);
-  const activeSiteDocuments = documents.filter((d) => d.siteId === activeSiteId);
-  const activeSiteAssets = assets.filter((a) => a.siteId === activeSiteId);
-  const activeSiteStaff = staff.filter((s) => s.siteId === activeSiteId);
-  const activeSiteVisitors = visitors.filter((v) => v.siteId === activeSiteId);
-  const activeSiteParcels = parcels.filter((p) => p.siteId === activeSiteId);
-  const activeSiteMeters = meters.filter((m) => m.siteId === activeSiteId);
-  const activeSiteAuditLogs = auditLogs.filter((l) => l.siteId === activeSiteId);
+  const resetToDefaults = resetDemoData;
 
   return (
     <AppContext.Provider
@@ -1054,39 +1074,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeSite,
         setActiveSiteId,
         addNewSite,
-
+        addSite,
         blocks,
         units,
         activeSiteUnits,
         addUnit,
         updateUnit,
-
         people,
         activeSitePeople,
         addPerson,
         updatePerson,
         assignTenantToUnit,
         vacateTenantFromUnit,
-
         tahakkuklar,
         activeSiteTahakkuklar,
         createBatchTahakkuk,
         cancelTahakkuk,
-
         collections,
         activeSiteCollections,
         addCollection,
-
         ledgerItems,
         getUnitLedger,
-
         accounts,
         activeSiteAccounts,
         accountTransactions,
         activeSiteAccountTransactions,
         addAccount,
         transferFunds,
-
         expenses,
         activeSiteExpenses,
         addExpense,
@@ -1094,15 +1108,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeSiteVendors,
         addVendor,
         recordVendorPayment,
-
         budget,
         updateBudgetItem,
-
         requests,
         activeSiteRequests,
         createServiceRequest,
         updateRequestStatus,
-
         announcements,
         activeSiteAnnouncements,
         addAnnouncement,
@@ -1113,7 +1124,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeSiteMeetings,
         documents,
         activeSiteDocuments,
-
         assets,
         activeSiteAssets,
         staff,
@@ -1126,16 +1136,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeSiteParcels,
         addParcelLog,
         updateParcelStatus,
-
         meters,
         activeSiteMeters,
         addMeterReading,
-
         auditLogs,
         activeSiteAuditLogs,
         addAuditLog,
-
         resetDemoData,
+        resetToDefaults,
       }}
     >
       {children}

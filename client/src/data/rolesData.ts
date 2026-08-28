@@ -229,6 +229,18 @@ export const ROLE_DEFINITIONS: Record<UserRole, RoleDefinition> = {
 
 export const DEMO_USERS: UserProfile[] = [
   {
+    id: "user-super-cebrail",
+    name: "Cebrail Kara",
+    email: "cebrailkara@gmail.com",
+    phone: "0500 000 00 00",
+    role: "SUPER_ADMIN",
+    avatarText: "CK",
+    avatarTone: "mint",
+    companyName: "Yönetim Merkezi Holding / SaaS",
+    managedSiteIds: ["site-1", "site-2", "site-3", "site-4"],
+    activeSiteId: "site-1",
+  },
+  {
     id: "user-1",
     name: "Elif Arslan",
     email: "elif.arslan@novayonetim.com",
