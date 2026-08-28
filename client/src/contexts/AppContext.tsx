@@ -32,6 +32,7 @@ interface AppContextType {
   setActiveSiteId: (siteId: string) => void;
   addNewSite: (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => Promise<void>;
   addSite: (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => Promise<void>;
+  updateSite: (siteId: string, siteData: Partial<Site>) => Promise<void>;
 
   // Blocks & Units
   blocks: Block[];
@@ -331,6 +332,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addSite = addNewSite;
+
+  const updateSite = async (siteId: string, siteData: Partial<Site>) => {
+    setSites((prev) =>
+      prev.map((s) => (s.id === siteId ? { ...s, ...siteData } : s))
+    );
+    try {
+      await updateDoc(doc(db, "sites", siteId), siteData);
+    } catch (e) {}
+    addAuditLog("UPDATE", "Site & Banka Ayarları", `${siteData.name || "Site"} ayarları ve IBAN bilgileri güncellendi.`);
+  };
 
   // Units CRUD
   const addUnit = async (unitData: Omit<Unit, "id">) => {
@@ -1075,6 +1086,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setActiveSiteId,
         addNewSite,
         addSite,
+        updateSite,
         blocks,
         units,
         activeSiteUnits,

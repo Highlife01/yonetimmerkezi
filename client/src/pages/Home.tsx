@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard, Building2, Users, Receipt, HandCoins,
   ShieldAlert, ArrowUpRight, Landmark, Handshake, PieChart,
   FileText, LifeBuoy, Bell, Wrench, UserCheck, ShieldCheck,
   Gauge, Vote, Settings, ChevronDown, Check, LogOut, LogIn,
   Search, Plus, Sparkles, User, HelpCircle, Layers, CheckCircle2,
-  CalendarDays, Wallet, CreditCard, ArrowRightLeft, Eye, RefreshCcw
+  CalendarDays, Wallet, CreditCard, ArrowRightLeft, Eye, RefreshCcw,
+  Globe
 } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +15,7 @@ import { formatCurrency } from "@/utils/formatters";
 import { toast } from "sonner";
 import LoginModal from "@/components/LoginModal";
 import LoginPage from "./LoginPage";
+import LandingPage from "./LandingPage";
 
 // Import all module views
 import DashboardView from "./modules/DashboardView";
@@ -52,6 +54,7 @@ export default function Home() {
   } = useAuth();
 
   const [activeModule, setActiveModule] = useState<AppModule>("DASHBOARD");
+  const [showLandingPage, setShowLandingPage] = useState(false);
   const [isSiteDropdownOpen, setIsSiteDropdownOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -132,6 +135,19 @@ export default function Home() {
       ]
     }
   ];
+
+  // If showing promotional landing website
+  if (showLandingPage) {
+    return (
+      <LandingPage
+        onGoToApp={() => setShowLandingPage(false)}
+        onOpenLogin={() => {
+          setShowLandingPage(false);
+          setIsLoginModalOpen(true);
+        }}
+      />
+    );
+  }
 
   // If not authenticated, show full login screen
   if (!isAuthenticated) {
@@ -346,10 +362,19 @@ export default function Home() {
 
           {/* Quick Actions, Search, Login & Role Switcher */}
           <div className="flex items-center gap-3">
+            {/* Tanıtım Sitesi Butonu */}
+            <button
+              onClick={() => setShowLandingPage(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold transition shadow-xs cursor-pointer"
+            >
+              <Globe size={14} className="text-emerald-700" />
+              <span className="hidden sm:inline">Tanıtım Sitesi</span>
+            </button>
+
             {/* Quick Search Button (Command Palette) */}
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-[#e4eae3] text-xs font-semibold text-slate-600 transition shadow-xs"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-[#e4eae3] text-xs font-semibold text-slate-600 transition shadow-xs cursor-pointer"
             >
               <Search size={14} className="text-emerald-700" />
               <span>Hızlı Arama</span>

@@ -13,13 +13,43 @@ import { toast } from "sonner";
 export default function AuditLogsSettingsView() {
   const {
     sites, activeSite, activeSiteAuditLogs,
-    addSite, resetToDefaults
+    addSite, updateSite, resetToDefaults
   } = useApp();
   const { currentUser, activeRole, roleDef, switchRole, allUsers, switchUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"AUDIT" | "ROLES" | "SITES">("AUDIT");
+  const [activeTab, setActiveTab] = useState<"AUDIT" | "ROLES" | "SITES" | "SITE_SETTINGS">("SITE_SETTINGS");
   const [logSearch, setLogSearch] = useState("");
   const [isAddSiteModalOpen, setIsAddSiteModalOpen] = useState(false);
+
+  // Active Site Settings State
+  const [siteSettings, setSiteSettings] = useState({
+    name: activeSite.name,
+    address: activeSite.address,
+    city: activeSite.city,
+    district: activeSite.district,
+    managerName: activeSite.managerName,
+    managerPhone: activeSite.managerPhone,
+    bankName: activeSite.bankName || "Garanti BBVA",
+    bankIban: activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01",
+    monthlyDuesDueDay: activeSite.monthlyDuesDueDay || 10,
+    lateInterestRatePerMonth: activeSite.lateInterestRatePerMonth || 5,
+  });
+
+  // Sync state if activeSite changes
+  React.useEffect(() => {
+    setSiteSettings({
+      name: activeSite.name,
+      address: activeSite.address,
+      city: activeSite.city,
+      district: activeSite.district,
+      managerName: activeSite.managerName,
+      managerPhone: activeSite.managerPhone,
+      bankName: activeSite.bankName || "Garanti BBVA",
+      bankIban: activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01",
+      monthlyDuesDueDay: activeSite.monthlyDuesDueDay || 10,
+      lateInterestRatePerMonth: activeSite.lateInterestRatePerMonth || 5,
+    });
+  }, [activeSite]);
 
   // New site form
   const [newSiteData, setNewSiteData] = useState({
@@ -104,7 +134,15 @@ export default function AuditLogsSettingsView() {
 
         {/* Tab switcher */}
         <div className="flex items-center gap-2 pt-2 border-t border-[#f0f4f1]">
-          <div className="inline-flex rounded-xl border border-[#e4eae3] p-1 bg-slate-50">
+          <div className="inline-flex rounded-xl border border-[#e4eae3] p-1 bg-slate-50 flex-wrap">
+            <button
+              onClick={() => setActiveTab("SITE_SETTINGS")}
+              className={`px-3.5 py-1.5 text-xs rounded-lg font-bold transition flex items-center gap-1.5 ${
+                activeTab === "SITE_SETTINGS" ? "bg-white text-emerald-800 shadow-xs" : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              <Building2 size={14} /> Site & IBAN / Banka Ayarları
+            </button>
             <button
               onClick={() => setActiveTab("AUDIT")}
               className={`px-3.5 py-1.5 text-xs rounded-lg font-bold transition flex items-center gap-1.5 ${
@@ -132,6 +170,162 @@ export default function AuditLogsSettingsView() {
           </div>
         </div>
       </div>
+
+      {/* SITE & IBAN SETTINGS TAB */}
+      {activeTab === "SITE_SETTINGS" && (
+        <div className="bg-white border border-[#e4eae3] rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-[#f0f4f1]">
+            <div>
+              <h3 className="text-base font-bold text-[#172b2b]">Site, Yönetici ve Resmi IBAN Ayarları</h3>
+              <p className="text-xs text-[#7c8a87]">
+                Buraya girdiğiniz IBAN, banka adı ve hesap sahibi bilgisi sakin portalında ve borç bildirimlerinde görünür.
+              </p>
+            </div>
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              {activeSite.name}
+            </span>
+          </div>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await updateSite(activeSite.id, {
+                name: siteSettings.name,
+                address: siteSettings.address,
+                city: siteSettings.city,
+                district: siteSettings.district,
+                managerName: siteSettings.managerName,
+                managerPhone: siteSettings.managerPhone,
+                bankName: siteSettings.bankName,
+                bankIban: siteSettings.bankIban,
+                monthlyDuesDueDay: Number(siteSettings.monthlyDuesDueDay),
+                lateInterestRatePerMonth: Number(siteSettings.lateInterestRatePerMonth),
+              });
+              toast.success("Site ayarları ve IBAN bilgileri başarıyla güncellendi!");
+            }}
+            className="space-y-4 text-xs"
+          >
+            {/* Bank & IBAN highlight box */}
+            <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-3">
+              <div className="flex items-center gap-2 text-emerald-950 font-bold text-sm">
+                <Building2 size={18} className="text-emerald-700" />
+                <span>Apartman / Site Resmi Banka & IBAN Bilgileri</span>
+              </div>
+              <p className="text-[11px] text-emerald-800">
+                Sakinlerinizin aidat ve demirbaş ödemelerini havale/EFT yaparken göreceği resmi banka hesabıdır.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="font-bold text-[#172b2b] block mb-1">Banka Adı *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Örn: Garanti BBVA, Ziraat Bankası, İş Bankası"
+                    value={siteSettings.bankName}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, bankName: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl border border-emerald-300 focus:outline-none focus:border-emerald-600 bg-white font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-[#172b2b] block mb-1">IBAN Numarası *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="TR00 0000 0000 0000 0000 0000 00"
+                    value={siteSettings.bankIban}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, bankIban: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl border border-emerald-300 focus:outline-none focus:border-emerald-600 bg-white font-mono font-bold text-emerald-900 tracking-wider"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Site & Manager details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="font-bold text-[#172b2b] block mb-1">Site / Apartman Adı</label>
+                <input
+                  type="text"
+                  required
+                  value={siteSettings.name}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, name: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-[#172b2b] block mb-1">Yönetici Adı & Soyadı</label>
+                <input
+                  type="text"
+                  required
+                  value={siteSettings.managerName}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, managerName: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-[#172b2b] block mb-1">Yönetici İletişim Telefonu</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="0532 000 00 00"
+                  value={siteSettings.managerPhone}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, managerPhone: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-[#172b2b] block mb-1">Açık Adres</label>
+                <input
+                  type="text"
+                  required
+                  value={siteSettings.address}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, address: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-[#172b2b] block mb-1">Her Ayın Aidat Son Ödeme Günü</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={31}
+                  value={siteSettings.monthlyDuesDueDay}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, monthlyDuesDueDay: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-[#172b2b] block mb-1">Aylık KMK Gecikme Tazminatı Oranı (%)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  step={0.5}
+                  value={siteSettings.lateInterestRatePerMonth}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, lateInterestRatePerMonth: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-bold"
+                />
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-[#f0f4f1] flex justify-end">
+              <button
+                type="submit"
+                className="px-6 py-2.5 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white text-xs font-bold transition shadow-sm"
+              >
+                Ayarları ve IBAN'ı Kaydet
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* AUDIT LOG TAB */}
       {activeTab === "AUDIT" && (

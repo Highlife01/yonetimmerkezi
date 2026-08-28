@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import {
   CreditCard, ReceiptText, Bell, ClipboardList, LifeBuoy,
   FileText, Building2, Phone, Mail, CheckCircle2, AlertCircle,
-  ArrowUpRight, Lock, Sparkles, LayoutDashboard, X, Plus, ShieldCheck
+  ArrowUpRight, Lock, Sparkles, LayoutDashboard, X, Plus, ShieldCheck,
+  Copy, Check
 } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -173,6 +174,69 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
             >
               <CreditCard size={17} /> Kartla Hemen Öde
             </button>
+          </div>
+        </div>
+
+        {/* SITE RESMİ BANKA & IBAN BİLGİLERİ (HAVALE / EFT İLE ÖDEME KARTI) */}
+        <div className="bg-white border border-[#d2dbd7] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#f0f4f1]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                <Building2 size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-[#172b2b]">Apartman / Site Resmi Banka & IBAN Bilgileri</h3>
+                <p className="text-[11px] text-[#7c8a87]">Banka hesabına doğrudan Havale / EFT ile aidat ödemesi yapabilirsiniz.</p>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              {activeSite.bankName || "Garanti BBVA"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+            {/* IBAN Box */}
+            <div className="p-3.5 bg-[#f8faf7] rounded-2xl border border-[#e4eae3] flex items-center justify-between gap-3">
+              <div className="truncate">
+                <span className="text-[10px] font-bold uppercase text-[#7c8a87] block">RESMİ IBAN NUMARASI</span>
+                <strong className="text-xs sm:text-sm font-mono font-bold text-emerald-950 block truncate mt-0.5">
+                  {activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01"}
+                </strong>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01");
+                  toast.success("IBAN numarası panoya kopyalandı!");
+                }}
+                className="px-3 py-1.5 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white text-[11px] font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer shadow-xs"
+              >
+                <Copy size={13} /> Kopyala
+              </button>
+            </div>
+
+            {/* Alıcı & Açıklama Şablonu */}
+            <div className="p-3.5 bg-[#f8faf7] rounded-2xl border border-[#e4eae3] flex items-center justify-between gap-3">
+              <div className="truncate">
+                <span className="text-[10px] font-bold uppercase text-[#7c8a87] block">HESAP SAHİBİ (ALICI)</span>
+                <strong className="text-xs font-bold text-[#172b2b] block truncate mt-0.5">
+                  {activeSite.name} Kat Malikleri Yöneticiliği
+                </strong>
+                <span className="text-[10px] text-slate-500 block truncate">
+                  Açıklama: {residentUnit.blockName} D:{residentUnit.unitNumber} {currentUser.name}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${residentUnit.blockName} D:${residentUnit.unitNumber} ${currentUser.name} - Aidat`);
+                  toast.success("Ödeme açıklama metni kopyalandı!");
+                }}
+                className="px-3 py-1.5 rounded-xl bg-white border border-[#d2dbd7] hover:bg-slate-50 text-slate-800 text-[11px] font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
+              >
+                <Copy size={13} /> Açıklama
+              </button>
+            </div>
           </div>
         </div>
 

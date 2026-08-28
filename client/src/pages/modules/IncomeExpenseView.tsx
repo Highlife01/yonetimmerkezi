@@ -25,6 +25,7 @@ export default function IncomeExpenseView({ initialOpenModal = false }: IncomeEx
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [isAddModalOpen, setIsAddModalOpen] = useState(initialOpenModal);
+  const [selectedReceiptExpense, setSelectedReceiptExpense] = useState<ExpenseRecord | null>(null);
 
   // New Expense Form
   const [newExpData, setNewExpData] = useState({
@@ -34,9 +35,11 @@ export default function IncomeExpenseView({ initialOpenModal = false }: IncomeEx
     amount: 1000,
     date: new Date().toISOString().split("T")[0],
     invoiceNumber: "",
+    receiptType: "FATURA" as "FATURA" | "SERBEST_MESLEK_MAKBUZU" | "PERAKENDE_FISI" | "GIDER_PUSULASI",
     vendorId: "",
     paymentStatus: "ODENDI" as "ODENDI" | "BEKLIYOR",
     paidFromAccountId: activeSiteAccounts[0]?.id || "",
+    attachmentName: "",
   });
 
   const filteredExpenses = activeSiteExpenses.filter((e) => {
@@ -221,6 +224,7 @@ export default function IncomeExpenseView({ initialOpenModal = false }: IncomeEx
                 <th className="py-3 px-4">Ödenen Hesap</th>
                 <th className="py-3 px-4 text-right">Tutar</th>
                 <th className="py-3 px-4 text-center">Durum</th>
+                <th className="py-3 px-4 text-center">Makbuz / Fiş</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f0f4f1]">
@@ -258,11 +262,19 @@ export default function IncomeExpenseView({ initialOpenModal = false }: IncomeEx
                         {exp.paymentStatus === "ODENDI" ? "Ödendi" : "Bekliyor"}
                       </span>
                     </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <button
+                        onClick={() => setSelectedReceiptExpense(exp)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#172b2b] text-slate-700 hover:text-white text-[10px] font-bold transition shadow-xs cursor-pointer"
+                      >
+                        <FileText size={12} /> Makbuz Gör
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-slate-400">
+                  <td colSpan={9} className="py-8 text-center text-slate-400">
                     Aramanızla eşleşen gider kaydı bulunamadı.
                   </td>
                 </tr>
@@ -424,6 +436,133 @@ export default function IncomeExpenseView({ initialOpenModal = false }: IncomeEx
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* HARCAMA / TEDİYE MAKBUZU ÖNİZLEME & YAZDIRMA MODALI */}
+      {selectedReceiptExpense && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-[#e4eae3] space-y-5 animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#e4eae3]">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                  <FileText size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#172b2b]">Resmi Gider / Tediye Makbuzu</h3>
+                  <p className="text-xs text-[#7c8a87]">Kat Mülkiyeti Kanunu ve Muhasebe Kayıt Belgesi</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedReceiptExpense(null)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Printable Receipt Box */}
+            <div className="p-6 bg-[#fcfdfc] border-2 border-dashed border-[#d2dbd7] rounded-2xl space-y-5 font-sans">
+              {/* Top site & receipt title */}
+              <div className="flex items-start justify-between border-b border-[#e4eae3] pb-4">
+                <div>
+                  <h4 className="text-base font-black text-[#172b2b] uppercase tracking-tight">
+                    {activeSite.name}
+                  </h4>
+                  <p className="text-[11px] text-slate-500">{activeSite.address}</p>
+                  <p className="text-[11px] text-slate-500 font-semibold">{activeSite.district} / {activeSite.city}</p>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    TEDİYE MAKBUZU
+                  </span>
+                  <strong className="block text-xs font-mono font-bold text-slate-700 mt-1">
+                    BELGE: {selectedReceiptExpense.invoiceNumber || `MKB-GDR-${selectedReceiptExpense.id.slice(-6).toUpperCase()}`}
+                  </strong>
+                  <span className="text-[10px] text-slate-400 block font-mono">{formatDate(selectedReceiptExpense.date)}</span>
+                </div>
+              </div>
+
+              {/* Receipt details table */}
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-500">Harcama Kalemi / Kategori:</span>
+                  <strong className="text-[#172b2b]">{selectedReceiptExpense.category}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-500">Gider / Fatura Açıklaması:</span>
+                  <strong className="text-[#172b2b] text-right max-w-xs">{selectedReceiptExpense.title}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-500">Ödeme Yapılan Firma / Kişi:</span>
+                  <strong className="text-[#172b2b]">{selectedReceiptExpense.vendorName || "Muhtelif Harcama"}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-500">Ödemenin Çıkış Hesabı:</span>
+                  <strong className="text-[#172b2b]">{selectedReceiptExpense.paidFromAccountName || "Site Ana Kasası"}</strong>
+                </div>
+                {selectedReceiptExpense.description && (
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">Ek Açıklama:</span>
+                    <span className="text-slate-700 text-right max-w-xs">{selectedReceiptExpense.description}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Total Amount Box */}
+              <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-950 uppercase">ÖDENEN NET TUTAR:</span>
+                <strong className="text-xl font-black text-emerald-900">
+                  {formatCurrency(selectedReceiptExpense.amount)}
+                </strong>
+              </div>
+
+              {/* Signatures */}
+              <div className="grid grid-cols-2 gap-6 pt-4 text-center text-xs">
+                <div className="space-y-8">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">ÖDEMEYİ YAPAN (YÖNETİCİ)</span>
+                  <div className="border-t border-slate-300 pt-1">
+                    <strong className="text-slate-800 text-[11px] block">{activeSite.managerName}</strong>
+                    <span className="text-[10px] text-slate-400">İmza / Kaşe</span>
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">TESLİM ALAN (FİRMA / ALICI)</span>
+                  <div className="border-t border-slate-300 pt-1">
+                    <strong className="text-slate-800 text-[11px] block">{selectedReceiptExpense.vendorName || "Yetkili Kişi"}</strong>
+                    <span className="text-[10px] text-slate-400">İmza / Kaşe</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-2 flex items-center justify-between text-xs">
+              <span className="text-slate-400 text-[11px]">Sistem Kayıt ID: {selectedReceiptExpense.id}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedReceiptExpense(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
+                >
+                  Kapat
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.print();
+                    toast.success("Makbuz yazdırma penceresi açıldı.");
+                  }}
+                  className="px-5 py-2 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FileText size={14} /> Makbuzu Yazdır / PDF
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
