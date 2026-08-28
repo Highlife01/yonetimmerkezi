@@ -15,6 +15,8 @@ interface AuthContextType {
   allUsers: UserProfile[];
   allRoles: Record<UserRole, RoleDefinition>;
   isLoggedIn: boolean;
+  isAuthenticated: boolean;
+  setIsAuthenticated: (auth: boolean) => void;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (open: boolean) => void;
   loginWithGoogle: () => Promise<void>;
@@ -32,6 +34,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   // Default: Cebrail Kara (SUPER_ADMIN)
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
@@ -93,12 +96,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       setFirebaseUser(user);
+      setIsAuthenticated(true);
       if (user.email?.toLowerCase() === "cebrailkara@gmail.com") {
         setCurrentUser(DEMO_USERS[0]);
       }
     } catch (err) {
       // In development or if popups blocked, switch to Super Admin
       setCurrentUser(DEMO_USERS[0]);
+      setIsAuthenticated(true);
       throw err;
     }
   };
@@ -106,17 +111,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithEmail = async (email: string, pass: string) => {
     if (email.toLowerCase() === "cebrailkara@gmail.com" && pass === "Ak010101") {
       setCurrentUser(DEMO_USERS[0]);
+      setIsAuthenticated(true);
       return;
     }
 
     try {
       const result = await signInWithEmailAndPassword(auth, email, pass);
       setFirebaseUser(result.user);
+      setIsAuthenticated(true);
     } catch (err) {
       // Match from demo users
       const matched = DEMO_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
       if (matched) {
         setCurrentUser(matched);
+        setIsAuthenticated(true);
         return;
       }
       throw err;
@@ -128,13 +136,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signOut(auth);
     } catch (e) {}
     setFirebaseUser(null);
-    setCurrentUser(DEMO_USERS[0]);
+    setIsAuthenticated(false);
   };
 
   const switchUser = (userId: string) => {
     const found = DEMO_USERS.find((u) => u.id === userId);
     if (found) {
       setCurrentUser(found);
+      setIsAuthenticated(true);
     }
   };
 
@@ -165,6 +174,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         allUsers: DEMO_USERS,
         allRoles: ROLE_DEFINITIONS,
         isLoggedIn: !!currentUser,
+        isAuthenticated,
+        setIsAuthenticated,
         isLoginModalOpen,
         setIsLoginModalOpen,
         loginWithGoogle,

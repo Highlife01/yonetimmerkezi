@@ -13,6 +13,7 @@ import { AppModule, UserRole } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
 import { toast } from "sonner";
 import LoginModal from "@/components/LoginModal";
+import LoginPage from "./LoginPage";
 
 // Import all module views
 import DashboardView from "./modules/DashboardView";
@@ -116,6 +117,11 @@ export default function Home() {
       ]
     }
   ];
+
+  // If not authenticated, show full login screen
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   // If showing resident portal view
   if (isResidentView) {
@@ -265,16 +271,29 @@ export default function Home() {
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                setActiveModule("RESIDENT_PORTAL");
-                toast.info("Sakin portalı görünümüne geçildi.");
-              }}
-              title="Sakin Portalı Olarak Gör"
-              className="p-1.5 rounded-lg bg-[#244240] hover:bg-[#2f5553] text-[#b8edb7] transition"
-            >
-              <Eye size={14} />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  setActiveModule("RESIDENT_PORTAL");
+                  toast.info("Sakin portalı görünümüne geçildi.");
+                }}
+                title="Sakin Portalı Olarak Gör"
+                className="p-1.5 rounded-lg bg-[#244240] hover:bg-[#2f5553] text-[#b8edb7] transition"
+              >
+                <Eye size={14} />
+              </button>
+
+              <button
+                onClick={async () => {
+                  await logout();
+                  toast.success("Oturum kapatıldı.");
+                }}
+                title="Güvenli Çıkış Yap"
+                className="p-1.5 rounded-lg bg-[#244240] hover:bg-rose-950 text-rose-300 hover:text-white transition"
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
           </div>
         </div>
       </aside>
