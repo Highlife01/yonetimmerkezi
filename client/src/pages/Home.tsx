@@ -36,6 +36,7 @@ import MetersView from "./modules/MetersView";
 import MeetingsPollsDocsView from "./modules/MeetingsPollsDocsView";
 import AuditLogsSettingsView from "./modules/AuditLogsSettingsView";
 import ResidentPortalView from "./modules/ResidentPortalView";
+import CommandPalette from "@/components/CommandPalette";
 
 export default function Home() {
   const {
@@ -54,9 +55,23 @@ export default function Home() {
   const [isSiteDropdownOpen, setIsSiteDropdownOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [openModalSignal, setOpenModalSignal] = useState(false);
 
   // Quick Action Modal states for triggering inside views
   const [quickActionModal, setQuickActionModal] = useState<string | null>(null);
+
+  // Keyboard shortcut Ctrl+K / Cmd+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // If currentUser is Kat Maliki or Kiracı and activeModule is DASHBOARD, default to RESIDENT_PORTAL
   const isResidentView = activeModule === "RESIDENT_PORTAL" || (isResidentRole && activeModule === "DASHBOARD");
@@ -329,12 +344,25 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Quick Actions, Login & Role Switcher */}
+          {/* Quick Actions, Search, Login & Role Switcher */}
           <div className="flex items-center gap-3">
+            {/* Quick Search Button (Command Palette) */}
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-[#e4eae3] text-xs font-semibold text-slate-600 transition shadow-xs"
+            >
+              <Search size={14} className="text-emerald-700" />
+              <span>Hızlı Arama</span>
+              <kbd className="text-[10px] font-mono bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-400">Ctrl+K</kbd>
+            </button>
+
             {/* Quick module action button */}
             {activeModule === "DASHBOARD" && (
               <button
-                onClick={() => setActiveModule("DUES_TAHAKKUK")}
+                onClick={() => {
+                  setActiveModule("DUES_TAHAKKUK");
+                  setOpenModalSignal(true);
+                }}
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition"
               >
                 <Plus size={14} /> Toplu Borçlandır
@@ -462,6 +490,13 @@ export default function Home() {
           </div>
         </header>
 
+        {/* Command Palette (Ctrl+K) */}
+        <CommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={() => setIsCommandPaletteOpen(false)}
+          onNavigate={(mod) => handleNavigate(mod)}
+        />
+
         {/* Login Modal */}
         <LoginModal
           isOpen={isLoginModalOpen}
@@ -473,33 +508,37 @@ export default function Home() {
           {activeModule === "DASHBOARD" && (
             <DashboardView
               onNavigate={(mod) => handleNavigate(mod as AppModule)}
-              onOpenTahakkukModal={() => {
+              onOpenBatchTahakkuk={() => {
                 setActiveModule("DUES_TAHAKKUK");
+                setOpenModalSignal(true);
               }}
-              onOpenCollectionModal={() => {
+              onOpenCollection={() => {
                 setActiveModule("COLLECTIONS");
+                setOpenModalSignal(true);
               }}
-              onOpenExpenseModal={() => {
+              onOpenExpense={() => {
                 setActiveModule("INCOME_EXPENSE");
+                setOpenModalSignal(true);
               }}
-              onOpenRequestModal={() => {
-                setActiveModule("REQUESTS");
+              onOpenAnnouncement={() => {
+                setActiveModule("ANNOUNCEMENTS");
+                setOpenModalSignal(true);
               }}
             />
           )}
 
           {activeModule === "UNITS" && <UnitsView />}
           {activeModule === "RESIDENTS" && <ResidentsView />}
-          {activeModule === "DUES_TAHAKKUK" && <DuesTahakkukView initialOpenModal={false} />}
-          {activeModule === "COLLECTIONS" && <CollectionsView initialOpenModal={false} />}
+          {activeModule === "DUES_TAHAKKUK" && <DuesTahakkukView initialOpenModal={openModalSignal} />}
+          {activeModule === "COLLECTIONS" && <CollectionsView initialOpenModal={openModalSignal} />}
           {activeModule === "DEBTORS_AGING" && <DebtorsAgingView />}
-          {activeModule === "INCOME_EXPENSE" && <IncomeExpenseView initialOpenModal={false} />}
+          {activeModule === "INCOME_EXPENSE" && <IncomeExpenseView initialOpenModal={openModalSignal} />}
           {activeModule === "CASH_BANK" && <CashBankView />}
           {activeModule === "VENDORS" && <VendorAccountsView />}
           {activeModule === "BUDGET" && <BudgetManagementView />}
           {activeModule === "REPORTS" && <ReportsView />}
-          {activeModule === "REQUESTS" && <RequestsComplaintsView initialOpenModal={false} />}
-          {activeModule === "ANNOUNCEMENTS" && <AnnouncementsView initialOpenModal={false} />}
+          {activeModule === "REQUESTS" && <RequestsComplaintsView initialOpenModal={openModalSignal} />}
+          {activeModule === "ANNOUNCEMENTS" && <AnnouncementsView initialOpenModal={openModalSignal} />}
           {activeModule === "MAINTENANCE" && <MaintenanceAssetsView />}
           {activeModule === "STAFF" && <StaffView />}
           {activeModule === "SECURITY" && <SecurityGateView />}
