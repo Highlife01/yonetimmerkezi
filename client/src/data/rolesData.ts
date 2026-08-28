@@ -1,0 +1,336 @@
+import { RoleDefinition, UserProfile, UserRole } from "@/types";
+
+export const ROLE_DEFINITIONS: Record<UserRole, RoleDefinition> = {
+  SUPER_ADMIN: {
+    id: "SUPER_ADMIN",
+    name: "Sistem Yöneticisi (Super Admin)",
+    badgeColor: "bg-purple-100 text-purple-800 border-purple-300",
+    description: "Tüm yönetim şirketlerini, siteleri, kullanıcıları ve sistem yapılandırmasını yönetme tam yetkisine sahiptir.",
+    allowedModules: [
+      "Ana Sayfa", "Bağımsız Bölümler", "Malik & Kiracılar", "Aidat & Tahakkuk",
+      "Tahsilatlar", "Borçlular", "Gelir & Gider", "Kasa & Banka", "Tedarikçi Carileri",
+      "Bütçe", "Raporlar", "Duyurular", "Talep & Arızalar", "Teknik Bakım",
+      "Personel", "Ziyaretçi & Kargo", "Sayaçlar", "Toplantılar & Belgeler", "Ayarlar & Denetim İzi"
+    ],
+    permissions: {
+      canCreateTahakkuk: true,
+      canCollectPayments: true,
+      canManageExpenses: true,
+      canViewAllFinancials: true,
+      canViewAuditLogs: true,
+      canManageResidents: true,
+      canManageRequests: true,
+      canManageSecurityGate: true,
+      canExportReports: true,
+      canChangeSettings: true,
+    }
+  },
+  MGMT_COMPANY: {
+    id: "MGMT_COMPANY",
+    name: "Yönetim Şirketi Yöneticisi",
+    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+    description: "Portföydeki tüm site ve apartmanların üst düzey finansal, operasyonel ve personel süreçlerini yönetir.",
+    allowedModules: [
+      "Ana Sayfa", "Bağımsız Bölümler", "Malik & Kiracılar", "Aidat & Tahakkuk",
+      "Tahsilatlar", "Borçlular", "Gelir & Gider", "Kasa & Banka", "Tedarikçi Carileri",
+      "Bütçe", "Raporlar", "Duyurular", "Talep & Arızalar", "Teknik Bakım",
+      "Personel", "Ziyaretçi & Kargo", "Sayaçlar", "Toplantılar & Belgeler", "Ayarlar & Denetim İzi"
+    ],
+    permissions: {
+      canCreateTahakkuk: true,
+      canCollectPayments: true,
+      canManageExpenses: true,
+      canViewAllFinancials: true,
+      canViewAuditLogs: true,
+      canManageResidents: true,
+      canManageRequests: true,
+      canManageSecurityGate: true,
+      canExportReports: true,
+      canChangeSettings: true,
+    }
+  },
+  SITE_MANAGER: {
+    id: "SITE_MANAGER",
+    name: "Site Yöneticisi",
+    badgeColor: "bg-teal-100 text-teal-800 border-teal-300",
+    description: "Yetkili olduğu sitenin tahakkuk, tahsilat, gider, bakım, sakin ve güvenlik operasyonlarını yürütür.",
+    allowedModules: [
+      "Ana Sayfa", "Bağımsız Bölümler", "Malik & Kiracılar", "Aidat & Tahakkuk",
+      "Tahsilatlar", "Borçlular", "Gelir & Gider", "Kasa & Banka", "Tedarikçi Carileri",
+      "Bütçe", "Raporlar", "Duyurular", "Talep & Arızalar", "Teknik Bakım",
+      "Personel", "Ziyaretçi & Kargo", "Sayaçlar", "Toplantılar & Belgeler"
+    ],
+    permissions: {
+      canCreateTahakkuk: true,
+      canCollectPayments: true,
+      canManageExpenses: true,
+      canViewAllFinancials: true,
+      canViewAuditLogs: true,
+      canManageResidents: true,
+      canManageRequests: true,
+      canManageSecurityGate: true,
+      canExportReports: true,
+      canChangeSettings: false,
+    }
+  },
+  ACCOUNTANT: {
+    id: "ACCOUNTANT",
+    name: "Muhasebe & Finans Sorumlusu",
+    badgeColor: "bg-blue-100 text-blue-800 border-blue-300",
+    description: "Aidat tahakkukları, tahsilat girişleri, kasa/banka mutabakatı, tedarikçi faturaları ve resmi raporları yönetir.",
+    allowedModules: [
+      "Ana Sayfa", "Bağımsız Bölümler", "Malik & Kiracılar", "Aidat & Tahakkuk",
+      "Tahsilatlar", "Borçlular", "Gelir & Gider", "Kasa & Banka", "Tedarikçi Carileri",
+      "Bütçe", "Raporlar", "Sayaçlar"
+    ],
+    permissions: {
+      canCreateTahakkuk: true,
+      canCollectPayments: true,
+      canManageExpenses: true,
+      canViewAllFinancials: true,
+      canViewAuditLogs: true,
+      canManageResidents: false,
+      canManageRequests: false,
+      canManageSecurityGate: false,
+      canExportReports: true,
+      canChangeSettings: false,
+    }
+  },
+  ASSISTANT_MANAGER: {
+    id: "ASSISTANT_MANAGER",
+    name: "Yönetici Yardımcısı",
+    badgeColor: "bg-cyan-100 text-cyan-800 border-cyan-300",
+    description: "Sakin talepleri, arızalar, duyurular, kargo ve ziyaretçi takibi ile günlük saha operasyonunu yürütür.",
+    allowedModules: [
+      "Ana Sayfa", "Bağımsız Bölümler", "Malik & Kiracılar", "Duyurular",
+      "Talep & Arızalar", "Teknik Bakım", "Personel", "Ziyaretçi & Kargo", "Sayaçlar"
+    ],
+    permissions: {
+      canCreateTahakkuk: false,
+      canCollectPayments: true,
+      canManageExpenses: false,
+      canViewAllFinancials: false,
+      canViewAuditLogs: false,
+      canManageResidents: true,
+      canManageRequests: true,
+      canManageSecurityGate: true,
+      canExportReports: false,
+      canChangeSettings: false,
+    }
+  },
+  AUDITOR: {
+    id: "AUDITOR",
+    name: "Denetçi (Denetim Kurulu)",
+    badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
+    description: "Tüm finansal hareketleri, banka ve kasa hareketlerini, faturaları ve denetim izini salt-okunur inceler ve raporlar.",
+    allowedModules: [
+      "Ana Sayfa", "Bağımsız Bölümler", "Aidat & Tahakkuk", "Tahsilatlar",
+      "Borçlular", "Gelir & Gider", "Kasa & Banka", "Tedarikçi Carileri",
+      "Bütçe", "Raporlar", "Ayarlar & Denetim İzi"
+    ],
+    permissions: {
+      canCreateTahakkuk: false,
+      canCollectPayments: false,
+      canManageExpenses: false,
+      canViewAllFinancials: true,
+      canViewAuditLogs: true,
+      canManageResidents: false,
+      canManageRequests: false,
+      canManageSecurityGate: false,
+      canExportReports: true,
+      canChangeSettings: false,
+    }
+  },
+  SECURITY: {
+    id: "SECURITY",
+    name: "Güvenlik Görevlisi",
+    badgeColor: "bg-slate-100 text-slate-800 border-slate-300",
+    description: "Güvenlik kulübesinden ziyaretçi giriş-çıkışları, kargo teslim alma/bildirme ve otopark araç plaka kontrolünü yapar.",
+    allowedModules: [
+      "Ziyaretçi & Kargo", "Duyurular", "Talep & Arızalar"
+    ],
+    permissions: {
+      canCreateTahakkuk: false,
+      canCollectPayments: false,
+      canManageExpenses: false,
+      canViewAllFinancials: false,
+      canViewAuditLogs: false,
+      canManageResidents: false,
+      canManageRequests: true,
+      canManageSecurityGate: true,
+      canExportReports: false,
+      canChangeSettings: false,
+    }
+  },
+  MAINTENANCE: {
+    id: "MAINTENANCE",
+    name: "Teknik / Hizmet Personeli",
+    badgeColor: "bg-orange-100 text-orange-800 border-orange-300",
+    description: "Kendisine atanan arıza ve bakım iş emirlerini görüntüler, sahada işlem durumunu günceller.",
+    allowedModules: [
+      "Talep & Arızalar", "Teknik Bakım", "Duyurular"
+    ],
+    permissions: {
+      canCreateTahakkuk: false,
+      canCollectPayments: false,
+      canManageExpenses: false,
+      canViewAllFinancials: false,
+      canViewAuditLogs: false,
+      canManageResidents: false,
+      canManageRequests: true,
+      canManageSecurityGate: false,
+      canExportReports: false,
+      canChangeSettings: false,
+    }
+  },
+  OWNER: {
+    id: "OWNER",
+    name: "Kat Maliki (Daire Sahibi)",
+    badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-300",
+    description: "Sakin portalından dairelerine ait borç dökümünü görür, kartla online ödeme yapar, talep açar, toplantı ve anketlere katılır.",
+    allowedModules: [
+      "Sakin Portalı", "Borçlarım & Ödeme", "Taleplerim", "Duyurular", "Anketler & Belgeler"
+    ],
+    permissions: {
+      canCreateTahakkuk: false,
+      canCollectPayments: false,
+      canManageExpenses: false,
+      canViewAllFinancials: false,
+      canViewAuditLogs: false,
+      canManageResidents: false,
+      canManageRequests: true,
+      canManageSecurityGate: false,
+      canExportReports: false,
+      canChangeSettings: false,
+    }
+  },
+  TENANT: {
+    id: "TENANT",
+    name: "Kiracı",
+    badgeColor: "bg-sky-100 text-sky-800 border-sky-300",
+    description: "Sakin portalından oturduğu dairenin aidat borcunu görür, online kartla öder, arıza bildirimi açar ve duyuruları takip eder.",
+    allowedModules: [
+      "Sakin Portalı", "Borçlarım & Ödeme", "Taleplerim", "Duyurular"
+    ],
+    permissions: {
+      canCreateTahakkuk: false,
+      canCollectPayments: false,
+      canManageExpenses: false,
+      canViewAllFinancials: false,
+      canViewAuditLogs: false,
+      canManageResidents: false,
+      canManageRequests: true,
+      canManageSecurityGate: false,
+      canExportReports: false,
+      canChangeSettings: false,
+    }
+  },
+};
+
+export const DEMO_USERS: UserProfile[] = [
+  {
+    id: "user-1",
+    name: "Elif Arslan",
+    email: "elif.arslan@novayonetim.com",
+    phone: "0532 450 12 34",
+    role: "MGMT_COMPANY",
+    avatarText: "EA",
+    avatarTone: "mint",
+    companyName: "Nova Yönetim A.Ş.",
+    managedSiteIds: ["site-1", "site-2", "site-3", "site-4"],
+    activeSiteId: "site-1",
+  },
+  {
+    id: "user-2",
+    name: "Serdar Yılmaz",
+    email: "serdar.yilmaz@defnepark.com",
+    phone: "0533 112 33 44",
+    role: "SITE_MANAGER",
+    avatarText: "SY",
+    avatarTone: "blue",
+    companyName: "Defne Park Yönetimi",
+    managedSiteIds: ["site-1"],
+    activeSiteId: "site-1",
+  },
+  {
+    id: "user-3",
+    name: "Ayşe Demir",
+    email: "muhasebe@novayonetim.com",
+    phone: "0542 987 65 43",
+    role: "ACCOUNTANT",
+    avatarText: "AD",
+    avatarTone: "coral",
+    companyName: "Nova Yönetim A.Ş.",
+    managedSiteIds: ["site-1", "site-2", "site-3", "site-4"],
+    activeSiteId: "site-1",
+  },
+  {
+    id: "user-4",
+    name: "Av. Kemal Özkan",
+    email: "kemal.ozkan@hukuk.com",
+    phone: "0505 321 44 55",
+    role: "AUDITOR",
+    avatarText: "KÖ",
+    avatarTone: "gold",
+    managedSiteIds: ["site-1"],
+    activeSiteId: "site-1",
+  },
+  {
+    id: "user-5",
+    name: "Hasan Çetin",
+    email: "guvenlik@defnepark.com",
+    phone: "0555 678 90 12",
+    role: "SECURITY",
+    avatarText: "HÇ",
+    avatarTone: "lavender",
+    managedSiteIds: ["site-1"],
+    activeSiteId: "site-1",
+  },
+  {
+    id: "user-6",
+    name: "Ahmet Usta",
+    email: "teknik@novayonetim.com",
+    phone: "0530 876 54 32",
+    role: "MAINTENANCE",
+    avatarText: "AU",
+    avatarTone: "coral",
+    managedSiteIds: ["site-1", "site-2"],
+    activeSiteId: "site-1",
+  },
+  {
+    id: "user-7",
+    name: "Mehmet Kaya (Kat Maliki)",
+    email: "mehmet.kaya@email.com",
+    phone: "0535 777 88 99",
+    role: "OWNER",
+    avatarText: "MK",
+    avatarTone: "cream",
+    managedSiteIds: ["site-1"],
+    residentUnitId: "unit-18",
+    activeSiteId: "site-1",
+  },
+  {
+    id: "user-8",
+    name: "Zeynep Korkmaz (Kiracı)",
+    email: "zeynep.korkmaz@email.com",
+    phone: "0544 555 66 77",
+    role: "TENANT",
+    avatarText: "ZK",
+    avatarTone: "mint",
+    managedSiteIds: ["site-1"],
+    residentUnitId: "unit-7",
+    activeSiteId: "site-1",
+  },
+  {
+    id: "user-9",
+    name: "Sistem Yöneticisi (Root)",
+    email: "admin@yonetimmerkezi.com",
+    phone: "0850 300 00 00",
+    role: "SUPER_ADMIN",
+    avatarText: "SA",
+    avatarTone: "lavender",
+    companyName: "Yönetim Merkezi SaaS",
+    managedSiteIds: ["site-1", "site-2", "site-3", "site-4"],
+    activeSiteId: "site-1",
+  },
+];
