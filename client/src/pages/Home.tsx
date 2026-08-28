@@ -47,7 +47,7 @@ export default function Home() {
   const {
     currentUser, activeRole, roleDef, switchRole,
     allUsers, switchUser, canAccessModule, isResidentRole,
-    isLoginModalOpen, setIsLoginModalOpen, logout
+    isLoginModalOpen, setIsLoginModalOpen, logout, isAuthenticated
   } = useAuth();
 
   const [activeModule, setActiveModule] = useState<AppModule>("DASHBOARD");
@@ -147,9 +147,14 @@ export default function Home() {
                 Y
               </div>
               <div className="leading-tight">
-                <span className="text-base font-extrabold tracking-tight text-white block">
-                  Yönetim Merkezi
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base font-extrabold tracking-tight text-white block">
+                    Yönetim Merkezi
+                  </span>
+                  <span className="bg-[#b8edb7] text-[#172b2b] text-[8px] font-black uppercase px-1.5 py-0.2 rounded font-mono">
+                    ÜCRETSİZ
+                  </span>
+                </div>
                 <span className="text-[10px] text-[#86af85] font-semibold tracking-wider uppercase">
                   SaaS Apartman Platformu
                 </span>
@@ -314,6 +319,9 @@ export default function Home() {
 
             {/* Slogans badge */}
             <div className="hidden xl:flex items-center gap-2 text-[11px] text-[#556b66] bg-[#f4f6f2] px-3 py-1 rounded-full border border-[#e4eae3]">
+              <span className="bg-emerald-600 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                %100 ÜCRETSİZ
+              </span>
               <Sparkles size={13} className="text-emerald-700" />
               <span>Aidattan Yönetime, Her Şey Tek Yerde.</span>
               <span className="text-slate-300">·</span>

@@ -60,12 +60,19 @@ export default function LoginPage() {
             Y
           </div>
           <div>
-            <h1 className="text-lg font-black tracking-tight text-white">Yönetim Merkezi</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-black tracking-tight text-white">Yönetim Merkezi</h1>
+              <span className="bg-[#b8edb7] text-[#172b2b] text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
+                %100 ÜCRETSİZ
+              </span>
+            </div>
             <p className="text-[10px] text-[#86af85] font-bold uppercase tracking-wider">Apartman & Site Yönetim SaaS</p>
           </div>
         </div>
 
         <div className="hidden md:flex items-center gap-4 text-xs font-semibold text-[#86af85]">
+          <span className="text-[#b8edb7] font-bold">✦ Tamamen Ücretsiz Platform</span>
+          <span className="text-white/20">·</span>
           <span>Aidattan Yönetime, Her Şey Tek Yerde.</span>
           <span className="text-white/20">·</span>
           <span>Siteniz Kontrol Altında</span>
@@ -75,15 +82,15 @@ export default function LoginPage() {
       {/* Center Auth Card */}
       <main className="flex-1 flex items-center justify-center p-6 my-8">
         <div className="max-w-md w-full bg-white text-[#172b2b] rounded-3xl p-8 sm:p-10 shadow-2xl space-y-6 border border-[#e4eae3] animate-in zoom-in-95 duration-200">
-          <div className="text-center space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full inline-block border border-emerald-200">
-              YÖNETİMİN TEK MERKEZİ
-            </span>
-            <h2 className="text-2xl font-extrabold text-[#172b2b] tracking-tight pt-2">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-950 font-black text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full border border-emerald-300 shadow-xs">
+              <Sparkles size={13} className="text-emerald-700" /> %100 ÜCRETSİZ SAAS SİSTEMİ
+            </div>
+            <h2 className="text-2xl font-extrabold text-[#172b2b] tracking-tight pt-1">
               Sisteme Giriş Yapın
             </h2>
-            <p className="text-xs text-[#6b7c78]">
-              Gerçek bulut veritabanı ile apartman ve site yönetim süreçlerinizi yönetin.
+            <p className="text-xs text-[#52635f] leading-relaxed">
+              Kredi kartı gerekmez · Sınırsız site, daire, aidat ve muhasebe yönetimi tamamen ücretsizdir.
             </p>
           </div>
 
