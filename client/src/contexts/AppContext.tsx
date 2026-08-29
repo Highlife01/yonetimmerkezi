@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import {
-  Site, Block, Unit, Person, TahakkukRecord,
+  Site, Block, Unit, Person, TahakkukRecord, UnitType,
   UnitAccountLedgerItem, Collection, AccountEntity,
   AccountTransaction, ExpenseRecord, Vendor, AnnualBudget,
   ServiceRequest, Announcement, Poll, MeetingMinute,
@@ -405,18 +405,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const ownerId = `person-imp-${now}-${index}-owner`;
       const tenantId = item.tenantName ? `person-imp-${now}-${index}-tenant` : undefined;
       const unitId = `unit-imp-${now}-${index}`;
+      const block = blocks.find(b => b.name.toLowerCase() === (item.blockName || "").toLowerCase()) || blocks[0];
 
       // Create owner person
       newPeople.push({
         id: ownerId,
         siteId: activeSiteId,
         fullName: item.ownerName || `Malik ${item.blockName} D:${item.unitNumber}`,
+        tcOrTaxNo: "11111111110",
         phone: item.ownerPhone || "0500 000 00 00",
         email: item.ownerEmail || `malik_${item.unitNumber}@site.com`,
         type: "MALIK",
         ownedUnitIds: [unitId],
         isActive: true,
-        notificationPreferences: { sms: true, email: true, push: true },
       });
 
       // If tenant exists, create tenant person
@@ -425,33 +426,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           id: tenantId,
           siteId: activeSiteId,
           fullName: item.tenantName,
+          tcOrTaxNo: "22222222220",
           phone: item.tenantPhone || "0500 000 00 00",
           email: item.tenantEmail || `kiraci_${item.unitNumber}@site.com`,
           type: "KIRACI",
           rentedUnitId: unitId,
+          ownedUnitIds: [],
           isActive: true,
-          notificationPreferences: { sms: true, email: true, push: true },
         });
       }
+
+      // Map unit type string
+      let parsedType: UnitType = "3+1";
+      if (item.type === "DUKKAN" || item.type === "DEPO") parsedType = "Dükkan";
+      else if (item.type === "OFIS") parsedType = "Ofis";
+      else parsedType = "3+1";
 
       // Create Unit
       newUnits.push({
         id: unitId,
         siteId: activeSiteId,
+        blockId: block?.id || "block-1",
         blockName: item.blockName || "A Blok",
         unitNumber: item.unitNumber || String(index + 1),
-        type: item.type || "DAIRE",
+        floor: Math.ceil(Number(item.unitNumber || 1) / 4),
+        type: parsedType,
         grossSquareMeters: Number(item.grossSquareMeters || 120),
-        netSquareMeters: Math.round(Number(item.grossSquareMeters || 120) * 0.85),
-        landShare: Number(item.landShare || 10),
-        landShareRatio: `${item.landShare || 10}/1000`,
-        floorNumber: Math.ceil(Number(item.unitNumber || 1) / 4),
+        shareOfLand: Number(item.landShare || 10),
         residentType: item.residentType || (item.tenantName ? "KIRACI_OTURUYOR" : "MALIK_OTURUYOR"),
+        residentCount: 3,
+        vehiclePlates: [],
         ownerId,
         tenantId,
         currentBalance: Number(item.initialBalance || 0),
-        monthlyDuesShare: activeSite.monthlyDuesDueDay || 2000,
-        isDuesExempt: false,
       });
     });
 

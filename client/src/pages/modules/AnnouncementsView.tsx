@@ -32,7 +32,7 @@ export default function AnnouncementsView({ initialOpenModal = false }: Announce
       return;
     }
 
-    addAnnouncement(newAnn);
+    addAnnouncement({ ...newAnn, siteId: activeSite.id });
     setIsAddModalOpen(false);
     toast.success("Duyuru tüm sakinlerin portalında başarıyla yayınlandı.");
   };

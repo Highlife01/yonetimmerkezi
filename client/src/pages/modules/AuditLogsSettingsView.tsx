@@ -71,7 +71,7 @@ export default function AuditLogsSettingsView() {
   const filteredLogs = activeSiteAuditLogs.filter((log) => {
     const q = logSearch.toLocaleLowerCase("tr-TR").trim();
     if (q) {
-      const matchText = `${log.userName} ${log.action} ${log.entity} ${log.details}`.toLocaleLowerCase("tr-TR");
+      const matchText = `${log.userName} ${log.actionType || ""} ${log.module || ""} ${log.description || ""}`.toLocaleLowerCase("tr-TR");
       if (!matchText.includes(q)) return false;
     }
     return true;
@@ -86,14 +86,17 @@ export default function AuditLogsSettingsView() {
 
     addSite({
       name: newSiteData.name,
+      type: "SITE",
       address: newSiteData.address,
       city: newSiteData.city,
       district: newSiteData.district,
       totalUnits: Number(newSiteData.totalUnits),
       totalBlocks: Number(newSiteData.totalBlocks),
-      managementCompanyName: "Elya Profesyonel Tesis & Site Yönetimi A.Ş.",
+      managerName: "Site Yöneticisi",
+      managerPhone: "0500 000 00 00",
+      bankName: "Garanti BBVA",
       bankIban: newSiteData.bankIban,
-      monthlyDuesDefault: Number(newSiteData.monthlyDuesDefault),
+      monthlyDuesDueDay: 10,
       lateInterestRatePerMonth: Number(newSiteData.lateInterestRatePerMonth),
     });
 
@@ -382,11 +385,11 @@ export default function AuditLogsSettingsView() {
                     </td>
                     <td className="py-2.5 px-3">
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                        {log.action} · {log.entity}
+                        {log.actionType} · {log.module}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-800 font-medium">{log.details}</td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-400">{log.ipAddress}</td>
+                    <td className="py-2.5 px-3 text-slate-800 font-medium">{log.description}</td>
+                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-400">{log.ipAddress || "127.0.0.1"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -411,10 +414,10 @@ export default function AuditLogsSettingsView() {
                   <th className="py-3 px-3 text-center">Toplu Aidat</th>
                   <th className="py-3 px-3 text-center">Tahsilat</th>
                   <th className="py-3 px-3 text-center">Gider Girişi</th>
-                  <th className="py-3 px-3 text-center">Virman</th>
-                  <th className="py-3 px-3 text-center">Sakin Ekle</th>
                   <th className="py-3 px-3 text-center">Mali Rapor</th>
-                  <th className="py-3 px-3 text-center">Duyuru</th>
+                  <th className="py-3 px-3 text-center">Sakin Yönetimi</th>
+                  <th className="py-3 px-3 text-center">Talep Yönetimi</th>
+                  <th className="py-3 px-3 text-center">Güvenlik Kapısı</th>
                   <th className="py-3 px-3 text-center">Denetim İzi</th>
                 </tr>
               </thead>
@@ -428,13 +431,13 @@ export default function AuditLogsSettingsView() {
                         <strong className="text-[#172b2b] block">{def.name}</strong>
                         <span className="text-[10px] text-[#7c8a87]">{def.description}</span>
                       </td>
-                      <td className="py-3 px-3 text-center">{p.canAccrueDues ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
+                      <td className="py-3 px-3 text-center">{p.canCreateTahakkuk ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
                       <td className="py-3 px-3 text-center">{p.canCollectPayments ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
                       <td className="py-3 px-3 text-center">{p.canManageExpenses ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
-                      <td className="py-3 px-3 text-center">{p.canManageBankAccounts ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
-                      <td className="py-3 px-3 text-center">{p.canManageUnitsAndResidents ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
-                      <td className="py-3 px-3 text-center">{p.canViewFinancialReports ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
-                      <td className="py-3 px-3 text-center">{p.canPostAnnouncements ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
+                      <td className="py-3 px-3 text-center">{p.canViewAllFinancials ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
+                      <td className="py-3 px-3 text-center">{p.canManageResidents ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
+                      <td className="py-3 px-3 text-center">{p.canManageRequests ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
+                      <td className="py-3 px-3 text-center">{p.canManageSecurityGate ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
                       <td className="py-3 px-3 text-center">{p.canViewAuditLogs ? <CheckCircle2 size={16} className="text-emerald-600 mx-auto" /> : <XCircle size={16} className="text-slate-300 mx-auto" />}</td>
                     </tr>
                   );
@@ -480,7 +483,7 @@ export default function AuditLogsSettingsView() {
                 </div>
                 <div className="bg-slate-50 p-2 rounded-xl text-center">
                   <span className="text-[10px] text-slate-400 block">Sabit Aidat</span>
-                  <strong className="text-sm font-bold text-emerald-800">₺{site.monthlyDuesDefault}</strong>
+                  <strong className="text-sm font-bold text-emerald-800">₺{(site as any).monthlyDuesDefault || 2500}</strong>
                 </div>
               </div>
             </div>

@@ -3,7 +3,7 @@ import {
   CreditCard, ReceiptText, Bell, ClipboardList, LifeBuoy,
   FileText, Building2, Phone, Mail, CheckCircle2, AlertCircle,
   ArrowUpRight, Lock, Sparkles, LayoutDashboard, X, Plus, ShieldCheck,
-  Copy, Check
+  Copy, Check, MessageSquare
 } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";

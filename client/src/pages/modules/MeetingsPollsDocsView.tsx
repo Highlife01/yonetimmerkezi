@@ -278,7 +278,7 @@ export default function MeetingsPollsDocsView() {
                           <td className="py-2 px-3 font-mono text-slate-400">{index + 1}</td>
                           <td className="py-2 px-3 font-bold text-[#172b2b]">{u.blockName} D:{u.unitNumber}</td>
                           <td className="py-2 px-3 font-medium text-slate-800">{owner?.fullName || "Kat Maliki"}</td>
-                          <td className="py-2 px-3 text-center font-mono text-slate-600">{u.landShare}/1000</td>
+                          <td className="py-2 px-3 text-center font-mono text-slate-600">{u.shareOfLand || (u as any).landShare || 10}/1000</td>
                           <td className="py-2 px-3 text-center">
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
                               Asil / Bizzat

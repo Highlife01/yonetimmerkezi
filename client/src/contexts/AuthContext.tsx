@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 id: fbUser.uid,
                 name: fbUser.displayName || userEmail.split("@")[0],
                 email: userEmail,
+                phone: fbUser.phoneNumber || "0500 000 00 00",
                 role: "SITE_MANAGER",
                 avatarText: (fbUser.displayName || userEmail).slice(0, 2).toUpperCase(),
                 avatarTone: "blue",

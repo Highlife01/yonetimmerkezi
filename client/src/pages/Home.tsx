@@ -275,15 +275,15 @@ export default function Home() {
                         <span className="truncate">{item.label}</span>
                       </div>
 
-                      {item.alertCount !== undefined && item.alertCount > 0 && (
+                      {(item as any).alertCount !== undefined && (item as any).alertCount > 0 && (
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500 text-white">
-                          {item.alertCount}
+                          {(item as any).alertCount}
                         </span>
                       )}
 
-                      {item.badge && (
+                      {(item as any).badge && (
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#2e5250] text-[#b8edb7]">
-                          {item.badge}
+                          {(item as any).badge}
                         </span>
                       )}
                     </button>
@@ -533,7 +533,7 @@ export default function Home() {
                         >
                           <div>
                             <strong className="block text-xs">{user.name}</strong>
-                            <span className="text-[10px] text-slate-500">{user.siteName || activeSite.name} · {user.role}</span>
+                            <span className="text-[10px] text-slate-500">{(user as any).siteName || activeSite.name} · {user.role}</span>
                           </div>
                           {user.id === currentUser.id && <CheckCircle2 size={15} className="text-emerald-700" />}
                         </button>

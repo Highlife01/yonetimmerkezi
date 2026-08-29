@@ -14,6 +14,28 @@ export type UserRole =
   | "OWNER"              // Kat Maliki
   | "TENANT";            // Kiracı
 
+export type AppModule =
+  | "DASHBOARD"
+  | "UNITS"
+  | "RESIDENTS"
+  | "DUES_TAHAKKUK"
+  | "COLLECTIONS"
+  | "DEBTORS_AGING"
+  | "INCOME_EXPENSE"
+  | "CASH_BANK"
+  | "VENDORS"
+  | "BUDGET"
+  | "REPORTS"
+  | "REQUESTS"
+  | "ANNOUNCEMENTS"
+  | "MAINTENANCE"
+  | "STAFF"
+  | "SECURITY"
+  | "METERS"
+  | "MEETINGS_POLLS"
+  | "AUDIT_SETTINGS"
+  | "RESIDENT_PORTAL";
+
 export interface RoleDefinition {
   id: UserRole;
   name: string;
@@ -375,6 +397,7 @@ export interface ServiceRequest {
   siteId: string;
   unitId: string;
   unitName: string;
+  reportedById?: string;
   reportedByName: string;
   reportedByPhone: string;
   category: "ELEKTRIK" | "TESISAT" | "ASANSOR" | "PEYZAJ" | "TEMIZLIK" | "GUVENLIK" | "SES_GURULTU" | "DIGER";
@@ -540,4 +563,5 @@ export interface AuditLogEntry {
   module: string;
   description: string;
   financialAmount?: number;
+  ipAddress?: string;
 }

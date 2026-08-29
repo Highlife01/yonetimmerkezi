@@ -42,13 +42,17 @@ export default function CommandPalette({
   if (!isOpen) return null;
 
   const filteredUnits = query.trim()
-    ? activeSiteUnits.filter(
-        (u) =>
-          u.unitNumber.toLowerCase().includes(query.toLowerCase()) ||
-          u.blockName.toLowerCase().includes(query.toLowerCase()) ||
-          u.ownerName.toLowerCase().includes(query.toLowerCase()) ||
-          (u.tenantName && u.tenantName.toLowerCase().includes(query.toLowerCase()))
-      ).slice(0, 5)
+    ? activeSiteUnits.filter((u) => {
+        const owner = activeSitePeople.find((p) => p.id === u.ownerId);
+        const tenant = u.tenantId ? activeSitePeople.find((p) => p.id === u.tenantId) : null;
+        const q = query.toLowerCase();
+        return (
+          u.unitNumber.toLowerCase().includes(q) ||
+          u.blockName.toLowerCase().includes(q) ||
+          (owner?.fullName || "").toLowerCase().includes(q) ||
+          (tenant?.fullName || "").toLowerCase().includes(q)
+        );
+      }).slice(0, 5)
     : [];
 
   const filteredPeople = query.trim()
@@ -124,38 +128,42 @@ export default function CommandPalette({
                 BAĞIMSIZ BÖLÜMLER ({filteredUnits.length})
               </span>
               <div className="space-y-1">
-                {filteredUnits.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => {
-                      onNavigate("UNITS");
-                      if (onSelectUnit) onSelectUnit(u.id);
-                      onClose();
-                    }}
-                    className="w-full p-2.5 rounded-xl hover:bg-emerald-50 text-left transition flex items-center justify-between group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#d5f1d2] text-[#2b6534] font-bold text-xs flex items-center justify-center">
-                        {u.unitNumber}
+                {filteredUnits.map((u) => {
+                  const owner = activeSitePeople.find((p) => p.id === u.ownerId);
+                  const tenant = u.tenantId ? activeSitePeople.find((p) => p.id === u.tenantId) : null;
+                  return (
+                    <button
+                      key={u.id}
+                      onClick={() => {
+                        onNavigate("UNITS");
+                        if (onSelectUnit) onSelectUnit(u.id);
+                        onClose();
+                      }}
+                      className="w-full p-2.5 rounded-xl hover:bg-emerald-50 text-left transition flex items-center justify-between group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[#d5f1d2] text-[#2b6534] font-bold text-xs flex items-center justify-center">
+                          {u.unitNumber}
+                        </div>
+                        <div>
+                          <strong className="text-xs text-[#172b2b] block group-hover:text-emerald-900">
+                            {u.blockName} Blok - No: {u.unitNumber} ({u.type})
+                          </strong>
+                          <span className="text-[11px] text-slate-500">
+                            Malik: {owner?.fullName || "-"} {tenant ? `· Kiracı: ${tenant.fullName}` : ""}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <strong className="text-xs text-[#172b2b] block group-hover:text-emerald-900">
-                          {u.blockName} Blok - No: {u.unitNumber} ({u.type})
-                        </strong>
-                        <span className="text-[11px] text-slate-500">
-                          Malik: {u.ownerName} {u.tenantName ? `· Kiracı: ${u.tenantName}` : ""}
-                        </span>
-                      </div>
-                    </div>
 
-                    <div className="text-right">
-                      <span className={`text-xs font-bold ${u.currentBalance > 0 ? "text-rose-600" : "text-emerald-700"}`}>
-                        {u.currentBalance > 0 ? `Borç: ${formatCurrency(u.currentBalance)}` : "Borçsuz"}
-                      </span>
-                      <span className="text-[10px] text-slate-400 block">{u.grossM2} m²</span>
-                    </div>
-                  </button>
-                ))}
+                      <div className="text-right">
+                        <span className={`text-xs font-bold ${u.currentBalance > 0 ? "text-rose-600" : "text-emerald-700"}`}>
+                          {u.currentBalance > 0 ? `Borç: ${formatCurrency(u.currentBalance)}` : "Borçsuz"}
+                        </span>
+                        <span className="text-[10px] text-slate-400 block">{u.grossSquareMeters} m²</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -191,7 +199,7 @@ export default function CommandPalette({
                     </div>
 
                     <span className="text-[11px] font-bold text-blue-700 bg-white border border-blue-200 px-2 py-0.5 rounded-md">
-                      {p.units.join(", ")}
+                      {p.ownedUnitIds?.length ? `${p.ownedUnitIds.length} Daire Sahibi` : p.rentedUnitId ? "Kiracı" : "Sakin"}
                     </span>
                   </button>
                 ))}

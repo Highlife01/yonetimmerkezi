@@ -13,9 +13,10 @@ import { toast } from "sonner";
 
 interface DuesTahakkukViewProps {
   initialOpenWizard?: boolean;
+  initialOpenModal?: boolean;
 }
 
-export default function DuesTahakkukView({ initialOpenWizard = false }: DuesTahakkukViewProps) {
+export default function DuesTahakkukView({ initialOpenWizard = false, initialOpenModal = false }: DuesTahakkukViewProps) {
   const {
     activeSite, activeSiteUnits, activeSiteTahakkuklar,
     blocks, createBatchTahakkuk, cancelTahakkuk
@@ -24,7 +25,7 @@ export default function DuesTahakkukView({ initialOpenWizard = false }: DuesTaha
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
-  const [isWizardOpen, setIsWizardOpen] = useState(initialOpenWizard);
+  const [isWizardOpen, setIsWizardOpen] = useState(initialOpenWizard || initialOpenModal);
   const [selectedTahakkukForDetail, setSelectedTahakkukForDetail] = useState<TahakkukRecord | null>(null);
 
   // Wizard form state
