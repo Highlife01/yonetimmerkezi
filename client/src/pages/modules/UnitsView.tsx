@@ -11,6 +11,7 @@ import { Unit, UnitType } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { exportToCSV, printReceipt } from "@/utils/exportUtils";
 import { toast } from "sonner";
+import ExcelBulkImportModal from "@/components/ExcelBulkImportModal";
 
 interface UnitsViewProps {
   onOpenCollectionForUnit?: (unitId: string) => void;
@@ -32,8 +33,9 @@ export default function UnitsView({ onOpenCollectionForUnit }: UnitsViewProps) {
   // Selected Unit for Detail Drawer
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
 
-  // New Unit Modal
+  // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [newUnitData, setNewUnitData] = useState({
     blockId: blocks[0]?.id || "",
     unitNumber: "",
@@ -205,6 +207,12 @@ export default function UnitsView({ onOpenCollectionForUnit }: UnitsViewProps) {
 
           <div className="flex items-center gap-2.5 flex-wrap">
             <button
+              onClick={() => setIsBulkImportOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold hover:bg-emerald-100 transition shadow-xs cursor-pointer"
+            >
+              <FileText size={14} className="text-emerald-700" /> Excel'den Toplu Yükle
+            </button>
+            <button
               onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-[#e4eae3] text-[#294342] text-xs font-semibold hover:bg-slate-50 transition shadow-sm"
             >
@@ -213,7 +221,7 @@ export default function UnitsView({ onOpenCollectionForUnit }: UnitsViewProps) {
             {hasPermission("canManageResidents") && (
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#172b2b] text-white text-xs font-semibold hover:bg-[#294342] transition shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#172b2b] text-white text-xs font-semibold hover:bg-[#294342] transition shadow-sm cursor-pointer"
               >
                 <Plus size={15} /> Yeni Daire Ekle
               </button>
@@ -805,6 +813,12 @@ export default function UnitsView({ onOpenCollectionForUnit }: UnitsViewProps) {
           </div>
         </div>
       )}
+
+      {/* EXCEL BULK IMPORT MODAL */}
+      <ExcelBulkImportModal
+        isOpen={isBulkImportOpen}
+        onClose={() => setIsBulkImportOpen(false)}
+      />
     </div>
   );
 }

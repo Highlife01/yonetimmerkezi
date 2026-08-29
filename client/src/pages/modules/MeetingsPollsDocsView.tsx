@@ -8,10 +8,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function MeetingsPollsDocsView() {
-  const { activeSite, activeSiteMeetings, activeSitePolls, activeSiteDocuments, votePoll } = useApp();
+  const { activeSite, activeSiteUnits, activeSiteMeetings, activeSitePolls, activeSiteDocuments, votePoll, people } = useApp();
   const { currentUser, hasPermission } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"MEETINGS" | "POLLS" | "DOCS">("MEETINGS");
+  const [selectedMeetingForHazirun, setSelectedMeetingForHazirun] = useState<any | null>(null);
 
   return (
     <div className="space-y-6">
@@ -70,12 +71,20 @@ export default function MeetingsPollsDocsView() {
                     <span>Konum: <strong>{meeting.location}</strong></span>
                   </div>
                 </div>
-                <button
-                  onClick={() => toast.info("İmzalı Genel Kurul Tutanağı PDF olarak indiriliyor...")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-[#172b2b] transition"
-                >
-                  <Download size={14} /> İmzalı Tutanağı İndir (PDF)
-                </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={() => setSelectedMeetingForHazirun(meeting)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-xs font-bold text-emerald-950 transition cursor-pointer shadow-xs"
+                  >
+                    <FileText size={14} className="text-emerald-700" /> Hazirun Cetveli (İmza Listesi) Yazdır
+                  </button>
+                  <button
+                    onClick={() => toast.info("İmzalı Genel Kurul Tutanağı PDF olarak indiriliyor...")}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-[#172b2b] transition cursor-pointer"
+                  >
+                    <Download size={14} /> İmzalı Tutanak (PDF)
+                  </button>
+                </div>
               </div>
 
               <div className="p-3 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-xl text-xs flex items-center gap-2">
@@ -201,6 +210,132 @@ export default function MeetingsPollsDocsView() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* RESMİ GENEL KURUL HAZİRUN CETVELİ & İMZA LİSTESİ MODALI */}
+      {selectedMeetingForHazirun && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-[#e4eae3] space-y-5 animate-in zoom-in-95 duration-150 my-6">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#e4eae3]">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                  <FileText size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#172b2b]">Resmi Kat Malikleri Hazirun Cetveli</h3>
+                  <p className="text-xs text-[#7c8a87]">634 Sayılı KMK Madde 29 Toplantı ve Karar Yeter Sayısı İmza Tutanağı</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedMeetingForHazirun(null)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Printable Document Box */}
+            <div className="p-6 bg-[#fcfdfc] border-2 border-dashed border-[#d2dbd7] rounded-2xl space-y-4 font-sans text-xs">
+              {/* Document Header */}
+              <div className="text-center pb-3 border-b border-[#e4eae3] space-y-1">
+                <h4 className="text-base font-black uppercase text-[#172b2b]">
+                  {activeSite.name} KAT MALİKLERİ OLAĞAN GENEL KURUL TOPLANTISI
+                </h4>
+                <h5 className="font-extrabold text-emerald-850 uppercase text-xs">
+                  HAZİRUN CETVELİ (TOPLANTI KATILIM VE İMZA LİSTESİ)
+                </h5>
+                <p className="text-[11px] text-slate-500">
+                  Toplantı Tarihi: <strong>{selectedMeetingForHazirun.date}</strong> · Yer: <strong>{selectedMeetingForHazirun.location}</strong>
+                </p>
+              </div>
+
+              {/* Legal Quorum Box */}
+              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between text-[11px]">
+                <span>Toplam Daire: <strong>{activeSiteUnits.length}</strong> | Toplam Arsa Payı: <strong>1000/1000</strong></span>
+                <span className="font-bold text-emerald-950">KMK Salt Çoğunluk Yeter Sayısı: <strong>{Math.floor(activeSiteUnits.length / 2) + 1} Asil/Vekil</strong></span>
+              </div>
+
+              {/* Table of Units & Owners */}
+              <div className="border border-[#e4eae3] rounded-xl overflow-hidden max-h-72 overflow-y-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#f8faf7] border-b border-[#e4eae3] text-[#7c8a87] text-[10px] font-black uppercase sticky top-0">
+                    <tr>
+                      <th className="py-2 px-3">No</th>
+                      <th className="py-2 px-3">Blok / Daire</th>
+                      <th className="py-2 px-3">Kat Maliki Adı Soyadı</th>
+                      <th className="py-2 px-3 text-center">Arsa Payı</th>
+                      <th className="py-2 px-3 text-center">Katılım Türü</th>
+                      <th className="py-2 px-3 text-center">İmza</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#f0f4f1]">
+                    {activeSiteUnits.map((u, index) => {
+                      const owner = people.find(p => p.id === u.ownerId);
+                      return (
+                        <tr key={u.id} className="hover:bg-slate-50">
+                          <td className="py-2 px-3 font-mono text-slate-400">{index + 1}</td>
+                          <td className="py-2 px-3 font-bold text-[#172b2b]">{u.blockName} D:{u.unitNumber}</td>
+                          <td className="py-2 px-3 font-medium text-slate-800">{owner?.fullName || "Kat Maliki"}</td>
+                          <td className="py-2 px-3 text-center font-mono text-slate-600">{u.landShare}/1000</td>
+                          <td className="py-2 px-3 text-center">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                              Asil / Bizzat
+                            </span>
+                          </td>
+                          <td className="py-2 px-3 text-center text-slate-400 font-mono text-[10px]">
+                            ...........................
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Signatures */}
+              <div className="grid grid-cols-2 gap-6 pt-4 text-center text-xs border-t border-slate-200">
+                <div className="space-y-6">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block">DİVAN BAŞKANI</span>
+                  <div className="border-t border-slate-300 pt-1">
+                    <span className="text-[10px] text-slate-400">İmza / Tarih</span>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block">DİVAN KÂTİP ÜYESİ</span>
+                  <div className="border-t border-slate-300 pt-1">
+                    <span className="text-[10px] text-slate-400">İmza / Tarih</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-2 flex items-center justify-between text-xs">
+              <span className="text-slate-400 text-[11px]">Resmi Hazirun Şablonu</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedMeetingForHazirun(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
+                >
+                  Kapat
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.print();
+                    toast.success("Hazirun cetveli yazdırma penceresi açıldı.");
+                  }}
+                  className="px-5 py-2 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FileText size={14} /> Hazirun Cetvelini Yazdır / PDF
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

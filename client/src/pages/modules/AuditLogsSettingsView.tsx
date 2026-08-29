@@ -33,6 +33,8 @@ export default function AuditLogsSettingsView() {
     bankIban: activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01",
     monthlyDuesDueDay: activeSite.monthlyDuesDueDay || 10,
     lateInterestRatePerMonth: activeSite.lateInterestRatePerMonth || 5,
+    whatsappGroupUrl: activeSite.whatsappGroupUrl || "https://chat.whatsapp.com/invite-ornek",
+    autoDuesEnabled: activeSite.autoDuesEnabled ?? true,
   });
 
   // Sync state if activeSite changes
@@ -48,6 +50,8 @@ export default function AuditLogsSettingsView() {
       bankIban: activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01",
       monthlyDuesDueDay: activeSite.monthlyDuesDueDay || 10,
       lateInterestRatePerMonth: activeSite.lateInterestRatePerMonth || 5,
+      whatsappGroupUrl: activeSite.whatsappGroupUrl || "https://chat.whatsapp.com/invite-ornek",
+      autoDuesEnabled: activeSite.autoDuesEnabled ?? true,
     });
   }, [activeSite]);
 
@@ -302,15 +306,26 @@ export default function AuditLogsSettingsView() {
               </div>
 
               <div>
-                <label className="font-bold text-[#172b2b] block mb-1">Aylık KMK Gecikme Tazminatı Oranı (%)</label>
+                <label className="font-bold text-[#172b2b] block mb-1">Resmi Apartman WhatsApp Duyuru Grubu Linki</label>
                 <input
-                  type="number"
-                  min={0}
-                  max={50}
-                  step={0.5}
-                  value={siteSettings.lateInterestRatePerMonth}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, lateInterestRatePerMonth: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-bold"
+                  type="url"
+                  placeholder="https://chat.whatsapp.com/..."
+                  value={siteSettings.whatsappGroupUrl}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, whatsappGroupUrl: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-mono text-emerald-900"
+                />
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+                <div>
+                  <strong className="block text-[#172b2b]">Otomatik Aylık Aidat Tahakkuku</strong>
+                  <span className="text-[11px] text-slate-500">Her ayın 1'inde sabit aidatları otomatik işlet</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={siteSettings.autoDuesEnabled}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, autoDuesEnabled: e.target.checked })}
+                  className="w-4 h-4 accent-emerald-600 cursor-pointer"
                 />
               </div>
             </div>
@@ -318,7 +333,7 @@ export default function AuditLogsSettingsView() {
             <div className="pt-3 border-t border-[#f0f4f1] flex justify-end">
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white text-xs font-bold transition shadow-sm"
+                className="px-6 py-2.5 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white text-xs font-bold transition shadow-sm cursor-pointer"
               >
                 Ayarları ve IBAN'ı Kaydet
               </button>

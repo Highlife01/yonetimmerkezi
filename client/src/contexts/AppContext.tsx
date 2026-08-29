@@ -40,6 +40,21 @@ interface AppContextType {
   activeSiteUnits: Unit[];
   addUnit: (unitData: Omit<Unit, "id">) => Promise<void>;
   updateUnit: (unitId: string, unitData: Partial<Unit>) => Promise<void>;
+  bulkImportUnitsAndPeople: (items: Array<{
+    blockName: string;
+    unitNumber: string;
+    type?: "DAIRE" | "DUKKAN" | "OFIS" | "DEPO";
+    grossSquareMeters?: number;
+    landShare?: number;
+    residentType?: "MALIK_OTURUYOR" | "KIRACI_OTURUYOR" | "BOS";
+    ownerName: string;
+    ownerPhone?: string;
+    ownerEmail?: string;
+    tenantName?: string;
+    tenantPhone?: string;
+    tenantEmail?: string;
+    initialBalance?: number;
+  }>) => Promise<number>;
 
   // People
   people: Person[];
@@ -365,6 +380,101 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await updateDoc(doc(db, "units", unitId), unitData);
     } catch (e) {}
     addAuditLog("UPDATE", "Bağımsız Bölümler", `Daire bilgileri güncellendi (ID: ${unitId})`);
+  };
+
+  const bulkImportUnitsAndPeople = async (items: Array<{
+    blockName: string;
+    unitNumber: string;
+    type?: "DAIRE" | "DUKKAN" | "OFIS" | "DEPO";
+    grossSquareMeters?: number;
+    landShare?: number;
+    residentType?: "MALIK_OTURUYOR" | "KIRACI_OTURUYOR" | "BOS";
+    ownerName: string;
+    ownerPhone?: string;
+    ownerEmail?: string;
+    tenantName?: string;
+    tenantPhone?: string;
+    tenantEmail?: string;
+    initialBalance?: number;
+  }>) => {
+    const newUnits: Unit[] = [];
+    const newPeople: Person[] = [];
+    const now = Date.now();
+
+    items.forEach((item, index) => {
+      const ownerId = `person-imp-${now}-${index}-owner`;
+      const tenantId = item.tenantName ? `person-imp-${now}-${index}-tenant` : undefined;
+      const unitId = `unit-imp-${now}-${index}`;
+
+      // Create owner person
+      newPeople.push({
+        id: ownerId,
+        siteId: activeSiteId,
+        fullName: item.ownerName || `Malik ${item.blockName} D:${item.unitNumber}`,
+        phone: item.ownerPhone || "0500 000 00 00",
+        email: item.ownerEmail || `malik_${item.unitNumber}@site.com`,
+        type: "MALIK",
+        ownedUnitIds: [unitId],
+        isActive: true,
+        notificationPreferences: { sms: true, email: true, push: true },
+      });
+
+      // If tenant exists, create tenant person
+      if (item.tenantName && tenantId) {
+        newPeople.push({
+          id: tenantId,
+          siteId: activeSiteId,
+          fullName: item.tenantName,
+          phone: item.tenantPhone || "0500 000 00 00",
+          email: item.tenantEmail || `kiraci_${item.unitNumber}@site.com`,
+          type: "KIRACI",
+          rentedUnitId: unitId,
+          isActive: true,
+          notificationPreferences: { sms: true, email: true, push: true },
+        });
+      }
+
+      // Create Unit
+      newUnits.push({
+        id: unitId,
+        siteId: activeSiteId,
+        blockName: item.blockName || "A Blok",
+        unitNumber: item.unitNumber || String(index + 1),
+        type: item.type || "DAIRE",
+        grossSquareMeters: Number(item.grossSquareMeters || 120),
+        netSquareMeters: Math.round(Number(item.grossSquareMeters || 120) * 0.85),
+        landShare: Number(item.landShare || 10),
+        landShareRatio: `${item.landShare || 10}/1000`,
+        floorNumber: Math.ceil(Number(item.unitNumber || 1) / 4),
+        residentType: item.residentType || (item.tenantName ? "KIRACI_OTURUYOR" : "MALIK_OTURUYOR"),
+        ownerId,
+        tenantId,
+        currentBalance: Number(item.initialBalance || 0),
+        monthlyDuesShare: activeSite.monthlyDuesDueDay || 2000,
+        isDuesExempt: false,
+      });
+    });
+
+    setUnits((prev) => [...newUnits, ...prev]);
+    setPeople((prev) => [...newPeople, ...prev]);
+
+    // Save batch to Firestore asynchronously
+    try {
+      for (const u of newUnits) {
+        await setDoc(doc(db, "units", u.id), u);
+      }
+      for (const p of newPeople) {
+        await setDoc(doc(db, "people", p.id), p);
+      }
+    } catch (e) {}
+
+    addAuditLog(
+      "CREATE",
+      "Toplu Excel İçe Aktarma",
+      `Excel/CSV üzerinden ${newUnits.length} daire ve ${newPeople.length} kişi kaydı sisteme aktarıldı.`
+    );
+
+    return newUnits.length;
   };
 
   // People CRUD
@@ -1092,6 +1202,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeSiteUnits,
         addUnit,
         updateUnit,
+        bulkImportUnitsAndPeople,
         people,
         activeSitePeople,
         addPerson,

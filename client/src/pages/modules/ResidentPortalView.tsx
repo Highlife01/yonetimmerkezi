@@ -237,6 +237,27 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
                 <Copy size={13} /> Açıklama
               </button>
             </div>
+
+            {/* Apartman WhatsApp Grubu Daveti */}
+            <a
+              href={activeSite.whatsappGroupUrl || "https://chat.whatsapp.com/invite-demo"}
+              target="_blank"
+              rel="noreferrer"
+              className="p-3.5 bg-emerald-50 hover:bg-emerald-100 rounded-2xl border border-emerald-200 flex items-center justify-between gap-3 text-emerald-950 transition group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-xs">
+                  <MessageSquare size={16} />
+                </div>
+                <div>
+                  <strong className="text-xs font-black block">Resmi WhatsApp Duyuru Grubu</strong>
+                  <span className="text-[10px] text-emerald-800">Acil duyurular ve yönetim bilgilendirmeleri için katılın.</span>
+                </div>
+              </div>
+              <span className="text-[11px] font-bold bg-white text-emerald-900 px-3 py-1.5 rounded-xl border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white transition shadow-2xs">
+                Gruba Katıl →
+              </span>
+            </a>
           </div>
         </div>
 

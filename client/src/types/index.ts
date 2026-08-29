@@ -85,6 +85,8 @@ export interface Site {
   decisionBookNo?: string;
   decisionDate?: string;
   taxNumber?: string;
+  whatsappGroupUrl?: string;
+  autoDuesEnabled?: boolean;
 }
 
 export interface Block {

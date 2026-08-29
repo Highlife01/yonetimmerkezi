@@ -35,7 +35,7 @@ export default function IncomeExpenseView({ initialOpenModal = false }: IncomeEx
     amount: 1000,
     date: new Date().toISOString().split("T")[0],
     invoiceNumber: "",
-    receiptType: "FATURA" as "FATURA" | "SERBEST_MESLEK_MAKBUZU" | "PERAKENDE_FISI" | "GIDER_PUSULASI",
+    
     vendorId: "",
     paymentStatus: "ODENDI" as "ODENDI" | "BEKLIYOR",
     paidFromAccountId: activeSiteAccounts[0]?.id || "",
@@ -569,3 +569,5 @@ export default function IncomeExpenseView({ initialOpenModal = false }: IncomeEx
     </div>
   );
 }
+
+

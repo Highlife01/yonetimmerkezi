@@ -316,15 +316,37 @@ export default function DebtorsAgingView() {
                       </strong>
                     </td>
                     <td className="py-3.5 px-4 text-center">
-                      <button
-                        onClick={() => {
-                          toast.info(`${item.unit.blockName} D:${item.unit.unitNumber} sakinine borç bildirim SMS'i gönderildi.`);
-                        }}
-                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-rose-700 transition"
-                        title="SMS Hatırlatma Gönder"
-                      >
-                        <Send size={14} />
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            const phoneClean = (item.occupant?.phone || "").replace(/[^0-9]/g, "");
+                            const formattedPhone = phoneClean.startsWith("0") ? "9" + phoneClean : phoneClean.startsWith("90") ? phoneClean : "90" + phoneClean;
+                            const msg = encodeURIComponent(
+                              `Sayın ${item.occupant?.fullName || "Sakinimiz"},\n\n` +
+                              `${activeSite.name} - ${item.unit.blockName} Daire ${item.unit.unitNumber} için vadesi geçen toplam aidat borcunuz: ${formatCurrency(item.totalWithInterest)} (Gecikme süresi: ~${item.daysOverdue} gün).\n\n` +
+                              `Apartman Resmi IBAN:\n${activeSite.bankName || "Banka"}: ${activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01"}\n` +
+                              `Hesap Sahibi: ${activeSite.name} Kat Malikleri Yöneticiliği\n\n` +
+                              `Lütfen ödeme açıklamanıza [${item.unit.blockName} D:${item.unit.unitNumber} - ${item.occupant?.fullName || ""}] yazarak dekontu iletiniz.\n` +
+                              `Yönetim: ${activeSite.managerName || "Site Yönetimi"}`
+                            );
+                            window.open(`https://wa.me/${formattedPhone}?text=${msg}`, "_blank");
+                            toast.success(`${item.occupant?.fullName || "Sakin"} için WhatsApp mesaj penceresi açıldı.`);
+                          }}
+                          className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition cursor-pointer shadow-xs"
+                          title="WhatsApp ile Borç Hatırlat"
+                        >
+                          <MessageSquare size={14} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            toast.info(`${item.unit.blockName} D:${item.unit.unitNumber} sakinine borç bildirim SMS'i gönderildi.`);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 transition cursor-pointer"
+                          title="SMS Hatırlatma Gönder"
+                        >
+                          <Send size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
