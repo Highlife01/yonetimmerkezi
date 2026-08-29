@@ -35,6 +35,11 @@ export const INITIAL_SITES: Site[] = [
     monthlyDuesDueDay: 10,
     lateInterestRatePerMonth: 5,
     createdAt: "2024-01-15",
+    isVerified: true,
+    verificationCode: "AP-TR-34-202601",
+    decisionBookNo: "KD-2026/04",
+    decisionDate: "2026-01-15",
+    taxNumber: "8472910384",
   },
   {
     id: "site-2",
@@ -53,6 +58,11 @@ export const INITIAL_SITES: Site[] = [
     monthlyDuesDueDay: 5,
     lateInterestRatePerMonth: 5,
     createdAt: "2024-03-01",
+    isVerified: true,
+    verificationCode: "AP-TR-34-202602",
+    decisionBookNo: "KD-2026/02",
+    decisionDate: "2026-03-01",
+    taxNumber: "9182374619",
   },
   {
     id: "site-3",

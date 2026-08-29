@@ -39,6 +39,7 @@ import MeetingsPollsDocsView from "./modules/MeetingsPollsDocsView";
 import AuditLogsSettingsView from "./modules/AuditLogsSettingsView";
 import ResidentPortalView from "./modules/ResidentPortalView";
 import CommandPalette from "@/components/CommandPalette";
+import ApartmentVerificationModal from "@/components/ApartmentVerificationModal";
 
 export default function Home() {
   const {
@@ -59,6 +60,7 @@ export default function Home() {
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [openModalSignal, setOpenModalSignal] = useState(false);
 
   // Quick Action Modal states for triggering inside views
@@ -342,6 +344,26 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#7c8a87]">
               <span>{activeSite.name}</span>
+              {activeSite.isVerified ? (
+                <button
+                  type="button"
+                  onClick={() => setIsVerificationModalOpen(true)}
+                  title="Resmi KMK Doğrulaması Yapılmıştır. Bilgileri görüntülemek/güncellemek için tıklayın."
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold cursor-pointer hover:bg-emerald-100 transition"
+                >
+                  <ShieldCheck size={12} className="text-emerald-700" />
+                  <span>Doğrulanmış Apartman</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsVerificationModalOpen(true)}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 text-[10px] font-extrabold cursor-pointer hover:bg-amber-100 transition animate-pulse"
+                >
+                  <ShieldAlert size={12} className="text-amber-700" />
+                  <span>Apartmanı Doğrula</span>
+                </button>
+              )}
               <span>/</span>
               <span className="text-[#172b2b] font-bold">
                 {navCategories.flatMap(c => c.items).find(i => i.id === activeModule)?.label || "Modül"}
@@ -362,6 +384,15 @@ export default function Home() {
 
           {/* Quick Actions, Search, Login & Role Switcher */}
           <div className="flex items-center gap-3">
+            {/* Apartman Doğrula Butonu */}
+            <button
+              onClick={() => setIsVerificationModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-[#e4eae3] text-xs font-bold transition shadow-xs cursor-pointer"
+            >
+              <ShieldCheck size={14} className="text-emerald-700" />
+              <span className="hidden md:inline">Apartman Doğrulama</span>
+            </button>
+
             {/* Tanıtım Sitesi Butonu */}
             <button
               onClick={() => setShowLandingPage(true)}
@@ -572,6 +603,12 @@ export default function Home() {
           {activeModule === "AUDIT_SETTINGS" && <AuditLogsSettingsView />}
         </main>
       </div>
+
+      {/* APARTMENT RESMİ DOĞRULAMA MODALI */}
+      <ApartmentVerificationModal
+        isOpen={isVerificationModalOpen}
+        onClose={() => setIsVerificationModalOpen(false)}
+      />
     </div>
   );
 }

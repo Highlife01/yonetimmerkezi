@@ -87,22 +87,22 @@ export default function LoginPage() {
               <Sparkles size={13} className="text-emerald-700" /> %100 ÜCRETSİZ SAAS SİSTEMİ
             </div>
             <h2 className="text-2xl font-extrabold text-[#172b2b] tracking-tight pt-1">
-              Sisteme Giriş Yapın
+              Google ile Güvenli Giriş & Apartman Doğrulama
             </h2>
             <p className="text-xs text-[#52635f] leading-relaxed">
-              Kredi kartı gerekmez · Sınırsız site, daire, aidat ve muhasebe yönetimi tamamen ücretsizdir.
+              Google hesabınızla tek tıkla giriş yapın, apartmanınızı Kat Mülkiyeti Kanunu standartlarında doğrulayarak hemen yönetmeye başlayın.
             </p>
           </div>
 
-          {/* Google Sign In Button */}
-          <div>
+          {/* Featured Google Sign In Button */}
+          <div className="space-y-3">
             <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-[#d2dbd7] hover:border-slate-400 bg-white hover:bg-slate-50 transition text-xs font-bold text-slate-800 shadow-xs cursor-pointer"
+              className="w-full flex items-center justify-center gap-3.5 py-3.5 px-5 rounded-2xl border-2 border-emerald-500/40 hover:border-emerald-600 bg-emerald-50/50 hover:bg-emerald-100/70 transition text-sm font-extrabold text-emerald-950 shadow-sm cursor-pointer transform hover:scale-[1.01] active:scale-[0.99]"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
@@ -120,15 +120,20 @@ export default function LoginPage() {
                   d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                 />
               </svg>
-              Google ile Giriş Yap
+              <span>Google ile Giriş Yap</span>
             </button>
+
+            <div className="flex items-center justify-center gap-2 text-[11px] text-emerald-850 font-bold">
+              <ShieldCheck size={14} className="text-emerald-700" />
+              <span>Resmi Apartman & Yönetici Tescili</span>
+            </div>
           </div>
 
           {/* Divider */}
           <div className="relative flex items-center justify-center">
             <div className="border-t border-[#e4eae3] w-full" />
             <span className="bg-white px-2.5 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-              veya E-Posta ile
+              veya Süper Admin / Şifre ile
             </span>
           </div>
 

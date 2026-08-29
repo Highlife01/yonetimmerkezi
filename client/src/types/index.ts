@@ -79,6 +79,12 @@ export interface Site {
   monthlyDuesDueDay: number; // e.g. 10 (10th of every month)
   lateInterestRatePerMonth: number; // e.g. 5 (%)
   createdAt: string;
+  isVerified?: boolean;
+  verificationDate?: string;
+  verificationCode?: string;
+  decisionBookNo?: string;
+  decisionDate?: string;
+  taxNumber?: string;
 }
 
 export interface Block {
