@@ -5,10 +5,11 @@ import {
   PieChart, Wrench, Bell, Lock, Smartphone, ChevronRight,
   Calculator, FileCheck2, HelpCircle, Star, Eye, LogIn,
   ArrowUpRight, Award, Zap, Check, Play, ShieldAlert, Laptop,
-  LayoutDashboard
+  LayoutDashboard, MessageCircle
 } from "lucide-react";
 import { formatCurrency } from "@/utils/formatters";
 import { useAuth } from "@/contexts/AuthContext";
+import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
 
 interface LandingPageProps {
   onGoToApp: () => void;
@@ -132,6 +133,17 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           </nav>
 
           <div className="flex items-center gap-3">
+            {/* WhatsApp Direkt Butonu */}
+            <a
+              href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20hakk%C4%B1nda%20bilgi%20ve%20destek%20almak%20istiyorum."
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#4ade80] border border-[#25D366]/40 text-xs font-extrabold transition shadow-xs cursor-pointer"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#25D366] animate-ping" />
+              <span>WP: 0532 055 09 45</span>
+            </a>
+
             {isAuthenticated ? (
               <button
                 onClick={onGoToApp}
@@ -497,10 +509,18 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={onGoToApp}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#b8edb7] hover:bg-[#a6e6a5] text-[#172b2b] text-sm font-extrabold shadow-xl transition transform hover:scale-105"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#b8edb7] hover:bg-[#a6e6a5] text-[#172b2b] text-sm font-extrabold shadow-xl transition transform hover:scale-105 cursor-pointer"
             >
               Yönetim Paneline Giriş Yap →
             </button>
+            <a
+              href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20hakk%C4%B1nda%20bilgi%20ve%20destek%20almak%20istiyorum."
+              target="_blank"
+              rel="noreferrer"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-sm font-extrabold shadow-xl transition transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>WhatsApp'tan Danışın: 0532 055 09 45</span>
+            </a>
           </div>
         </div>
       </section>
@@ -518,13 +538,25 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
             </div>
           </div>
 
-          <div className="flex items-center gap-6 text-slate-400 font-semibold">
+          <div className="flex flex-wrap items-center gap-6 text-slate-400 font-semibold">
+            <a
+              href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20destek%20talebi."
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#4ade80] hover:underline flex items-center gap-1.5 font-bold"
+            >
+              <span>WhatsApp Destek: 0532 055 09 45</span>
+            </a>
+            <span>·</span>
             <span>© 2026 Yönetim Merkezi</span>
             <span>·</span>
             <span>Tüm Hakları Saklıdır</span>
           </div>
         </div>
       </footer>
+
+      {/* FLOATING WHATSAPP BUTTON */}
+      <WhatsAppFloatingButton phoneNumber="905320550945" />
     </div>
   );
 }

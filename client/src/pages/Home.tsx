@@ -40,6 +40,7 @@ import AuditLogsSettingsView from "./modules/AuditLogsSettingsView";
 import ResidentPortalView from "./modules/ResidentPortalView";
 import CommandPalette from "@/components/CommandPalette";
 import ApartmentVerificationModal from "@/components/ApartmentVerificationModal";
+import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
 
 export default function Home() {
   const {
@@ -609,6 +610,9 @@ export default function Home() {
         isOpen={isVerificationModalOpen}
         onClose={() => setIsVerificationModalOpen(false)}
       />
+
+      {/* WHATSAPP CANLI DESTEK BUTONU */}
+      <WhatsAppFloatingButton phoneNumber="905320550945" />
     </div>
   );
 }
