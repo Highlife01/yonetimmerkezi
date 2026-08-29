@@ -4,9 +4,11 @@ import {
   TrendingUp, ReceiptText, HandCoins, Users, CreditCard,
   PieChart, Wrench, Bell, Lock, Smartphone, ChevronRight,
   Calculator, FileCheck2, HelpCircle, Star, Eye, LogIn,
-  ArrowUpRight, Award, Zap, Check, Play, ShieldAlert, Laptop
+  ArrowUpRight, Award, Zap, Check, Play, ShieldAlert, Laptop,
+  LayoutDashboard
 } from "lucide-react";
 import { formatCurrency } from "@/utils/formatters";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LandingPageProps {
   onGoToApp: () => void;
@@ -14,6 +16,7 @@ interface LandingPageProps {
 }
 
 export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps) {
+  const { isAuthenticated, currentUser } = useAuth();
   const [calcUnits, setCalcUnits] = useState<number>(40);
   const [calcDues, setCalcDues] = useState<number>(2000);
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
@@ -129,18 +132,29 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           </nav>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={onOpenLogin}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-white/5 transition"
-            >
-              <LogIn size={15} /> Giriş Yap
-            </button>
-            <button
-              onClick={onGoToApp}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#b8edb7] hover:bg-[#a6e6a5] text-[#172b2b] text-xs font-extrabold shadow-lg shadow-emerald-900/30 transition transform hover:scale-105 active:scale-95"
-            >
-              Yönetim Paneline Git <ArrowRight size={15} />
-            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={onGoToApp}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#b8edb7] hover:bg-[#a6e6a5] text-[#172b2b] text-xs font-extrabold shadow-lg shadow-emerald-900/30 transition transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <LayoutDashboard size={15} /> Yönetim Paneline Geç <ArrowRight size={15} />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={onOpenLogin}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+                >
+                  <LogIn size={15} /> Giriş Yap
+                </button>
+                <button
+                  onClick={onGoToApp}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#b8edb7] hover:bg-[#a6e6a5] text-[#172b2b] text-xs font-extrabold shadow-lg shadow-emerald-900/30 transition transform hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  Yönetim Paneline Git <ArrowRight size={15} />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -180,15 +194,17 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               onClick={onGoToApp}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-[#b8edb7] hover:bg-[#a6e6a5] text-[#172b2b] text-base font-extrabold shadow-xl shadow-emerald-950/50 transition transform hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <Zap size={20} className="fill-[#172b2b]" /> Ücretsiz Hemen Başlayın
+              <Zap size={20} className="fill-[#172b2b]" /> {isAuthenticated ? "Yönetim Paneline Git" : "Ücretsiz Hemen Başlayın"}
             </button>
 
-            <button
-              onClick={onOpenLogin}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white text-base font-bold transition cursor-pointer backdrop-blur-md"
-            >
-              <LogIn size={18} /> Süper Admin / Google Girişi
-            </button>
+            {!isAuthenticated && (
+              <button
+                onClick={onOpenLogin}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white text-base font-bold transition cursor-pointer backdrop-blur-md"
+              >
+                <LogIn size={18} /> Süper Admin / Google Girişi
+              </button>
+            )}
           </div>
 
           {/* Trust badges */}

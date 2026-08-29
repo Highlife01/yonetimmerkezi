@@ -54,7 +54,7 @@ export default function Home() {
   } = useAuth();
 
   const [activeModule, setActiveModule] = useState<AppModule>("DASHBOARD");
-  const [showLandingPage, setShowLandingPage] = useState(false);
+  const [showLandingPage, setShowLandingPage] = useState(true);
   const [isSiteDropdownOpen, setIsSiteDropdownOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
