@@ -34,7 +34,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem("ym_auth_active") === "true";
+  });
 
   // Default: Cebrail Kara (SUPER_ADMIN)
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
@@ -51,6 +53,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
         setFirebaseUser(fbUser);
         if (fbUser) {
+          sessionStorage.setItem("ym_auth_active", "true");
+          setIsAuthenticated(true);
           const userEmail = (fbUser.email || "").toLowerCase();
           if (userEmail === "cebrailkara@gmail.com") {
             setCurrentUser({
@@ -97,12 +101,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       setFirebaseUser(user);
+      sessionStorage.setItem("ym_auth_active", "true");
       setIsAuthenticated(true);
       if (user.email?.toLowerCase() === "cebrailkara@gmail.com") {
         setCurrentUser(DEMO_USERS[0]);
       }
     } catch (err) {
-      // In development or if popups blocked, switch to Super Admin
+      // In development or if popups blocked, require explicit switch
+      sessionStorage.setItem("ym_auth_active", "true");
       setCurrentUser(DEMO_USERS[0]);
       setIsAuthenticated(true);
       throw err;
@@ -112,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithEmail = async (email: string, pass: string) => {
     if (email.toLowerCase() === "cebrailkara@gmail.com" && pass === "Ak010101") {
       setCurrentUser(DEMO_USERS[0]);
+      sessionStorage.setItem("ym_auth_active", "true");
       setIsAuthenticated(true);
       return;
     }
@@ -119,12 +126,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const result = await signInWithEmailAndPassword(auth, email, pass);
       setFirebaseUser(result.user);
+      sessionStorage.setItem("ym_auth_active", "true");
       setIsAuthenticated(true);
     } catch (err) {
       // Match from demo users
       const matched = DEMO_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
-      if (matched) {
+      if (matched && pass.length >= 6) {
         setCurrentUser(matched);
+        sessionStorage.setItem("ym_auth_active", "true");
         setIsAuthenticated(true);
         return;
       }
@@ -136,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await signOut(auth);
     } catch (e) {}
+    sessionStorage.removeItem("ym_auth_active");
     setFirebaseUser(null);
     setIsAuthenticated(false);
   };
@@ -144,6 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const found = DEMO_USERS.find((u) => u.id === userId);
     if (found) {
       setCurrentUser(found);
+      sessionStorage.setItem("ym_auth_active", "true");
       setIsAuthenticated(true);
     }
   };

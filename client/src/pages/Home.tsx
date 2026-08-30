@@ -143,18 +143,19 @@ export default function Home() {
   if (showLandingPage) {
     return (
       <LandingPage
-        onGoToApp={() => setShowLandingPage(false)}
+        onGoToApp={() => {
+          setShowLandingPage(false);
+        }}
         onOpenLogin={() => {
           setShowLandingPage(false);
-          setIsLoginModalOpen(true);
         }}
       />
     );
   }
 
-  // If not authenticated, show full login screen
+  // If not authenticated, show full login screen (Password or Google login required)
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return <LoginPage onBackToLanding={() => setShowLandingPage(true)} />;
   }
 
   // If showing resident portal view
@@ -325,7 +326,8 @@ export default function Home() {
               <button
                 onClick={async () => {
                   await logout();
-                  toast.success("Oturum kapatıldı.");
+                  setShowLandingPage(true);
+                  toast.success("Oturum güvenli bir şekilde kapatıldı.");
                 }}
                 title="Güvenli Çıkış Yap"
                 className="p-1.5 rounded-lg bg-[#244240] hover:bg-rose-950 text-rose-300 hover:text-white transition"
