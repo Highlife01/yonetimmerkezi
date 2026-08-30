@@ -56,21 +56,21 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#071313] flex flex-col justify-between text-white font-sans selection:bg-[#b8edb7] selection:text-[#071313]">
+    <div className="min-h-screen bg-[#f8faf8] flex flex-col justify-between text-[#172b2b] font-sans selection:bg-[#b8edb7] selection:text-[#172b2b]">
       {/* Top Navbar */}
-      <header className="p-4 sm:px-12 flex items-center justify-between border-b border-white/10 bg-[#071313]/90 backdrop-blur-md">
+      <header className="p-4 sm:px-12 flex items-center justify-between border-b border-[#e2e8e3] bg-white/90 backdrop-blur-md shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#34d399] to-[#b8edb7] text-[#071313] flex items-center justify-center font-black text-2xl shadow-lg transform -rotate-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#172b2b] text-[#b8edb7] flex items-center justify-center font-black text-2xl shadow-md transform -rotate-3">
             Y
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-black tracking-tight text-white">Yönetim Merkezi</span>
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-300 text-[#071313] text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
+              <span className="text-lg font-black tracking-tight text-[#172b2b]">Yönetim Merkezi</span>
+              <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
                 %100 ÜCRETSİZ
               </span>
             </div>
-            <p className="text-[10px] text-[#86af85] font-bold uppercase tracking-wider">Yetkili Yönetici Giriş Portalı</p>
+            <p className="text-[10px] text-[#5e7773] font-bold uppercase tracking-wider">Yetkili Yönetici Giriş Portalı</p>
           </div>
         </div>
 
@@ -79,7 +79,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
             <button
               type="button"
               onClick={onBackToLanding}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-white/10 transition border border-white/15 cursor-pointer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-[#172b2b] bg-white hover:bg-slate-100 transition border border-slate-200 shadow-2xs cursor-pointer"
             >
               <ArrowLeft size={14} />
               <span>Ana Sayfaya Dön</span>
@@ -90,9 +90,9 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
 
       {/* Center Auth Card */}
       <main className="flex-1 flex items-center justify-center p-6 my-8">
-        <div className="max-w-md w-full bg-white text-[#172b2b] rounded-3xl p-8 sm:p-10 shadow-2xl space-y-6 border border-[#e4eae3] animate-in zoom-in-95 duration-200">
+        <div className="max-w-md w-full bg-white text-[#172b2b] rounded-3xl p-8 sm:p-10 shadow-xl space-y-6 border border-[#e2e8e3] animate-in zoom-in-95 duration-200">
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-950 font-black text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full border border-emerald-300 shadow-xs">
+            <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-950 font-black text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full border border-emerald-300 shadow-2xs">
               <ShieldCheck size={13} className="text-emerald-700" /> GÜVENLİ YÖNETİM GİRİŞİ
             </div>
             <h2 className="text-2xl font-black text-[#172b2b] tracking-tight pt-1">
@@ -109,7 +109,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
               type="button"
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3.5 py-3.5 px-5 rounded-2xl border-2 border-emerald-500/40 hover:border-emerald-600 bg-emerald-50/50 hover:bg-emerald-100/70 transition text-sm font-extrabold text-emerald-950 shadow-sm cursor-pointer transform hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full flex items-center justify-center gap-3.5 py-3.5 px-5 rounded-2xl border-2 border-emerald-500/30 hover:border-emerald-600 bg-emerald-50/50 hover:bg-emerald-100/70 transition text-sm font-extrabold text-emerald-950 shadow-2xs cursor-pointer transform hover:scale-[1.01] active:scale-[0.99]"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -132,7 +132,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
               <span>Google ile Güvenli Giriş</span>
             </button>
 
-            <div className="flex items-center justify-center gap-2 text-[11px] text-emerald-850 font-bold">
+            <div className="flex items-center justify-center gap-2 text-[11px] text-emerald-800 font-bold">
               <ShieldCheck size={14} className="text-emerald-700" />
               <span>256-Bit SSL Şifreleme Korumalı</span>
             </div>
@@ -140,7 +140,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
 
           {/* Divider */}
           <div className="relative flex items-center justify-center">
-            <div className="border-t border-[#e4eae3] w-full" />
+            <div className="border-t border-[#e2e8e3] w-full" />
             <span className="bg-white px-2.5 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
               veya E-Posta & Şifre ile
             </span>
@@ -158,7 +158,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="yonetici@apartman.com"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#e2e8e3] focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
             </div>
@@ -173,7 +173,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Şifrenizi giriniz"
-                  className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-mono"
+                  className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#e2e8e3] focus:outline-none focus:border-emerald-500 font-mono"
                 />
                 <button
                   type="button"
@@ -186,7 +186,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
             </div>
 
             {/* Super Admin Quick Credentials Box */}
-            <div className="p-3 bg-emerald-50 text-emerald-950 border border-emerald-200 rounded-2xl text-[11px] flex items-center justify-between">
+            <div className="p-3 bg-emerald-50/70 text-emerald-950 border border-emerald-200 rounded-2xl text-[11px] flex items-center justify-between">
               <div>
                 <strong className="block font-bold">Tanımlı Süper Admin:</strong>
                 <span className="text-slate-600 font-mono text-[10px]">cebrailkara@gmail.com</span>
@@ -206,7 +206,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 px-4 rounded-xl bg-[#071313] hover:bg-[#172b2b] text-white text-xs font-black transition shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-xl bg-[#172b2b] hover:bg-[#254643] text-white text-xs font-black transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               {isLoading ? "Giriş Yapılıyor..." : (
                 <>Giriş Yap ve Panele Geç <ArrowRight size={14} /></>
@@ -229,7 +229,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
       </main>
 
       {/* Footer */}
-      <footer className="p-6 text-center text-xs text-white/40 border-t border-white/10">
+      <footer className="p-6 text-center text-xs text-slate-500 border-t border-[#e2e8e3] bg-white">
         © 2026 Yönetim Merkezi SaaS Platformu · Kat Mülkiyeti Kanunu (KMK) Uyumlu Profesyonel Yönetim
       </footer>
     </div>
