@@ -180,99 +180,288 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const { currentUser } = useAuth();
 
-  const [company] = useState<ManagementCompany>(INITIAL_COMPANY);
-  const [sites, setSites] = useState<Site[]>(INITIAL_SITES);
+  const [company, setCompany] = useState<ManagementCompany>(INITIAL_COMPANY);
+  const [sites, setSites] = useState<Site[]>([]);
   const [activeSiteId, setActiveSiteId] = useState<string>("site-1");
 
-  const [blocks, setBlocks] = useState<Block[]>(INITIAL_BLOCKS);
-  const [units, setUnits] = useState<Unit[]>(INITIAL_UNITS);
-  const [people, setPeople] = useState<Person[]>(INITIAL_PEOPLE);
-  const [tahakkuklar, setTahakkuklar] = useState<TahakkukRecord[]>(INITIAL_TAHAKKUKLAR);
-  const [collections, setCollections] = useState<Collection[]>(INITIAL_COLLECTIONS);
-  const [ledgerItems, setLedgerItems] = useState<UnitAccountLedgerItem[]>(INITIAL_LEDGER_ITEMS);
-  const [accounts, setAccounts] = useState<AccountEntity[]>(INITIAL_ACCOUNTS);
-  const [accountTransactions, setAccountTransactions] = useState<AccountTransaction[]>(INITIAL_ACCOUNT_TXS);
-  const [expenses, setExpenses] = useState<ExpenseRecord[]>(INITIAL_EXPENSES);
-  const [vendors, setVendors] = useState<Vendor[]>(INITIAL_VENDORS);
+  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [people, setPeople] = useState<Person[]>([]);
+  const [tahakkuklar, setTahakkuklar] = useState<TahakkukRecord[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [ledgerItems, setLedgerItems] = useState<UnitAccountLedgerItem[]>([]);
+  const [accounts, setAccounts] = useState<AccountEntity[]>([]);
+  const [accountTransactions, setAccountTransactions] = useState<AccountTransaction[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [budget, setBudget] = useState<AnnualBudget>(INITIAL_BUDGET);
-  const [requests, setRequests] = useState<ServiceRequest[]>(INITIAL_REQUESTS);
-  const [announcements, setAnnouncements] = useState<Announcement[]>(INITIAL_ANNOUNCEMENTS);
-  const [polls, setPolls] = useState<Poll[]>(INITIAL_POLLS);
-  const [meetings] = useState<MeetingMinute[]>(INITIAL_MEETINGS);
-  const [documents] = useState<DocumentArchiveItem[]>(INITIAL_DOCS);
-  const [assets, setAssets] = useState<AssetFixture[]>(INITIAL_ASSETS);
-  const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
-  const [visitors, setVisitors] = useState<VisitorLog[]>(INITIAL_VISITORS);
-  const [parcels, setParcels] = useState<ParcelLog[]>(INITIAL_PARCELS);
-  const [meters, setMeters] = useState<MeterReading[]>(INITIAL_METERS);
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(INITIAL_AUDIT_LOGS);
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [meetings, setMeetings] = useState<MeetingMinute[]>([]);
+  const [documents, setDocuments] = useState<DocumentArchiveItem[]>([]);
+  const [assets, setAssets] = useState<AssetFixture[]>([]);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [visitors, setVisitors] = useState<VisitorLog[]>([]);
+  const [parcels, setParcels] = useState<ParcelLog[]>([]);
+  const [meters, setMeters] = useState<MeterReading[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
 
-  // Firestore Real-Time Sync Listeners
+  // =========================================================================
+  // Firestore Live Real-Time Data Synchronization
+  // =========================================================================
   useEffect(() => {
     try {
-      // Sites listener
+      // 1. Sites
       const unsubSites = onSnapshot(collection(db, "sites"), (snapshot) => {
         if (!snapshot.empty) {
           const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Site));
           setSites(loaded);
         } else {
-          // Seed Firestore initial data
           INITIAL_SITES.forEach(s => setDoc(doc(db, "sites", s.id), s));
+          setSites(INITIAL_SITES);
         }
-      }, (err) => console.warn("Firestore sites snapshot fallback:", err));
+      }, (err) => {
+        console.warn("Firestore sites sync:", err);
+        setSites(INITIAL_SITES);
+      });
 
-      // Units listener
+      // 2. Blocks
+      const unsubBlocks = onSnapshot(collection(db, "blocks"), (snapshot) => {
+        if (!snapshot.empty) {
+          setBlocks(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Block)));
+        } else {
+          INITIAL_BLOCKS.forEach(b => setDoc(doc(db, "blocks", b.id), b));
+          setBlocks(INITIAL_BLOCKS);
+        }
+      }, (err) => setBlocks(INITIAL_BLOCKS));
+
+      // 3. Units
       const unsubUnits = onSnapshot(collection(db, "units"), (snapshot) => {
         if (!snapshot.empty) {
-          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Unit));
-          setUnits(loaded);
+          setUnits(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Unit)));
         } else {
           INITIAL_UNITS.forEach(u => setDoc(doc(db, "units", u.id), u));
+          setUnits(INITIAL_UNITS);
         }
-      }, (err) => console.warn("Firestore units snapshot fallback:", err));
+      }, (err) => setUnits(INITIAL_UNITS));
 
-      // Collections listener
+      // 4. People
+      const unsubPeople = onSnapshot(collection(db, "people"), (snapshot) => {
+        if (!snapshot.empty) {
+          setPeople(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Person)));
+        } else {
+          INITIAL_PEOPLE.forEach(p => setDoc(doc(db, "people", p.id), p));
+          setPeople(INITIAL_PEOPLE);
+        }
+      }, (err) => setPeople(INITIAL_PEOPLE));
+
+      // 5. Tahakkuklar
+      const unsubTahakkuklar = onSnapshot(collection(db, "tahakkuklar"), (snapshot) => {
+        if (!snapshot.empty) {
+          setTahakkuklar(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as TahakkukRecord)));
+        } else {
+          INITIAL_TAHAKKUKLAR.forEach(t => setDoc(doc(db, "tahakkuklar", t.id), t));
+          setTahakkuklar(INITIAL_TAHAKKUKLAR);
+        }
+      }, (err) => setTahakkuklar(INITIAL_TAHAKKUKLAR));
+
+      // 6. Collections
       const unsubCollections = onSnapshot(collection(db, "collections"), (snapshot) => {
         if (!snapshot.empty) {
-          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Collection));
-          setCollections(loaded);
+          setCollections(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Collection)));
+        } else {
+          INITIAL_COLLECTIONS.forEach(c => setDoc(doc(db, "collections", c.id), c));
+          setCollections(INITIAL_COLLECTIONS);
         }
-      }, (err) => console.warn("Firestore collections snapshot fallback:", err));
+      }, (err) => setCollections(INITIAL_COLLECTIONS));
 
-      // Expenses listener
+      // 7. Ledger Items
+      const unsubLedger = onSnapshot(collection(db, "ledger_items"), (snapshot) => {
+        if (!snapshot.empty) {
+          setLedgerItems(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as UnitAccountLedgerItem)));
+        } else {
+          INITIAL_LEDGER_ITEMS.forEach(l => setDoc(doc(db, "ledger_items", l.id), l));
+          setLedgerItems(INITIAL_LEDGER_ITEMS);
+        }
+      }, (err) => setLedgerItems(INITIAL_LEDGER_ITEMS));
+
+      // 8. Accounts (Kasa & Banka)
+      const unsubAccounts = onSnapshot(collection(db, "accounts"), (snapshot) => {
+        if (!snapshot.empty) {
+          setAccounts(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as AccountEntity)));
+        } else {
+          INITIAL_ACCOUNTS.forEach(a => setDoc(doc(db, "accounts", a.id), a));
+          setAccounts(INITIAL_ACCOUNTS);
+        }
+      }, (err) => setAccounts(INITIAL_ACCOUNTS));
+
+      // 9. Account Transactions
+      const unsubTx = onSnapshot(collection(db, "account_transactions"), (snapshot) => {
+        if (!snapshot.empty) {
+          setAccountTransactions(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as AccountTransaction)));
+        } else {
+          INITIAL_ACCOUNT_TXS.forEach(tx => setDoc(doc(db, "account_transactions", tx.id), tx));
+          setAccountTransactions(INITIAL_ACCOUNT_TXS);
+        }
+      }, (err) => setAccountTransactions(INITIAL_ACCOUNT_TXS));
+
+      // 10. Expenses
       const unsubExpenses = onSnapshot(collection(db, "expenses"), (snapshot) => {
         if (!snapshot.empty) {
-          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ExpenseRecord));
-          setExpenses(loaded);
+          setExpenses(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ExpenseRecord)));
+        } else {
+          INITIAL_EXPENSES.forEach(e => setDoc(doc(db, "expenses", e.id), e));
+          setExpenses(INITIAL_EXPENSES);
         }
-      }, (err) => console.warn("Firestore expenses snapshot fallback:", err));
+      }, (err) => setExpenses(INITIAL_EXPENSES));
 
-      // Requests listener
+      // 11. Vendors
+      const unsubVendors = onSnapshot(collection(db, "vendors"), (snapshot) => {
+        if (!snapshot.empty) {
+          setVendors(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Vendor)));
+        } else {
+          INITIAL_VENDORS.forEach(v => setDoc(doc(db, "vendors", v.id), v));
+          setVendors(INITIAL_VENDORS);
+        }
+      }, (err) => setVendors(INITIAL_VENDORS));
+
+      // 12. Requests (Arıza & Hizmet)
       const unsubRequests = onSnapshot(collection(db, "requests"), (snapshot) => {
         if (!snapshot.empty) {
-          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ServiceRequest));
-          setRequests(loaded);
+          setRequests(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ServiceRequest)));
+        } else {
+          INITIAL_REQUESTS.forEach(r => setDoc(doc(db, "requests", r.id), r));
+          setRequests(INITIAL_REQUESTS);
         }
-      }, (err) => console.warn("Firestore requests snapshot fallback:", err));
+      }, (err) => setRequests(INITIAL_REQUESTS));
 
-      // Announcements listener
+      // 13. Announcements
       const unsubAnnouncements = onSnapshot(collection(db, "announcements"), (snapshot) => {
         if (!snapshot.empty) {
-          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Announcement));
-          setAnnouncements(loaded);
+          setAnnouncements(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Announcement)));
+        } else {
+          INITIAL_ANNOUNCEMENTS.forEach(a => setDoc(doc(db, "announcements", a.id), a));
+          setAnnouncements(INITIAL_ANNOUNCEMENTS);
         }
-      }, (err) => console.warn("Firestore announcements snapshot fallback:", err));
+      }, (err) => setAnnouncements(INITIAL_ANNOUNCEMENTS));
+
+      // 14. Polls
+      const unsubPolls = onSnapshot(collection(db, "polls"), (snapshot) => {
+        if (!snapshot.empty) {
+          setPolls(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Poll)));
+        } else {
+          INITIAL_POLLS.forEach(p => setDoc(doc(db, "polls", p.id), p));
+          setPolls(INITIAL_POLLS);
+        }
+      }, (err) => setPolls(INITIAL_POLLS));
+
+      // 15. Meetings
+      const unsubMeetings = onSnapshot(collection(db, "meetings"), (snapshot) => {
+        if (!snapshot.empty) {
+          setMeetings(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as MeetingMinute)));
+        } else {
+          INITIAL_MEETINGS.forEach(m => setDoc(doc(db, "meetings", m.id), m));
+          setMeetings(INITIAL_MEETINGS);
+        }
+      }, (err) => setMeetings(INITIAL_MEETINGS));
+
+      // 16. Documents
+      const unsubDocs = onSnapshot(collection(db, "documents"), (snapshot) => {
+        if (!snapshot.empty) {
+          setDocuments(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as DocumentArchiveItem)));
+        } else {
+          INITIAL_DOCS.forEach(docItem => setDoc(doc(db, "documents", docItem.id), docItem));
+          setDocuments(INITIAL_DOCS);
+        }
+      }, (err) => setDocuments(INITIAL_DOCS));
+
+      // 17. Assets
+      const unsubAssets = onSnapshot(collection(db, "assets"), (snapshot) => {
+        if (!snapshot.empty) {
+          setAssets(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as AssetFixture)));
+        } else {
+          INITIAL_ASSETS.forEach(a => setDoc(doc(db, "assets", a.id), a));
+          setAssets(INITIAL_ASSETS);
+        }
+      }, (err) => setAssets(INITIAL_ASSETS));
+
+      // 18. Staff
+      const unsubStaff = onSnapshot(collection(db, "staff"), (snapshot) => {
+        if (!snapshot.empty) {
+          setStaff(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as StaffMember)));
+        } else {
+          INITIAL_STAFF.forEach(s => setDoc(doc(db, "staff", s.id), s));
+          setStaff(INITIAL_STAFF);
+        }
+      }, (err) => setStaff(INITIAL_STAFF));
+
+      // 19. Visitors
+      const unsubVisitors = onSnapshot(collection(db, "visitors"), (snapshot) => {
+        if (!snapshot.empty) {
+          setVisitors(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as VisitorLog)));
+        } else {
+          INITIAL_VISITORS.forEach(v => setDoc(doc(db, "visitors", v.id), v));
+          setVisitors(INITIAL_VISITORS);
+        }
+      }, (err) => setVisitors(INITIAL_VISITORS));
+
+      // 20. Parcels
+      const unsubParcels = onSnapshot(collection(db, "parcels"), (snapshot) => {
+        if (!snapshot.empty) {
+          setParcels(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ParcelLog)));
+        } else {
+          INITIAL_PARCELS.forEach(p => setDoc(doc(db, "parcels", p.id), p));
+          setParcels(INITIAL_PARCELS);
+        }
+      }, (err) => setParcels(INITIAL_PARCELS));
+
+      // 21. Meters
+      const unsubMeters = onSnapshot(collection(db, "meters"), (snapshot) => {
+        if (!snapshot.empty) {
+          setMeters(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as MeterReading)));
+        } else {
+          INITIAL_METERS.forEach(m => setDoc(doc(db, "meters", m.id), m));
+          setMeters(INITIAL_METERS);
+        }
+      }, (err) => setMeters(INITIAL_METERS));
+
+      // 22. Audit Logs
+      const unsubLogs = onSnapshot(collection(db, "audit_logs"), (snapshot) => {
+        if (!snapshot.empty) {
+          setAuditLogs(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as AuditLogEntry)));
+        } else {
+          INITIAL_AUDIT_LOGS.forEach(l => setDoc(doc(db, "audit_logs", l.id), l));
+          setAuditLogs(INITIAL_AUDIT_LOGS);
+        }
+      }, (err) => setAuditLogs(INITIAL_AUDIT_LOGS));
 
       return () => {
         unsubSites();
+        unsubBlocks();
         unsubUnits();
+        unsubPeople();
+        unsubTahakkuklar();
         unsubCollections();
+        unsubLedger();
+        unsubAccounts();
+        unsubTx();
         unsubExpenses();
+        unsubVendors();
         unsubRequests();
         unsubAnnouncements();
+        unsubPolls();
+        unsubMeetings();
+        unsubDocs();
+        unsubAssets();
+        unsubStaff();
+        unsubVisitors();
+        unsubParcels();
+        unsubMeters();
+        unsubLogs();
       };
     } catch (e) {
-      console.warn("Firestore listeners active with local in-memory fallback.");
+      console.warn("Firestore listeners active with local fallback.");
     }
   }, []);
 
@@ -300,7 +489,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const activeSiteAuditLogs = auditLogs.filter((l) => l.siteId === activeSiteId);
 
   // Helper Audit Logger
-  const addAuditLog = (
+  const addAuditLog = async (
     actionType: AuditLogEntry["actionType"],
     module: string,
     description: string,
@@ -323,15 +512,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setAuditLogs((prev) => [newLog, ...prev]);
 
-    // Save to Firestore audit_logs collection
     try {
-      setDoc(doc(db, "audit_logs", newLog.id), newLog);
+      await setDoc(doc(db, "audit_logs", newLog.id), newLog);
     } catch (e) {}
   };
 
   // Add new Site
   const addNewSite = async (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => {
-    const newId = "site-" + (sites.length + 1);
+    const newId = "site-" + Date.now();
     const newSite: Site = {
       ...siteData,
       id: newId,
@@ -645,8 +833,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const alloc = allocations.find((a) => a.unitId === u.id);
         if (alloc) {
           const newBal = u.currentBalance + alloc.amount;
-          newLedgerRows.push({
-            id: "led-" + Date.now() + "-" + u.id,
+          const ledId = "led-" + Date.now() + "-" + u.id;
+          const ledItem: UnitAccountLedgerItem = {
+            id: ledId,
             siteId: activeSiteId,
             unitId: u.id,
             date: nowStr,
@@ -658,7 +847,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             balanceAfter: newBal,
             referenceId: newTahakkuk.id,
             processedBy: currentUser.name,
-          });
+          };
+          newLedgerRows.push(ledItem);
+          setDoc(doc(db, "ledger_items", ledId), ledItem).catch(() => {});
+          updateDoc(doc(db, "units", u.id), { currentBalance: newBal }).catch(() => {});
           return { ...u, currentBalance: newBal };
         }
         return u;
@@ -692,7 +884,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((u) => {
         const alloc = t.allocations.find((a) => a.unitId === u.id);
         if (alloc) {
-          return { ...u, currentBalance: Math.max(0, u.currentBalance - (alloc.amount - alloc.paidAmount)) };
+          const updatedBal = Math.max(0, u.currentBalance - (alloc.amount - alloc.paidAmount));
+          updateDoc(doc(db, "units", u.id), { currentBalance: updatedBal }).catch(() => {});
+          return { ...u, currentBalance: updatedBal };
         }
         return u;
       })
@@ -777,6 +971,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       processedBy: currentUser.name,
     };
     setLedgerItems((prev) => [newLedgerItem, ...prev]);
+    setDoc(doc(db, "ledger_items", newLedgerItem.id), newLedgerItem).catch(() => {});
 
     // Update Target Account Balance
     if (targetAcc) {
@@ -784,6 +979,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setAccounts((prev) =>
         prev.map((a) => (a.id === targetAcc.id ? { ...a, balance: newAccBal } : a))
       );
+      updateDoc(doc(db, "accounts", targetAcc.id), { balance: newAccBal }).catch(() => {});
 
       const newTx: AccountTransaction = {
         id: "atx-" + Date.now(),
@@ -800,6 +996,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: currentUser.name,
       };
       setAccountTransactions((prev) => [newTx, ...prev]);
+      setDoc(doc(db, "account_transactions", newTx.id), newTx).catch(() => {});
     }
 
     try {
@@ -856,6 +1053,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
+    try {
+      await updateDoc(doc(db, "accounts", fromAcc.id), { balance: fromNewBal });
+      await updateDoc(doc(db, "accounts", toAcc.id), { balance: toNewBal });
+    } catch (e) {}
+
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
     const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -890,6 +1092,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setAccountTransactions((prev) => [txIn, txOut, ...prev]);
 
+    try {
+      await setDoc(doc(db, "account_transactions", txOut.id), txOut);
+      await setDoc(doc(db, "account_transactions", txIn.id), txIn);
+    } catch (e) {}
+
     addAuditLog(
       "UPDATE",
       "Kasa & Banka",
@@ -917,6 +1124,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setAccounts((prev) =>
           prev.map((a) => (a.id === acc.id ? { ...a, balance: newBal } : a))
         );
+        updateDoc(doc(db, "accounts", acc.id), { balance: newBal }).catch(() => {});
       }
     }
 
@@ -960,6 +1168,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((a) => (a.id === acc.id ? { ...a, balance: newBal } : a))
     );
 
+    try {
+      await updateDoc(doc(db, "vendors", vendorId), { currentBalance: vendor.currentBalance - amount });
+      await updateDoc(doc(db, "accounts", acc.id), { balance: newBal });
+    } catch (e) {}
+
     addAuditLog(
       "UPDATE",
       "Tedarikçi Carileri",
@@ -968,11 +1181,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const updateBudgetItem = (itemId: string, updates: Partial<AnnualBudget["items"][0]>) => {
-    setBudget((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === itemId ? { ...i, ...updates } : i)),
-    }));
+  const updateBudgetItem = async (itemId: string, updates: Partial<AnnualBudget["items"][0]>) => {
+    const updatedItems = budget.items.map((i) => (i.id === itemId ? { ...i, ...updates } : i));
+    const newBudget = { ...budget, items: updatedItems };
+    setBudget(newBudget);
+    try {
+      await setDoc(doc(db, "budget", budget.id), newBudget);
+    } catch (e) {}
   };
 
   // Requests / Tickets
@@ -1020,6 +1235,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateRequestStatus = async (requestId: string, status: RequestStatus, adminNote?: string, assignedStaffName?: string) => {
+    const completedAt = status === "TAMAMLANDI" ? new Date().toISOString().split("T")[0] : undefined;
     setRequests((prev) =>
       prev.map((r) =>
         r.id === requestId
@@ -1028,13 +1244,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               status,
               adminNote: adminNote || r.adminNote,
               assignedStaffName: assignedStaffName || r.assignedStaffName,
-              resolvedAt: status === "TAMAMLANDI" ? new Date().toISOString().split("T")[0] : undefined,
+              completedAt: completedAt || r.completedAt,
             }
           : r
       )
     );
     try {
-      await updateDoc(doc(db, "requests", requestId), { status });
+      await updateDoc(doc(db, "requests", requestId), {
+        status,
+        ...(adminNote ? { adminNote } : {}),
+        ...(assignedStaffName ? { assignedStaffName } : {}),
+        ...(completedAt ? { completedAt } : {})
+      });
     } catch (e) {}
     addAuditLog("UPDATE", "Arıza & Talep", `Talep durumu güncellendi: ${status} (ID: ${requestId})`);
   };
@@ -1058,20 +1279,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Polls
   const votePoll = async (pollId: string, optionId: string) => {
+    let updatedPoll: Poll | null = null;
     setPolls((prev) =>
       prev.map((p) => {
         if (p.id === pollId) {
-          return {
+          updatedPoll = {
             ...p,
             totalVotes: p.totalVotes + 1,
             options: p.options.map((opt) =>
               opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
             ),
           };
+          return updatedPoll;
         }
         return p;
       })
     );
+    if (updatedPoll) {
+      try {
+        await setDoc(doc(db, "polls", pollId), updatedPoll);
+      } catch (e) {}
+    }
   };
 
   // Security Gate
@@ -1128,19 +1356,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateParcelStatus = async (parcelId: string, status: ParcelLog["status"]) => {
+    const deliveredTime = status === "TESLIM_EDILDI" ? new Date().toLocaleDateString("tr-TR") : undefined;
     setParcels((prev) =>
       prev.map((p) =>
         p.id === parcelId
           ? {
               ...p,
               status,
-              deliveredTime: status === "TESLIM_EDILDI" ? new Date().toLocaleDateString("tr-TR") : undefined,
+              deliveredTime: deliveredTime || p.deliveredTime,
             }
           : p
       )
     );
     try {
-      await updateDoc(doc(db, "parcels", parcelId), { status });
+      await updateDoc(doc(db, "parcels", parcelId), {
+        status,
+        ...(deliveredTime ? { deliveredTime } : {})
+      });
     } catch (e) {}
     addAuditLog("UPDATE", "Kargo Takibi", `Kargo teslim durumu güncellendi: ${status} (ID: ${parcelId})`);
   };
@@ -1165,30 +1397,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addAuditLog("CREATE", "Sayaç Okuma", `${newMeter.unitName} için ${newMeter.meterType} endeksi girildi: Tüketim ${consumption}`);
   };
 
-  // Reset
+  // Reset to live initial seeds
   const resetDemoData = () => {
-    setSites(INITIAL_SITES);
-    setActiveSiteId("site-1");
-    setBlocks(INITIAL_BLOCKS);
-    setUnits(INITIAL_UNITS);
-    setPeople(INITIAL_PEOPLE);
-    setTahakkuklar(INITIAL_TAHAKKUKLAR);
-    setCollections(INITIAL_COLLECTIONS);
-    setLedgerItems(INITIAL_LEDGER_ITEMS);
-    setAccounts(INITIAL_ACCOUNTS);
-    setAccountTransactions(INITIAL_ACCOUNT_TXS);
-    setExpenses(INITIAL_EXPENSES);
-    setVendors(INITIAL_VENDORS);
-    setBudget(INITIAL_BUDGET);
-    setRequests(INITIAL_REQUESTS);
-    setAnnouncements(INITIAL_ANNOUNCEMENTS);
-    setPolls(INITIAL_POLLS);
-    setAssets(INITIAL_ASSETS);
-    setStaff(INITIAL_STAFF);
-    setVisitors(INITIAL_VISITORS);
-    setParcels(INITIAL_PARCELS);
-    setMeters(INITIAL_METERS);
-    setAuditLogs(INITIAL_AUDIT_LOGS);
+    INITIAL_SITES.forEach(s => setDoc(doc(db, "sites", s.id), s).catch(() => {}));
+    INITIAL_UNITS.forEach(u => setDoc(doc(db, "units", u.id), u).catch(() => {}));
+    INITIAL_PEOPLE.forEach(p => setDoc(doc(db, "people", p.id), p).catch(() => {}));
+    INITIAL_ACCOUNTS.forEach(a => setDoc(doc(db, "accounts", a.id), a).catch(() => {}));
   };
 
   const resetToDefaults = resetDemoData;
