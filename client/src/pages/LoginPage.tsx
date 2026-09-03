@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import {
   ShieldCheck, Lock, Mail, KeyRound, Sparkles, CheckCircle2,
   Building2, ArrowRight, User, AlertCircle, Eye, EyeOff,
-  ArrowLeft
+  ArrowLeft, MessageCircle
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
 
 interface LoginPageProps {
   onBackToLanding?: () => void;
@@ -229,9 +230,25 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
       </main>
 
       {/* Footer */}
-      <footer className="p-6 text-center text-xs text-slate-500 border-t border-[#e2e8e3] bg-white">
-        © 2026 Yönetim Merkezi SaaS Platformu · Kat Mülkiyeti Kanunu (KMK) Uyumlu Profesyonel Yönetim
+      <footer className="p-6 text-center text-xs text-slate-500 border-t border-[#e2e8e3] bg-white flex flex-col sm:flex-row items-center justify-between gap-4 px-6 sm:px-12">
+        <div>
+          © 2026 Yönetim Merkezi SaaS Platformu · Kat Mülkiyeti Kanunu (KMK) Uyumlu Profesyonel Yönetim
+        </div>
+        <div className="flex items-center gap-4 font-semibold">
+          <a
+            href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20giri%C5%9F%20ve%20destek%20talebi."
+            target="_blank"
+            rel="noreferrer"
+            className="text-emerald-700 hover:underline flex items-center gap-1.5 font-bold"
+          >
+            <MessageCircle size={14} className="text-[#25D366]" />
+            <span>WhatsApp Destek: 0532 055 09 45</span>
+          </a>
+        </div>
       </footer>
+
+      {/* Floating WhatsApp Button */}
+      <WhatsAppFloatingButton phoneNumber="905320550945" />
     </div>
   );
 }
