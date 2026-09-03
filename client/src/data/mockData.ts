@@ -9,12 +9,12 @@ import {
 
 export const INITIAL_COMPANY: ManagementCompany = {
   id: "comp-1",
-  name: "Nova Yönetim A.Ş.",
+  name: "Yönetim Merkezi A.Ş.",
   taxNumber: "6310892341",
   taxOffice: "Kadıköy Vergi Dairesi",
-  phone: "0216 444 88 90",
-  email: "iletisim@novayonetim.com",
-  address: "Bağdat Caddesi No: 214/8 Kadıköy / İstanbul",
+  phone: "0532 055 09 45",
+  email: "info@yonetimmerkezi.com.tr",
+  address: "Türkiye Geneli / info@yonetimmerkezi.com.tr",
 };
 
 export const INITIAL_SITES: Site[] = [

@@ -8,7 +8,7 @@ import {
   LayoutDashboard, MessageCircle, BarChart3, ChevronDown,
   Layers, Database, FileSpreadsheet, CheckCheck, RefreshCw,
   Wallet, Shield, HelpCircle as QuestionIcon, ArrowRightLeft,
-  Coins, PhoneCall, Sparkle, CircleCheck
+  Coins, PhoneCall, Sparkle, CircleCheck, Mail, Globe
 } from "lucide-react";
 import { formatCurrency } from "@/utils/formatters";
 import { useAuth } from "@/contexts/AuthContext";
@@ -433,7 +433,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                 </div>
                 <div className="flex items-center gap-2 ml-3 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 font-mono text-[11px] text-slate-700 font-semibold">
                   <Lock size={11} className="text-emerald-600" />
-                  <span>yonetimmerkezi.web.app/kokpit</span>
+                  <span>www.yonetimmerkezi.com.tr/kokpit</span>
                 </div>
               </div>
 
@@ -1338,13 +1338,28 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           </div>
 
           <div className="border-t border-slate-100 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <span>© 2026 Yönetim Merkezi. Tüm Hakları Saklıdır.</span>
               <span>·</span>
               <span className="text-emerald-700 font-bold">Ömür Boyu %100 Ücretsiz</span>
+              <span>·</span>
+              <a
+                href="https://www.yonetimmerkezi.com.tr"
+                className="hover:text-emerald-700 transition flex items-center gap-1 font-semibold"
+              >
+                <Globe size={13} className="text-emerald-600" />
+                <span>www.yonetimmerkezi.com.tr</span>
+              </a>
             </div>
 
-            <div className="flex items-center gap-4 font-semibold">
+            <div className="flex flex-wrap items-center gap-5 font-semibold">
+              <a
+                href="mailto:info@yonetimmerkezi.com.tr"
+                className="text-slate-700 hover:text-emerald-700 flex items-center gap-1.5 transition font-bold"
+              >
+                <Mail size={14} className="text-emerald-600" />
+                <span>info@yonetimmerkezi.com.tr</span>
+              </a>
               <a
                 href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20destek%20talebi."
                 target="_blank"
@@ -1352,7 +1367,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                 className="text-emerald-700 hover:underline flex items-center gap-1.5 font-bold"
               >
                 <MessageCircle size={14} className="text-[#25D366]" />
-                <span>WhatsApp Destek: 0532 055 09 45</span>
+                <span>WhatsApp: 0532 055 09 45</span>
               </a>
             </div>
           </div>
