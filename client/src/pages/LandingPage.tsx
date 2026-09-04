@@ -360,7 +360,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           </div>
 
           {/* Main Hero Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[#172b2b] leading-[1.1] max-w-4xl mx-auto">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[#172b2b] leading-[1.12] max-w-4xl mx-auto font-heading">
             Apartman ve Siteler İçin <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-700 via-teal-600 to-emerald-800">
               Türkiye'nin En Kapsamlı ve Ücretsiz
@@ -369,7 +369,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           </h1>
 
           {/* Subtitle & Value Proposition */}
-          <p className="text-base sm:text-xl text-[#4a635f] max-w-3xl mx-auto font-medium leading-relaxed">
+          <p className="text-base sm:text-xl text-[#4a635f] max-w-3xl mx-auto font-medium leading-relaxed font-sans-modern">
             Daire başı aidat kesintilerine ve fahiş aylık yazılım lisanslarına son. 
             Aidat tahakkukundan <strong className="text-[#172b2b]">QR kodlu resmi makbuza</strong>, 
             <strong className="text-emerald-800"> %5 KMK gecikme tazminatından</strong> sakin mobil portalına kadar tüm ihtiyaçlarınız tek sistemde — 
@@ -380,7 +380,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 pt-3">
             <button
               onClick={onGoToApp}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#172b2b] via-[#213f3d] to-[#172b2b] hover:from-[#213f3d] hover:to-[#2e5754] text-white text-base font-black shadow-xl shadow-[#172b2b]/15 transition-all transform hover:scale-105 active:scale-95 cursor-pointer border border-[#2d5250]"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#172b2b] via-[#213f3d] to-[#172b2b] hover:from-[#213f3d] hover:to-[#2e5754] text-white text-base font-black shadow-xl shadow-emerald-950/20 transition-all transform hover:scale-105 active:scale-95 cursor-pointer border border-[#2d5250] glow-emerald"
             >
               <Zap size={20} className="fill-[#b8edb7] text-[#b8edb7]" />
               <span>{isAuthenticated ? "Yönetim Paneline Git" : "Hemen Ücretsiz Başlayın"}</span>

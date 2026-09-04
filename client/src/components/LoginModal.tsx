@@ -94,7 +94,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             type="button"
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-[#d2dbd7] hover:border-slate-400 bg-white hover:bg-slate-50 transition text-xs font-bold text-slate-800 shadow-xs"
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-emerald-500/30 hover:border-emerald-500 bg-emerald-50/50 hover:bg-emerald-100/70 transition text-xs font-extrabold text-emerald-950 shadow-2xs cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -114,7 +114,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
               />
             </svg>
-            Google ile Giriş Yap
+            Google ile Tek Tıkla Giriş
           </button>
         </div>
 
@@ -122,14 +122,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         <div className="relative flex items-center justify-center">
           <div className="border-t border-[#e4eae3] w-full" />
           <span className="bg-white px-2.5 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-            veya E-Posta ile
+            veya E-Posta & Şifre ile
           </span>
         </div>
 
         {/* Email & Password Form */}
-        <form onSubmit={handleEmailLogin} className="space-y-3 text-xs">
+        <form onSubmit={handleEmailLogin} className="space-y-3.5 text-xs">
           <div>
-            <label className="font-bold text-[#172b2b] block mb-1">E-Posta Adresi</label>
+            <label className="font-bold text-[#172b2b] block mb-1">Yetkili E-Posta Adresi</label>
             <div className="relative">
               <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -138,13 +138,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="ornek@domain.com"
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-medium"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#e4eae3] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 font-medium transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="font-bold text-[#172b2b] block mb-1">Şifre</label>
+            <label className="font-bold text-[#172b2b] block mb-1">Giriş Şifresi</label>
             <div className="relative">
               <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -153,16 +153,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-emerald-500 font-mono"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#e4eae3] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 font-mono transition"
               />
             </div>
           </div>
 
           {/* Super Admin Quick Badge */}
-          <div className="p-3 bg-emerald-50 text-emerald-950 border border-emerald-200 rounded-xl text-[11px] flex items-center justify-between">
+          <div className="p-3 bg-emerald-50/80 text-emerald-950 border border-emerald-200/80 rounded-xl text-[11px] flex items-center justify-between">
             <div>
-              <strong className="block font-bold">Süper Admin Tanımlı Hesap:</strong>
-              <span className="text-slate-600 font-mono text-[10px]">cebrailkara@gmail.com / Ak010101</span>
+              <strong className="block font-bold">Tanımlı Süper Admin:</strong>
+              <span className="text-slate-600 font-mono text-[10px]">cebrailkara@gmail.com</span>
             </div>
             <button
               type="button"
@@ -170,7 +170,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 setEmail("cebrailkara@gmail.com");
                 setPassword("Ak010101");
               }}
-              className="text-[10px] font-bold text-emerald-800 bg-white px-2 py-1 rounded-md border border-emerald-300 hover:bg-emerald-100 transition"
+              className="text-[10px] font-extrabold text-emerald-900 bg-white px-2.5 py-1 rounded-lg border border-emerald-300 hover:bg-emerald-100 transition shadow-2xs cursor-pointer"
             >
               Doldur
             </button>
@@ -179,9 +179,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white text-xs font-bold transition shadow-sm flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#172b2b] via-[#213f3d] to-[#172b2b] hover:from-[#213f3d] hover:to-[#2e5754] text-white text-xs font-black transition shadow-md flex items-center justify-center gap-2 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
           >
-            {isLoading ? "Giriş Yapılıyor..." : "Giriş Yap"}
+            {isLoading ? "Giriş Yapılıyor..." : (
+              <>Giriş Yap ve Devam Et <ArrowRight size={14} /></>
+            )}
           </button>
         </form>
 
