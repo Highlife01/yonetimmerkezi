@@ -173,40 +173,43 @@ export default function Home() {
   return (
     <div className="flex h-screen bg-[#f3f6f3] font-sans antialiased text-[#172b2b] overflow-hidden select-none">
       {/* ===================== SIDEBAR ===================== */}
-      <aside className="w-68 bg-gradient-to-b from-[#0a1817] via-[#0e211f] to-[#0a1615] text-white flex flex-col justify-between flex-shrink-0 z-20 border-r border-[#193633] shadow-2xl">
+      <aside className="w-70 bg-gradient-to-b from-[#071413] via-[#0c201e] to-[#061110] text-white flex flex-col justify-between flex-shrink-0 z-20 border-r border-[#163632]/80 shadow-2xl">
         {/* Top Logo & Active Site Switcher */}
         <div>
-          <div className="p-4 border-b border-[#193633]">
+          <div className="p-4 border-b border-[#163632]/80">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#b8edb7] to-[#8fe08e] text-[#0a1817] flex items-center justify-center font-black text-xl shadow-md shadow-[#b8edb7]/20 transform -rotate-3 transition hover:rotate-0">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 text-[#071413] flex items-center justify-center font-black text-xl shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400/30 transform -rotate-3 transition hover:rotate-0">
                 Y
               </div>
               <div className="leading-tight">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-base font-extrabold tracking-tight text-white block font-heading">
-                    Yönetim<span className="text-[#b8edb7]">Merkezi</span>
+                  <span className="text-base font-black tracking-tight text-white block font-heading">
+                    Yönetim<span className="text-emerald-300">Merkezi</span>
                   </span>
-                  <span className="bg-[#b8edb7] text-[#0a1817] text-[8px] font-black uppercase px-1.5 py-0.2 rounded font-mono shadow-2xs">
+                  <span className="bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full font-mono">
                     ÜCRETSİZ
                   </span>
                 </div>
-                <span className="text-[10px] text-[#7ea97d] font-semibold tracking-wider uppercase">
+                <span className="text-[10px] text-emerald-400/80 font-bold tracking-wider uppercase">
                   SaaS Apartman Platformu
                 </span>
               </div>
             </div>
 
             {/* Site Switcher Dropdown */}
-            <div className="relative mt-3.5">
+            <div className="relative mt-4">
               <button
                 onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#162f2c] hover:bg-[#1b3a37] text-white transition text-xs font-semibold text-left border border-[#224844] shadow-xs cursor-pointer"
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#112926]/90 hover:bg-[#163531] text-white transition text-xs font-semibold text-left border border-[#1d4641] shadow-inner cursor-pointer group"
               >
                 <div className="truncate pr-2">
-                  <span className="text-[9px] uppercase tracking-wider text-[#a8d3aa] block font-bold">ÇALIŞILAN SİTE</span>
-                  <span className="truncate block font-bold text-xs">{activeSite.name}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[9px] uppercase tracking-wider text-emerald-300/80 font-black">AKTİF SİTE</span>
+                  </div>
+                  <span className="truncate block font-bold text-xs text-white group-hover:text-emerald-200 transition-colors">{activeSite.name}</span>
                 </div>
-                <ChevronDown size={14} className="text-[#a8d3aa] flex-shrink-0" />
+                <ChevronDown size={14} className="text-emerald-400/80 flex-shrink-0 group-hover:translate-y-0.5 transition-transform" />
               </button>
 
               {isSiteDropdownOpen && (
@@ -215,8 +218,8 @@ export default function Home() {
                     className="fixed inset-0 z-30"
                     onClick={() => setIsSiteDropdownOpen(false)}
                   />
-                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#142927] border border-[#274f4b] rounded-2xl p-1.5 shadow-2xl z-40 space-y-1">
-                    <span className="text-[9px] font-bold text-[#86af85] uppercase px-2.5 py-1 block">
+                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#0e2422] border border-[#1e4843] rounded-2xl p-1.5 shadow-2xl z-40 space-y-1 backdrop-blur-xl">
+                    <span className="text-[9px] font-black text-emerald-400/80 uppercase px-2.5 py-1 block tracking-wider">
                       YÖNETİM ŞİRKETİ PORTFÖYÜ ({sites.length} SİTE)
                     </span>
                     {sites.map((s) => (
@@ -227,17 +230,17 @@ export default function Home() {
                           setIsSiteDropdownOpen(false);
                           toast.success(`Aktif site değiştirildi: ${s.name}`);
                         }}
-                        className={`w-full text-left p-2 rounded-xl text-xs font-medium transition flex items-center justify-between cursor-pointer ${
+                        className={`w-full text-left p-2.5 rounded-xl text-xs font-medium transition flex items-center justify-between cursor-pointer ${
                           s.id === activeSiteId
-                            ? "bg-[#b8edb7] text-[#0a1817] font-bold shadow-xs"
-                            : "text-slate-200 hover:bg-[#1d3936]"
+                            ? "bg-gradient-to-r from-[#b8edb7] to-[#a0e59f] text-[#071413] font-black shadow-md shadow-emerald-500/20"
+                            : "text-slate-200 hover:bg-white/8 hover:text-white"
                         }`}
                       >
                         <div className="truncate">
                           <strong className="block truncate">{s.name}</strong>
                           <span className="text-[10px] opacity-75">{s.totalUnits} Daire · {s.city}</span>
                         </div>
-                        {s.id === activeSiteId && <Check size={14} className="flex-shrink-0" />}
+                        {s.id === activeSiteId && <Check size={14} className="flex-shrink-0 font-black" />}
                       </button>
                     ))}
                   </div>
@@ -247,10 +250,10 @@ export default function Home() {
           </div>
 
           {/* Navigation Items */}
-          <nav className="p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-220px)] scrollbar-thin">
+          <nav className="p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-230px)] scrollbar-thin">
             {navCategories.map((cat, idx) => (
               <div key={idx} className="space-y-1">
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#567f78] px-3 block">
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#4e7d76] px-3 block">
                   {cat.title}
                 </span>
 
@@ -266,25 +269,25 @@ export default function Home() {
                       disabled={!hasAccess}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
                         isActive
-                          ? "bg-[#b8edb7] text-[#0a1817] font-black shadow-sm shadow-[#b8edb7]/20"
+                          ? "bg-gradient-to-r from-[#b8edb7] via-[#a8e8a7] to-[#91df90] text-[#071715] font-black shadow-md shadow-emerald-500/25 ring-1 ring-white/20"
                           : hasAccess
-                          ? "text-slate-300 hover:bg-white/8 hover:text-white"
+                          ? "text-slate-300 hover:bg-white/7 hover:text-white"
                           : "text-slate-500 opacity-40 cursor-not-allowed"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
-                        <Icon size={16} className={isActive ? "text-[#0a1817]" : "text-[#7fa786]"} />
+                        <Icon size={16} className={isActive ? "text-[#071715]" : "text-emerald-400/70"} />
                         <span className="truncate">{item.label}</span>
                       </div>
 
                       {(item as any).alertCount !== undefined && (item as any).alertCount > 0 && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500 text-white shadow-2xs">
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-rose-500 text-white shadow-sm">
                           {(item as any).alertCount}
                         </span>
                       )}
 
                       {(item as any).badge && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#193633] text-[#b8edb7] border border-[#26534e]">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#13302c] text-emerald-300 border border-[#1e4b45]">
                           {(item as any).badge}
                         </span>
                       )}
@@ -297,15 +300,15 @@ export default function Home() {
         </div>
 
         {/* Sidebar Footer with Active Role Indicator */}
-        <div className="p-3.5 border-t border-[#193633] bg-[#071312]">
+        <div className="p-3.5 border-t border-[#163632]/80 bg-[#050f0e]/95 backdrop-blur-md">
           <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2 truncate">
-              <div className="w-8 h-8 rounded-full bg-[#b8edb7] text-[#172b2b] font-bold flex items-center justify-center text-xs flex-shrink-0">
+            <div className="flex items-center gap-2.5 truncate">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-400 text-[#071413] font-black flex items-center justify-center text-xs flex-shrink-0 shadow-sm shadow-emerald-500/25">
                 {currentUser.name.split(" ").map(n => n[0]).join("")}
               </div>
               <div className="truncate leading-tight">
-                <strong className="block text-white text-xs truncate">{currentUser.name}</strong>
-                <span className="text-[10px] text-[#86af85] font-semibold block truncate">
+                <strong className="block text-white text-xs truncate font-bold">{currentUser.name}</strong>
+                <span className="text-[10px] text-emerald-400/90 font-semibold block truncate">
                   {roleDef.name}
                 </span>
               </div>
@@ -318,7 +321,7 @@ export default function Home() {
                   toast.info("Sakin portalı görünümüne geçildi.");
                 }}
                 title="Sakin Portalı Olarak Gör"
-                className="p-1.5 rounded-lg bg-[#244240] hover:bg-[#2f5553] text-[#b8edb7] transition"
+                className="p-1.5 rounded-lg bg-[#142f2c] hover:bg-[#1a3c39] text-emerald-300 transition cursor-pointer border border-[#214944]"
               >
                 <Eye size={14} />
               </button>
@@ -330,7 +333,7 @@ export default function Home() {
                   toast.success("Oturum güvenli bir şekilde kapatıldı.");
                 }}
                 title="Güvenli Çıkış Yap"
-                className="p-1.5 rounded-lg bg-[#244240] hover:bg-rose-950 text-rose-300 hover:text-white transition"
+                className="p-1.5 rounded-lg bg-[#142f2c] hover:bg-rose-950/80 text-rose-300 hover:text-white transition cursor-pointer border border-[#214944]"
               >
                 <LogOut size={14} />
               </button>
@@ -342,75 +345,75 @@ export default function Home() {
       {/* ===================== MAIN CONTENT WRAPPER ===================== */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* TOPBAR */}
-        <header className="h-16 bg-white/90 backdrop-blur-xl border-b border-[#e2eae3] px-6 flex items-center justify-between flex-shrink-0 z-10 shadow-2xs">
+        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 px-6 flex items-center justify-between flex-shrink-0 z-10 shadow-xs">
           {/* Breadcrumb / Slogans */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#667a75]">
-              <span className="font-bold text-[#172b2b]">{activeSite.name}</span>
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+              <span className="font-extrabold text-[#0e211f] font-heading">{activeSite.name}</span>
               {activeSite.isVerified ? (
                 <button
                   type="button"
                   onClick={() => setIsVerificationModalOpen(true)}
                   title="Resmi KMK Doğrulaması Yapılmıştır. Bilgileri görüntülemek/güncellemek için tıklayın."
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold cursor-pointer hover:bg-emerald-100 transition shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold cursor-pointer hover:bg-emerald-100 transition shadow-2xs"
                 >
-                  <ShieldCheck size={12} className="text-emerald-700" />
+                  <ShieldCheck size={13} className="text-emerald-600" />
                   <span>Doğrulanmış Apartman</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => setIsVerificationModalOpen(true)}
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300 text-[10px] font-extrabold cursor-pointer hover:bg-amber-100 transition animate-pulse shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300 text-[10px] font-extrabold cursor-pointer hover:bg-amber-100 transition animate-pulse shadow-2xs"
                 >
-                  <ShieldAlert size={12} className="text-amber-700" />
+                  <ShieldAlert size={13} className="text-amber-600" />
                   <span>Apartmanı Doğrula</span>
                 </button>
               )}
               <span className="text-slate-300">/</span>
-              <span className="text-emerald-900 font-extrabold bg-emerald-50/70 px-2 py-0.5 rounded-md border border-emerald-100">
+              <span className="text-emerald-900 font-extrabold bg-emerald-50/80 px-2.5 py-0.5 rounded-lg border border-emerald-200/60">
                 {navCategories.flatMap(c => c.items).find(i => i.id === activeModule)?.label || "Modül"}
               </span>
             </div>
 
             {/* Slogans badge */}
-            <div className="hidden xl:flex items-center gap-2 text-[11px] text-[#556b66] bg-[#f4f7f4] px-3.5 py-1 rounded-full border border-[#e2eae3] shadow-2xs">
-              <span className="bg-emerald-600 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
+            <div className="hidden xl:flex items-center gap-2 text-[11px] text-slate-600 bg-slate-50/90 px-3.5 py-1 rounded-full border border-slate-200/80 shadow-2xs">
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
                 %100 ÜCRETSİZ
               </span>
-              <Sparkles size={13} className="text-emerald-700" />
-              <span>Aidattan Yönetime, Her Şey Tek Yerde.</span>
+              <Sparkles size={13} className="text-emerald-600" />
+              <span className="font-medium">Aidattan Yönetime, Her Şey Tek Yerde.</span>
               <span className="text-slate-300">·</span>
-              <span className="font-semibold text-emerald-800">Siteniz Kontrol Altında</span>
+              <span className="font-bold text-emerald-800">Siteniz Kontrol Altında</span>
             </div>
           </div>
 
           {/* Quick Actions, Search, Login & Role Switcher */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Apartman Doğrula Butonu */}
             <button
               onClick={() => setIsVerificationModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-[#e4eae3] text-xs font-bold transition shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold transition shadow-2xs cursor-pointer"
             >
-              <ShieldCheck size={14} className="text-emerald-700" />
+              <ShieldCheck size={14} className="text-emerald-600" />
               <span className="hidden md:inline">Apartman Doğrulama</span>
             </button>
 
             {/* Tanıtım Sitesi Butonu */}
             <button
               onClick={() => setShowLandingPage(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold transition shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50/80 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold transition shadow-2xs cursor-pointer"
             >
-              <Globe size={14} className="text-emerald-700" />
+              <Globe size={14} className="text-emerald-600" />
               <span className="hidden sm:inline">Tanıtım Sitesi</span>
             </button>
 
             {/* Quick Search Button (Command Palette) */}
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-[#e4eae3] text-xs font-semibold text-slate-600 transition shadow-2xs cursor-pointer"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-600 transition shadow-2xs cursor-pointer"
             >
-              <Search size={14} className="text-emerald-700" />
+              <Search size={14} className="text-emerald-600" />
               <span>Hızlı Arama</span>
               <kbd className="text-[10px] font-mono bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-400">Ctrl+K</kbd>
             </button>
@@ -422,7 +425,7 @@ export default function Home() {
                   setActiveModule("DUES_TAHAKKUK");
                   setOpenModalSignal(true);
                 }}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition shadow-2xs"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:from-emerald-500 hover:to-teal-500 transition shadow-sm shadow-emerald-600/20 cursor-pointer"
               >
                 <Plus size={14} /> Toplu Borçlandır
               </button>
@@ -431,7 +434,7 @@ export default function Home() {
             {/* Google / E-Posta Giriş Butonu */}
             <button
               onClick={() => setIsLoginModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#d2dbd7] hover:border-slate-400 text-slate-800 text-xs font-bold transition shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-800 text-xs font-bold transition shadow-2xs cursor-pointer"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                 <path

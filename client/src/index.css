@@ -52,32 +52,50 @@
   box-shadow: 0 20px 40px -12px rgba(15, 35, 33, 0.12), 0 4px 10px -2px rgba(15, 35, 33, 0.04);
 }
 
-.glass-dark {
-  background: rgba(15, 35, 33, 0.88);
+.glass-luxury {
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(226, 234, 227, 0.9);
+  box-shadow: 0 20px 50px -12px rgba(15, 35, 33, 0.07), 0 1px 3px 0 rgba(15, 35, 33, 0.03);
+}
+
+.glass-dark {
+  background: rgba(12, 28, 26, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.45);
 }
 
 .glow-emerald {
-  box-shadow: 0 0 40px -5px rgba(16, 185, 129, 0.28);
+  box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.35);
 }
 
 .glow-mint {
   box-shadow: 0 0 30px -5px rgba(184, 237, 183, 0.45);
 }
 
+.glow-card {
+  box-shadow: 0 14px 40px -10px rgba(16, 185, 129, 0.08), 0 2px 8px -2px rgba(15, 35, 33, 0.03);
+}
+
 .text-gradient-emerald {
-  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #047857 100%);
+  background: linear-gradient(135deg, #047857 0%, #10b981 50%, #059669 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-luxury {
-  background: linear-gradient(135deg, #0f2b28 0%, #154540 60%, #10b981 100%);
+  background: linear-gradient(135deg, #0d2825 0%, #17423d 50%, #059669 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.gradient-mesh {
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12), transparent 45%),
+              radial-gradient(circle at 100% 50%, rgba(45, 212, 191, 0.08), transparent 40%),
+              radial-gradient(circle at 0% 100%, rgba(52, 211, 153, 0.08), transparent 45%);
 }
 
 :root { --ink: #172b2b; --ink-2: #294342; --muted: #7c8a87; --soft: #f4f6f2; --line: #e4eae3; --mint: #b8edb7; --mint-dark: #5eaa71; --blue: #c7e4f1; --coral: #ffd1c4; --gold: #f7e5ad; --lavender: #ded9f4; --ease-out: cubic-bezier(.23,1,.32,1); }

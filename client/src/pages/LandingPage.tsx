@@ -348,24 +348,24 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       <section className="relative pt-12 sm:pt-20 pb-16 sm:pb-24 px-4 sm:px-8 lg:px-12 z-10">
         <div className="max-w-5xl mx-auto text-center space-y-7">
           
-          {/* Light Floating Badge */}
-          <div className="inline-flex items-center gap-2.5 bg-white border border-emerald-200 text-emerald-900 text-xs font-bold px-4 py-2 rounded-full shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
-            <span className="flex h-2 w-2 relative">
+          {/* Top Floating Badge */}
+          <div className="inline-flex items-center gap-2.5 bg-white/90 backdrop-blur-md border border-emerald-300 text-emerald-900 text-xs font-black px-4 py-2 rounded-full shadow-md animate-in fade-in slide-in-from-top-4 duration-500">
+            <span className="flex h-2.5 w-2.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600" />
             </span>
-            <span>Ömür Boyu %100 Ücretsiz Apartman & Site Yönetim Platformu</span>
+            <span className="tracking-wide">ÖMÜR BOYU %100 ÜCRETSİZ APARTMAN & SİTE YAZILIMI</span>
             <span className="text-slate-300 hidden sm:inline">|</span>
-            <span className="text-emerald-700 font-extrabold hidden sm:inline">Sıfır Lisans Maliyeti</span>
+            <span className="text-emerald-700 font-black hidden sm:inline">SIFIR LİSANS MALİYETİ</span>
           </div>
 
           {/* Main Hero Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[#172b2b] leading-[1.12] max-w-4xl mx-auto font-heading">
             Apartman ve Siteler İçin <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-700 via-teal-600 to-emerald-800">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-800 via-emerald-600 to-teal-700">
               Türkiye'nin En Kapsamlı ve Ücretsiz
             </span> <br />
-            Yönetim Yazılımı.
+            Yönetim Standardı.
           </h1>
 
           {/* Subtitle & Value Proposition */}
@@ -398,22 +398,22 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
             </a>
           </div>
 
-          {/* Quick Trust Seals (Light Cards) */}
+          {/* Quick Trust Seals (Luxury Glass Pills) */}
           <div className="pt-6 flex flex-wrap items-center justify-center gap-y-3 gap-x-4 text-xs text-[#3d5954] font-bold">
-            <div className="flex items-center gap-1.5 bg-white px-3.5 py-2 rounded-xl border border-[#e0e8e2] shadow-2xs">
-              <CheckCircle2 size={15} className="text-emerald-600" />
+            <div className="flex items-center gap-1.5 bg-white/90 px-4 py-2 rounded-xl border border-emerald-200/70 shadow-2xs backdrop-blur-md">
+              <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
               <span className="text-[#172b2b]">₺0 Lisans & Gizli Ücret Yok</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-white px-3.5 py-2 rounded-xl border border-[#e0e8e2] shadow-2xs">
-              <CheckCircle2 size={15} className="text-emerald-600" />
+            <div className="flex items-center gap-1.5 bg-white/90 px-4 py-2 rounded-xl border border-emerald-200/70 shadow-2xs backdrop-blur-md">
+              <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
               <span className="text-[#172b2b]">Kredi Kartı Asla İstenmez</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-white px-3.5 py-2 rounded-xl border border-[#e0e8e2] shadow-2xs">
-              <CheckCircle2 size={15} className="text-emerald-600" />
+            <div className="flex items-center gap-1.5 bg-white/90 px-4 py-2 rounded-xl border border-emerald-200/70 shadow-2xs backdrop-blur-md">
+              <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
               <span className="text-[#172b2b]">KMK 20 & 37. Madde Tam Uyumlu</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-white px-3.5 py-2 rounded-xl border border-[#e0e8e2] shadow-2xs">
-              <CheckCircle2 size={15} className="text-emerald-600" />
+            <div className="flex items-center gap-1.5 bg-white/90 px-4 py-2 rounded-xl border border-emerald-200/70 shadow-2xs backdrop-blur-md">
+              <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
               <span className="text-[#172b2b]">Sınırsız Daire & Blok Kapasitesi</span>
             </div>
           </div>
@@ -421,7 +421,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
 
         {/* ======================= LIVE COCKPIT INTERACTIVE WIDGET (LIGHT LUXURY) ======================= */}
         <div id="canli-kokpit" className="max-w-6xl mx-auto mt-14 sm:mt-16 scroll-mt-24">
-          <div className="relative rounded-3xl border border-[#d6e0d8] bg-white p-3 sm:p-6 shadow-2xl shadow-emerald-950/5">
+          <div className="relative rounded-3xl border border-[#d6e0d8] bg-white p-3 sm:p-6 shadow-2xl shadow-emerald-950/10">
             
             {/* Window Top Controls */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 mb-4 border-b border-[#e4eae3] gap-3 text-xs">
@@ -439,7 +439,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
 
               {/* Status pill */}
               <div className="flex items-center gap-2 self-end sm:self-auto">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-900 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300 tracking-wider">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-900 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300 tracking-wider shadow-2xs">
                   <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
                   CANLI İNTERAKTİF SİMÜLATÖR
                 </span>
@@ -831,46 +831,50 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
         </div>
       </section>
 
-      {/* ======================= LIVE STATS & TRUST BAR (LIGHT) ======================= */}
-      <section className="py-12 border-y border-[#e2e8e3] bg-white">
+      {/* ======================= LIVE STATS & TRUST BAR (LIGHT LUXURY) ======================= */}
+      <section className="py-14 border-y border-[#e2eae3] bg-white/80 backdrop-blur-md relative z-10 shadow-xs">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div className="space-y-1">
-              <span className="text-3xl sm:text-4xl font-black text-emerald-700 tracking-tight">₺0</span>
-              <p className="text-xs font-bold text-[#172b2b]">Ömür Boyu Lisans Ücreti</p>
-              <span className="text-[10px] text-slate-500 block">Gizli aidat yok</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
+            <div className="space-y-1 pt-4 md:pt-0">
+              <span className="text-4xl sm:text-5xl font-black text-emerald-700 tracking-tight font-heading block">₺0</span>
+              <p className="text-xs sm:text-sm font-bold text-[#172b2b]">Ömür Boyu Lisans Ücreti</p>
+              <span className="text-[11px] text-emerald-800 font-semibold block bg-emerald-50 max-w-fit mx-auto px-2 py-0.5 rounded-md border border-emerald-200">
+                Gizli Masraf veya Aidat Yok
+              </span>
             </div>
-            <div className="space-y-1">
-              <span className="text-3xl sm:text-4xl font-black text-[#172b2b] tracking-tight">1.450+</span>
-              <p className="text-xs font-bold text-[#172b2b]">Aktif Apartman & Site</p>
-              <span className="text-[10px] text-slate-500 block">Türkiye geneli</span>
+            <div className="space-y-1 pt-4 md:pt-0">
+              <span className="text-4xl sm:text-5xl font-black text-[#172b2b] tracking-tight font-heading block">1.450+</span>
+              <p className="text-xs sm:text-sm font-bold text-[#172b2b]">Aktif Apartman & Site</p>
+              <span className="text-[11px] text-slate-500 font-medium block">81 İl Genelinde Yönetim</span>
             </div>
-            <div className="space-y-1">
-              <span className="text-3xl sm:text-4xl font-black text-[#172b2b] tracking-tight">48.000+</span>
-              <p className="text-xs font-bold text-[#172b2b]">Yönetilen Bağımsız Bölüm</p>
-              <span className="text-[10px] text-slate-500 block">Malik ve kiracı</span>
+            <div className="space-y-1 pt-4 md:pt-0">
+              <span className="text-4xl sm:text-5xl font-black text-[#172b2b] tracking-tight font-heading block">48.000+</span>
+              <p className="text-xs sm:text-sm font-bold text-[#172b2b]">Yönetilen Bağımsız Bölüm</p>
+              <span className="text-[11px] text-slate-500 font-medium block">Malik & Kiracı Çift Cari</span>
             </div>
-            <div className="space-y-1">
-              <span className="text-3xl sm:text-4xl font-black text-emerald-700 tracking-tight">%99.8</span>
-              <p className="text-xs font-bold text-[#172b2b]">Zamanında Tahsilat Başarısı</p>
-              <span className="text-[10px] text-slate-500 block">Otomatik hatırlatmalarla</span>
+            <div className="space-y-1 pt-4 md:pt-0">
+              <span className="text-4xl sm:text-5xl font-black text-emerald-700 tracking-tight font-heading block">%99.8</span>
+              <p className="text-xs sm:text-sm font-bold text-[#172b2b]">Zamanında Tahsilat Başarısı</p>
+              <span className="text-[11px] text-emerald-800 font-semibold block bg-emerald-50 max-w-fit mx-auto px-2 py-0.5 rounded-md border border-emerald-200">
+                Otomatik Hatırlatmalarla
+              </span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ======================= WHY 100% FREE? (TRANSPARENCY MANIFESTO - LIGHT) ======================= */}
-      <section id="neden-ucretsiz" className="py-20 px-4 sm:px-8 lg:px-12 bg-[#f4f6f2] border-b border-[#e2e8e3] scroll-mt-20">
-        <div className="max-w-6xl mx-auto space-y-12">
+      <section id="neden-ucretsiz" className="py-24 px-4 sm:px-8 lg:px-12 bg-[#f4f7f4] border-b border-[#e2eae3] scroll-mt-20 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto space-y-12 relative z-10">
           
           <div className="text-center space-y-3 max-w-3xl mx-auto">
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-4 py-1.5 rounded-full border border-emerald-300">
+            <span className="text-xs font-black uppercase tracking-widest text-emerald-900 bg-emerald-100/90 px-4 py-1.5 rounded-full border border-emerald-300 shadow-2xs inline-block">
               ŞEFFAFLIK & GÜVEN MANİFESTOSU
             </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-[#172b2b] tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-black text-[#172b2b] tracking-tight font-heading">
               Neden %100 Ücretsiz? Sırrımız Ne?
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed font-sans-modern">
               Çoğu yazılım firması sitenizden daire başına aylık ₺45-90 aidat keserken, Yönetim Merkezi'ni nasıl tamamen ücretsiz sunuyoruz?
             </p>
           </div>
@@ -878,53 +882,53 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* Pillar 1 */}
-            <div className="bg-white border border-[#e2e8e3] hover:border-emerald-500 rounded-3xl p-6 space-y-3.5 transition group shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                <Coins size={24} />
+            <div className="glass-card rounded-3xl p-7 space-y-4 hover:border-emerald-500 transition-all transform hover:-translate-y-1 shadow-xs hover:shadow-xl group">
+              <div className="w-13 h-13 rounded-2xl bg-emerald-100 text-emerald-900 flex items-center justify-center font-bold border border-emerald-200 group-hover:scale-110 transition-transform">
+                <Coins size={26} />
               </div>
               <h3 className="text-base font-bold text-[#172b2b] group-hover:text-emerald-800 transition">
                 1. Fahiş Ücretleri Reddediyoruz
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Apartman bütçelerinin binlerce lirasının yazılım firmalarına gitmesine inanmıyoruz. O para sitenizin asansörüne, güvenliğine ve bakımına harcanmalıdır.
               </p>
             </div>
 
             {/* Pillar 2 */}
-            <div className="bg-white border border-[#e2e8e3] hover:border-teal-500 rounded-3xl p-6 space-y-3.5 transition group shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-teal-100 text-teal-800 flex items-center justify-center font-bold">
-                <Database size={24} />
+            <div className="glass-card rounded-3xl p-7 space-y-4 hover:border-teal-500 transition-all transform hover:-translate-y-1 shadow-xs hover:shadow-xl group">
+              <div className="w-13 h-13 rounded-2xl bg-teal-100 text-teal-900 flex items-center justify-center font-bold border border-teal-200 group-hover:scale-110 transition-transform">
+                <Database size={26} />
               </div>
               <h3 className="text-base font-bold text-[#172b2b] group-hover:text-teal-800 transition">
                 2. Yeni Nesil Bulut Mimarisi
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Eski hantal sunucular yerine Google Cloud & Firebase altyapısını kullanıyoruz. Maliyetlerimiz son derece düşük, sistemimiz ise ışık hızındadır.
               </p>
             </div>
 
             {/* Pillar 3 */}
-            <div className="bg-white border border-[#e2e8e3] hover:border-sky-500 rounded-3xl p-6 space-y-3.5 transition group shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-800 flex items-center justify-center font-bold">
-                <ShieldCheck size={24} />
+            <div className="glass-card rounded-3xl p-7 space-y-4 hover:border-sky-500 transition-all transform hover:-translate-y-1 shadow-xs hover:shadow-xl group">
+              <div className="w-13 h-13 rounded-2xl bg-sky-100 text-sky-900 flex items-center justify-center font-bold border border-sky-200 group-hover:scale-110 transition-transform">
+                <ShieldCheck size={26} />
               </div>
               <h3 className="text-base font-bold text-[#172b2b] group-hover:text-sky-800 transition">
                 3. Gizli Sözleşme & Kart Yok
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Kredi kartı bilgisi sormuyoruz. 'İlk 14 gün ücretsiz sonra paralı' tuzakları yoktur. Sisteme girdiğiniz ilk gün de, 10 yıl sonra da ücretsizdir.
               </p>
             </div>
 
             {/* Pillar 4 */}
-            <div className="bg-white border border-[#e2e8e3] hover:border-purple-500 rounded-3xl p-6 space-y-3.5 transition group shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
-                <FileSpreadsheet size={24} />
+            <div className="glass-card rounded-3xl p-7 space-y-4 hover:border-purple-500 transition-all transform hover:-translate-y-1 shadow-xs hover:shadow-xl group">
+              <div className="w-13 h-13 rounded-2xl bg-purple-100 text-purple-900 flex items-center justify-center font-bold border border-purple-200 group-hover:scale-110 transition-transform">
+                <FileSpreadsheet size={26} />
               </div>
               <h3 className="text-base font-bold text-[#172b2b] group-hover:text-purple-800 transition">
                 4. %100 Veri Bağımsızlığı
               </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Verileriniz sizin mülkünüzdür. Dilediğiniz an tüm sakin listelerini, makbuzları ve bilançoları tek tıkla Excel ve PDF olarak dışa aktarabilirsiniz.
               </p>
             </div>
@@ -934,20 +938,21 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </section>
 
       {/* ======================= SAVINGS / ROI CALCULATOR (LIGHT LUXURY) ======================= */}
-      <section id="tasarruf" className="py-20 px-4 sm:px-8 lg:px-12 bg-white border-b border-[#e2e8e3] scroll-mt-20">
-        <div className="max-w-5xl mx-auto bg-gradient-to-br from-[#f8faf8] via-white to-emerald-50/40 rounded-3xl p-6 sm:p-12 border border-emerald-200 shadow-xl space-y-8 relative overflow-hidden">
+      <section id="tasarruf" className="py-24 px-4 sm:px-8 lg:px-12 bg-white border-b border-[#e2eae3] scroll-mt-20 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto bg-gradient-to-br from-[#f8faf8] via-white to-emerald-50/40 rounded-3xl p-6 sm:p-12 border-2 border-emerald-200/80 shadow-2xl space-y-8 relative overflow-hidden">
           
           {/* Top light glow */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-100/50 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-50/50 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="text-center space-y-2 max-w-2xl mx-auto relative z-10">
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3.5 py-1 rounded-full border border-emerald-300">
+          <div className="text-center space-y-3 max-w-2xl mx-auto relative z-10">
+            <span className="text-xs font-black uppercase tracking-widest text-emerald-900 bg-emerald-100/90 px-4 py-1.5 rounded-full border border-emerald-300 shadow-2xs inline-block">
               TASARRUF & KAZANÇ HESAPLAYICI
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-[#172b2b]">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#172b2b] font-heading tracking-tight">
               Siteniz Ücretsiz Yazılımla Ne Kadar Kazanır?
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium">
               Diğer ücretli yönetim yazılımlarına her yıl on binlerce lira ödemek yerine, bütçenizi sitenizin yatırımlarına ayırın.
             </p>
           </div>
@@ -955,11 +960,11 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center pt-2 relative z-10">
             
             {/* Sliders Area */}
-            <div className="space-y-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+            <div className="space-y-6 bg-white/90 backdrop-blur-md p-6 sm:p-7 rounded-3xl border border-emerald-100 shadow-md">
               <div>
                 <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
-                  <span>Toplam Daire / Bağımsız Bölüm:</span>
-                  <strong className="text-base text-emerald-800 font-black">{calcUnits} Daire</strong>
+                  <span className="font-semibold text-slate-600">Toplam Daire / Bağımsız Bölüm:</span>
+                  <strong className="text-lg text-emerald-800 font-black font-heading">{calcUnits} Daire</strong>
                 </div>
                 <input
                   type="range"
@@ -968,9 +973,9 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                   step="2"
                   value={calcUnits}
                   onChange={(e) => setCalcUnits(Number(e.target.value))}
-                  className="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
+                  className="w-full accent-emerald-600 cursor-pointer h-2.5 bg-slate-200 rounded-lg"
                 />
-                <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-mono">
+                <div className="flex justify-between text-[11px] text-slate-400 mt-1.5 font-mono font-medium">
                   <span>6 Daire</span>
                   <span>100 Daire</span>
                   <span>250 Daire</span>
@@ -979,8 +984,8 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
 
               <div>
                 <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
-                  <span>Daire Başı Ortalama Aidat:</span>
-                  <strong className="text-base text-emerald-800 font-black">{formatCurrency(calcDues)} / Ay</strong>
+                  <span className="font-semibold text-slate-600">Daire Başı Ortalama Aidat:</span>
+                  <strong className="text-lg text-emerald-800 font-black font-heading">{formatCurrency(calcDues)} / Ay</strong>
                 </div>
                 <input
                   type="range"
@@ -989,46 +994,48 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                   step="100"
                   value={calcDues}
                   onChange={(e) => setCalcDues(Number(e.target.value))}
-                  className="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
+                  className="w-full accent-emerald-600 cursor-pointer h-2.5 bg-slate-200 rounded-lg"
                 />
-                <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-mono">
+                <div className="flex justify-between text-[11px] text-slate-400 mt-1.5 font-mono font-medium">
                   <span>₺500</span>
                   <span>₺5.000</span>
                   <span>₺10.000</span>
                 </div>
               </div>
 
-              <div className="pt-3 text-xs text-slate-600 border-t border-slate-100 flex items-center justify-between font-semibold">
+              <div className="pt-4 text-xs text-slate-600 border-t border-slate-100 flex items-center justify-between font-semibold">
                 <span>Aylık Toplam Aidat Hacminiz:</span>
-                <strong className="text-[#172b2b] text-sm">{formatCurrency(monthlyTotal)}</strong>
+                <strong className="text-[#172b2b] text-base font-black font-heading">{formatCurrency(monthlyTotal)}</strong>
               </div>
             </div>
 
             {/* Savings Result Card */}
-            <div className="bg-gradient-to-tr from-[#172b2b] via-[#213f3d] to-[#172b2b] text-white rounded-2xl p-7 space-y-4 shadow-xl text-center border border-[#2d5250]">
-              <span className="text-[10px] font-black uppercase tracking-wider bg-[#b8edb7] text-[#172b2b] px-3 py-1 rounded-full inline-block shadow-sm">
+            <div className="bg-gradient-to-br from-[#0e211f] via-[#173a36] to-[#0b1c1a] text-white rounded-3xl p-8 space-y-5 shadow-2xl text-center border border-[#275950] relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+              <span className="text-[10px] font-black uppercase tracking-wider bg-[#b8edb7] text-[#172b2b] px-3.5 py-1 rounded-full inline-block shadow-sm">
                 YILLIK NET YAZILIM TASARRUFUNUZ
               </span>
               
               <div>
-                <strong className="text-4xl sm:text-5xl font-black block tracking-tight text-white">
+                <strong className="text-4xl sm:text-5xl font-black block tracking-tight text-white font-heading">
                   {formatCurrency(competitorAnnualCost)}
                 </strong>
-                <span className="text-xs font-extrabold text-[#b8edb7] block mt-1">
+                <span className="text-xs font-black text-[#b8edb7] block mt-1.5">
                   5 Yılda Tam <strong>{formatCurrency(fiveYearSavings)}</strong> Kasada Kalır!
                 </span>
               </div>
 
-              <div className="bg-white/10 p-3 rounded-xl text-left text-xs space-y-1 font-medium text-slate-200">
+              <div className="bg-white/10 p-4 rounded-2xl text-left text-xs space-y-1.5 font-medium text-slate-200 border border-white/10">
                 <strong className="block text-[11px] font-black uppercase text-[#b8edb7]">💡 Bu Tasarrufla Sitenize Ne Yapabilirsiniz?</strong>
-                <p>• 1 Yıllık Tam Kapsamlı Asansör Revizyonu & Bakımı</p>
-                <p>• Ortak Alan LED Aydınlatma & Bahçe Peyzajı</p>
-                <p>• 8 Kameralı IP Güvenlik Sistemi Kurulumu</p>
+                <p className="flex items-center gap-1.5"><span className="text-[#b8edb7] font-bold">✓</span> 1 Yıllık Tam Kapsamlı Asansör Revizyonu & Bakımı</p>
+                <p className="flex items-center gap-1.5"><span className="text-[#b8edb7] font-bold">✓</span> Ortak Alan LED Aydınlatma & Bahçe Peyzajı</p>
+                <p className="flex items-center gap-1.5"><span className="text-[#b8edb7] font-bold">✓</span> 8 Kameralı IP Güvenlik Sistemi Kurulumu</p>
               </div>
 
               <button
                 onClick={onGoToApp}
-                className="w-full py-3.5 rounded-xl bg-[#b8edb7] hover:bg-[#a6e6a5] text-[#172b2b] text-xs font-black shadow-lg transition-all transform hover:scale-[1.02] cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#b8edb7] to-[#91e78f] hover:from-[#a7efa5] hover:to-[#7fe07d] text-[#172b2b] text-xs font-black shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 Bu Tasarrufu Sitenize Kazandırın →
               </button>
@@ -1039,17 +1046,17 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </section>
 
       {/* ======================= COMPREHENSIVE FEATURES GRID (LIGHT) ======================= */}
-      <section id="ozellikler" className="py-20 px-4 sm:px-8 lg:px-12 bg-[#f4f6f2] border-b border-[#e2e8e3] scroll-mt-20">
+      <section id="ozellikler" className="py-24 px-4 sm:px-8 lg:px-12 bg-[#f4f7f4] border-b border-[#e2eae3] scroll-mt-20">
         <div className="max-w-7xl mx-auto space-y-12">
           
           <div className="text-center space-y-3 max-w-3xl mx-auto">
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-4 py-1.5 rounded-full border border-emerald-300">
+            <span className="text-xs font-black uppercase tracking-widest text-emerald-900 bg-emerald-100/90 px-4 py-1.5 rounded-full border border-emerald-300 shadow-2xs inline-block">
               19 ENTEGRE PROFESYONEL MODÜL
             </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-[#172b2b] tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-black text-[#172b2b] tracking-tight font-heading">
               Eksiksiz Yönetim, Sıfır Maliyet.
             </h2>
-            <p className="text-sm text-slate-600 font-medium">
+            <p className="text-sm sm:text-base text-slate-600 font-medium">
               Profesyonel yönetim şirketlerinin kullandığı en gelişmiş özelliklerin tamamı parmaklarınızın ucunda.
             </p>
           </div>
@@ -1066,9 +1073,9 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id as any)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs ${
                   activeCategory === cat.id
-                    ? "bg-[#172b2b] text-white font-black shadow-sm"
+                    ? "bg-[#172b2b] text-white font-black shadow-md"
                     : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
                 }`}
               >
@@ -1084,30 +1091,30 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               return (
                 <div
                   key={idx}
-                  className="bg-white border border-[#e2e8e3] hover:border-emerald-500 rounded-3xl p-7 transition-all transform hover:-translate-y-1 shadow-xs hover:shadow-lg space-y-4 group relative overflow-hidden"
+                  className="bg-white border border-[#e2eae3] hover:border-emerald-400 rounded-3xl p-7 transition-all transform hover:-translate-y-1 shadow-xs hover:shadow-xl space-y-4 group relative overflow-hidden"
                 >
                   <div className="flex items-center justify-between">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 border ${f.accentBg}`}>
-                      <Icon size={24} className={f.iconColor} />
+                    <div className={`w-13 h-13 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 border ${f.accentBg} shadow-2xs`}>
+                      <Icon size={26} className={f.iconColor} />
                     </div>
                     <span className="text-[10px] font-black uppercase text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                       {f.badge}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-[#172b2b] group-hover:text-emerald-800 transition">
+                  <h3 className="text-lg font-bold text-[#172b2b] group-hover:text-emerald-800 transition font-heading">
                     {f.title}
                   </h3>
 
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
                     {f.desc}
                   </p>
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                    <span className="text-emerald-700 flex items-center gap-1">
-                      <CheckCircle2 size={13} /> {f.highlight}
+                    <span className="text-emerald-700 flex items-center gap-1.5 font-bold">
+                      <CheckCircle2 size={14} /> {f.highlight}
                     </span>
-                    <span className="text-emerald-800 opacity-0 group-hover:opacity-100 transition">Ücretsiz →</span>
+                    <span className="text-emerald-800 opacity-0 group-hover:opacity-100 transition font-extrabold">Ücretsiz →</span>
                   </div>
                 </div>
               );
@@ -1117,22 +1124,22 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </section>
 
       {/* ======================= DETAILED COMPARISON TABLE (LIGHT) ======================= */}
-      <section id="karsilastirma" className="py-20 px-4 sm:px-8 lg:px-12 bg-white border-b border-[#e2e8e3] scroll-mt-20">
+      <section id="karsilastirma" className="py-24 px-4 sm:px-8 lg:px-12 bg-white border-b border-[#e2eae3] scroll-mt-20">
         <div className="max-w-5xl mx-auto space-y-10">
           
-          <div className="text-center space-y-2">
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3.5 py-1 rounded-full border border-emerald-300">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-black uppercase tracking-widest text-emerald-900 bg-emerald-100/90 px-4 py-1.5 rounded-full border border-emerald-300 shadow-2xs inline-block">
               NET KARŞILAŞTIRMA
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#172b2b]">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#172b2b] font-heading tracking-tight">
               Klasik Ücretli Yazılımlar vs. Yönetim Merkezi
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium">
               Neden binlerce site yöneticisi Yönetim Merkezi'ne geçiş yapıyor?
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl border border-[#d6e0d8] overflow-hidden shadow-md">
+          <div className="bg-white rounded-3xl border border-[#d6e0d8] overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs min-w-[550px]">
                 <thead className="bg-[#172b2b] text-white font-bold uppercase text-[10px] tracking-wider">
@@ -1169,49 +1176,49 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </section>
 
       {/* ======================= 3-STEP EASY ONBOARDING (LIGHT) ======================= */}
-      <section className="py-20 px-4 sm:px-8 lg:px-12 bg-[#f4f6f2] border-b border-[#e2e8e3]">
+      <section className="py-24 px-4 sm:px-8 lg:px-12 bg-[#f4f7f4] border-b border-[#e2eae3]">
         <div className="max-w-5xl mx-auto space-y-12">
           
           <div className="text-center space-y-3 max-w-2xl mx-auto">
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-800">
+            <span className="text-xs font-black uppercase tracking-widest text-emerald-900 bg-emerald-100/90 px-4 py-1.5 rounded-full border border-emerald-300 shadow-2xs inline-block">
               KOLAY BAŞLANGIÇ
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#172b2b]">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#172b2b] font-heading tracking-tight">
               3 Kolay Adımda Sitenizi Yayına Alın
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium">
               Karmaşık eğitimler veya teknik personel gerekmez. 5 dakika içinde sisteminiz hazır.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <div className="bg-white border border-[#e2e8e3] rounded-3xl p-6 space-y-3 relative shadow-xs">
-              <div className="w-10 h-10 rounded-xl bg-[#172b2b] text-[#b8edb7] font-black text-lg flex items-center justify-center">
+            <div className="glass-card rounded-3xl p-7 space-y-3.5 relative shadow-xs hover:shadow-xl transition-all transform hover:-translate-y-1 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#172b2b] to-[#244240] text-[#b8edb7] font-black text-xl flex items-center justify-center shadow-md">
                 1
               </div>
-              <h3 className="text-base font-bold text-[#172b2b]">Sitenizi & Daireleri Ekleyin</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <h3 className="text-base font-bold text-[#172b2b] font-heading">Sitenizi & Daireleri Ekleyin</h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Sitenizin blok ve dairelerini manuel ekleyin veya mevcut Excel listenizi tek tıkla yükleyin.
               </p>
             </div>
 
-            <div className="bg-white border border-[#e2e8e3] rounded-3xl p-6 space-y-3 relative shadow-xs">
-              <div className="w-10 h-10 rounded-xl bg-[#172b2b] text-[#b8edb7] font-black text-lg flex items-center justify-center">
+            <div className="glass-card rounded-3xl p-7 space-y-3.5 relative shadow-xs hover:shadow-xl transition-all transform hover:-translate-y-1 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#172b2b] to-[#244240] text-[#b8edb7] font-black text-xl flex items-center justify-center shadow-md">
                 2
               </div>
-              <h3 className="text-base font-bold text-[#172b2b]">Aidat Tahakkuku Yapın</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <h3 className="text-base font-bold text-[#172b2b] font-heading">Aidat Tahakkuku Yapın</h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Aidat tutarınızı ve dağıtım tipini (m², arsa payı veya eşit) seçerek tek tıkla borçlandırın.
               </p>
             </div>
 
-            <div className="bg-white border border-[#e2e8e3] rounded-3xl p-6 space-y-3 relative shadow-xs">
-              <div className="w-10 h-10 rounded-xl bg-[#172b2b] text-[#b8edb7] font-black text-lg flex items-center justify-center">
+            <div className="glass-card rounded-3xl p-7 space-y-3.5 relative shadow-xs hover:shadow-xl transition-all transform hover:-translate-y-1 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#172b2b] to-[#244240] text-[#b8edb7] font-black text-xl flex items-center justify-center shadow-md">
                 3
               </div>
-              <h3 className="text-base font-bold text-[#172b2b]">Tahsil Edin & Makbuz Üretin</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <h3 className="text-base font-bold text-[#172b2b] font-heading">Tahsil Edin & Makbuz Üretin</h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 Nakit, havale veya kredi kartı tahsilatlarını işleyin; QR kodlu resmi makbuzları otomatik üretin.
               </p>
             </div>
@@ -1221,34 +1228,34 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </section>
 
       {/* ======================= FAQ ACCORDION SECTION (LIGHT) ======================= */}
-      <section id="sss" className="py-20 px-4 sm:px-8 lg:px-12 bg-white border-b border-[#e2e8e3] scroll-mt-20">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <section id="sss" className="py-24 px-4 sm:px-8 lg:px-12 bg-white border-b border-[#e2eae3] scroll-mt-20">
+        <div className="max-w-4xl mx-auto space-y-10">
           
-          <div className="text-center space-y-2">
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3.5 py-1 rounded-full border border-emerald-300">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-black uppercase tracking-widest text-emerald-900 bg-emerald-100/90 px-4 py-1.5 rounded-full border border-emerald-300 shadow-2xs inline-block">
               MERAK EDİLENLER
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#172b2b]">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#172b2b] font-heading tracking-tight">
               Sıkça Sorulan Sorular
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium">
               Aklınıza takılan tüm soruların şeffaf yanıtları.
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-[#f8faf8] rounded-2xl border border-[#e2e8e3] overflow-hidden transition-all"
+                className="bg-[#f8faf8] rounded-2xl border border-[#e2eae3] hover:border-emerald-300 overflow-hidden transition-all shadow-2xs"
               >
                 <button
                   onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
                   className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-[#172b2b] hover:text-emerald-800 transition cursor-pointer"
                 >
-                  <span className="flex items-center gap-2.5">
-                    <QuestionIcon size={16} className="text-emerald-700 flex-shrink-0" />
-                    {faq.q}
+                  <span className="flex items-center gap-3">
+                    <QuestionIcon size={17} className="text-emerald-700 flex-shrink-0" />
+                    <span>{faq.q}</span>
                   </span>
                   <ChevronRight
                     size={18}
@@ -1257,7 +1264,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                 </button>
 
                 {activeFaq === idx && (
-                  <div className="p-5 pt-0 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 animate-in fade-in duration-150">
+                  <div className="p-5 pt-0 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 animate-in fade-in duration-150 font-medium">
                     {faq.a}
                   </div>
                 )}
@@ -1268,26 +1275,26 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </section>
 
       {/* ======================= BOTTOM HIGH-IMPACT CTA BANNER (LIGHT/EMERALD LUXURY) ======================= */}
-      <section className="py-20 px-4 sm:px-8 lg:px-12 bg-gradient-to-b from-[#f4f6f2] to-white">
-        <div className="max-w-5xl mx-auto text-center space-y-7 bg-gradient-to-r from-[#172b2b] via-[#244643] to-[#172b2b] text-white rounded-3xl p-8 sm:p-16 border border-[#2e5250] shadow-2xl relative overflow-hidden">
+      <section className="py-24 px-4 sm:px-8 lg:px-12 bg-gradient-to-b from-[#f4f7f4] to-white relative overflow-hidden">
+        <div className="max-w-5xl mx-auto text-center space-y-7 bg-gradient-to-r from-[#172b2b] via-[#214340] to-[#122826] text-white rounded-3xl p-8 sm:p-16 border border-[#2d5551] shadow-2xl relative overflow-hidden glow-emerald">
           
           <div className="relative z-10 space-y-5">
             <span className="bg-[#b8edb7] text-[#172b2b] text-xs font-black uppercase px-4 py-1.5 rounded-full inline-block shadow-md">
               HİÇBİR MASRAF YOK · %100 ÜCRETSİZ
             </span>
             
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight max-w-3xl mx-auto leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight max-w-3xl mx-auto leading-tight font-heading">
               Sitenizi Bugün Geleceğin Yönetim Standardına Taşıyın.
             </h2>
             
             <p className="text-sm sm:text-base text-slate-200 max-w-2xl mx-auto font-medium">
-              Kredi kartı gerekmeden, saniyeler içinde ilk sitenizi oluşturun veya Süper Admin olarak tüm modülleri anında canlı test edin.
+              Kredi kartı gerekmeden, saniyeler içinde ilk sitenizi oluşturun veya tüm modülleri anında canlı test edin.
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={onGoToApp}
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-[#b8edb7] to-[#8ae588] hover:from-[#a4eda3] hover:to-[#73d771] text-[#172b2b] text-sm font-black shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-[#b8edb7] to-[#8ae588] hover:from-[#a4eda3] hover:to-[#73d771] text-[#172b2b] text-sm font-black shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2 font-heading"
               >
                 <Zap size={18} className="fill-[#172b2b]" />
                 <span>Ücretsiz Yönetim Paneline Geç</span>
@@ -1298,14 +1305,14 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                 href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20hakk%C4%B1nda%20bilgi%20ve%20kurulum%20deste%C4%9Fi%20almak%20istiyorum."
                 target="_blank"
                 rel="noreferrer"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-sm font-black shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-sm font-black shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer font-heading"
               >
                 <MessageCircle size={18} />
                 <span>WhatsApp'tan Danışın: 0532 055 09 45</span>
               </a>
             </div>
 
-            <div className="pt-2 text-xs text-[#b8edb7] font-semibold flex items-center justify-center gap-2">
+            <div className="pt-2 text-xs text-[#b8edb7] font-bold flex items-center justify-center gap-2">
               <ShieldCheck size={16} className="text-[#b8edb7]" />
               <span>Kat Mülkiyeti Kanunu (KMK) 20 & 37. Madde Uyum Garantisi</span>
             </div>
@@ -1314,16 +1321,16 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </section>
 
       {/* ======================= FOOTER (LIGHT) ======================= */}
-      <footer className="py-12 px-4 sm:px-8 lg:px-12 bg-white border-t border-[#e2e8e3] text-xs text-slate-500">
+      <footer className="py-12 px-4 sm:px-8 lg:px-12 bg-white border-t border-[#e2eae3] text-xs text-slate-500">
         <div className="max-w-7xl mx-auto space-y-8">
           
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-[#172b2b] text-[#b8edb7] flex items-center justify-center font-black text-xl">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#172b2b] to-[#254643] text-[#b8edb7] flex items-center justify-center font-black text-xl shadow-md">
                 Y
               </div>
               <div>
-                <strong className="text-[#172b2b] block text-sm font-black">Yönetim Merkezi</strong>
+                <strong className="text-[#172b2b] block text-base font-black font-heading">Yönetim Merkezi</strong>
                 <span className="text-[11px] text-slate-500 font-semibold">Kat Mülkiyeti Kanunu (KMK) Uyumlu %100 Ücretsiz SaaS Platformu</span>
               </div>
             </div>
