@@ -1,0 +1,63 @@
+# Yönetim Merkezi (www.yonetimmerkezi.com.tr) - Kapsamlı Sistem & Hukuki Dokümantasyonu
+
+> Yönetim Merkezi, 634 Sayılı Kat Mülkiyeti Kanunu (KMK) standartlarına %100 uyumlu, Türkiye'nin ilk ömür boyu tamamen ücretsiz apartman, site, plaza ve rezidans yönetim bulut platformudur.
+
+- **Resmi Web Sitesi:** https://www.yonetimmerkezi.com.tr
+- **Resmi İletişim & Destek:** 7/24 WhatsApp Canlı Destek (+90 532 055 09 45) | info@yonetimmerkezi.com.tr
+- **Hizmet Kapsamı:** Türkiye'nin 81 ilindeki tüm bağımsız bölümler, apartmanlar ve toplu yapılar.
+- **Fiyat Politikası:** Ömür boyu %100 Ücretsiz. Daire başı ücret, kurulum masrafı veya gizli maliyet yoktur.
+
+---
+
+## 1. Temel Hukuki Uyum ve Standartlar (634 Sayılı KMK)
+
+### KMK Madde 20: Ortak Gider Paylaşımı ve Aidat Tahakkuku
+- Yönetim Merkezi, kat maliklerinin ve kiracıların ortak gider paylarını kanunda öngörüldüğü şekilde eşit, bağımsız bölüm arsa payı veya brüt metrekare (m²) kriterlerine göre otomatik hesaplar.
+- Tek tıkla yüzlerce bağımsız bölüme toplu aidat ve demirbaş/ek bütçe tahakkuku gerçekleştirilir.
+
+### KMK Madde 20/c: Kanuni %5 Aylık Gecikme Tazminatı (Faiz) Motoru
+- Vadesinde ödenmeyen aidat ve ortak gider avansları için KMK 20/c bendi uyarınca aylık %5 gecikme tazminatı günlük esasta otomatik olarak hesaplanır.
+- Yöneticinin manuel faiz hesaplama ihtiyacını ortadan kaldırır ve olası icra/dava süreçlerinde mahkemece geçerli yasal hesap tablosu sunar.
+
+### KMK Madde 37: İşletme Projesi (Bütçe) ve Kesin Hesap
+- Yıllık tahmini işletme projesi oluşturulur.
+- Kat malikleri genel kuruluna sunulmak üzere gerçekleşen gelir-gider sapma raporları, kasa mutabakatları ve denetim kurulu raporları tek tıkla PDF olarak dökülür.
+
+### Çift Cari Mülkiyet Mimarisi
+- Her bağımsız bölüm için kat maliki ve kiracı carileri ayrı ayrı tutulur.
+- Kiracı tahliye olduğunda borç ve tahsilat geçmişi kiracı arşivinde güvenle saklanır, yeni kiracı sıfır bakiye ile başlatılır.
+
+---
+
+## 2. Dijital ve Finansal Yetenekler
+
+1. **QR Kodlu Resmi Tahsilat Makbuzu:**
+   - Nakit, havale/EFT veya kredi kartı ile yapılan her tahsilata benzersiz doğrulama QR kodu ve seri numarası atanır.
+   - Makbuzlar anında PDF olarak üretilebilir ve sakine WhatsApp/SMS/E-posta ile iletilebilir.
+
+2. **Sakin Mobil Portalı & 256-Bit SSL Sanal POS:**
+   - Kat sakinleri herhangi bir uygulama indirmeden web tarayıcısından portala erişebilir.
+   - Güncel ekstrelerini, geçmiş makbuzlarını inceleyebilir ve kredi/banka kartı ile güvenle aidat ödeyebilir.
+
+3. **Kasa & Banka Virman Yönetimi:**
+   - Nakit kasa, Garanti BBVA, Ziraat Bankası, İş Bankası vb. tüm banka hesapları tek ekranda izlenir.
+   - Hesaplar arası virman kayıtları çift taraflı muhasebe kaydıyla tutulur.
+
+4. **Sayaç Okuma ve Isı Pay Ölçer Paylaşımı:**
+   - Merkezi sistem doğalgaz, sıcak/soğuk su ve elektrik sayaç endeksleri sisteme girilerek bağımsız bölümlere kanuni formüllerle dağıtılır.
+
+5. **Silinemez Kriptografik Denetim İzi (Audit Log):**
+   - Sistemde yapılan tüm finansal, idari ve kullanıcı işlemleri zaman damgası, kullanıcı adı ve işlem detayı ile silinemez log defterine kaydedilir.
+
+---
+
+## 3. Site Sayfaları ve Dizin
+
+- **Ana Sayfa:** https://www.yonetimmerkezi.com.tr/
+- **Özellikler:** https://www.yonetimmerkezi.com.tr/ozellikler
+- **KMK Hukuki Rehber:** https://www.yonetimmerkezi.com.tr/kmk-mevzuat-rehberi
+- **Tasarruf Hesaplama:** https://www.yonetimmerkezi.com.tr/tasarruf-hesapla
+- **81 İl Hizmet Ağı:** https://www.yonetimmerkezi.com.tr/turkiye-geneli-hizmet
+- **Sıkça Sorulan Sorular:** https://www.yonetimmerkezi.com.tr/sss
+- **İletişim:** https://www.yonetimmerkezi.com.tr/iletisim
+- **Giriş Paneli:** https://www.yonetimmerkezi.com.tr/giris

@@ -1,42 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  <!-- Ana Sayfa (Landing & Canlı Kokpit Simülatörü) -->
   <url>
     <loc>https://www.yonetimmerkezi.com.tr/</loc>
-    <lastmod>2026-09-03</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.yonetimmerkezi.com.tr/og-image.svg</image:loc>
+      <image:title>Yönetim Merkezi · %100 Ücretsiz Apartman ve Site Yönetimi Bulut Platformu</image:title>
+      <image:caption>KMK 20 ve 37 uyumlu aidat tahakkuku, %5 yasal gecikme faizi, QR kodlu makbuz ve sakin portalı</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.yonetimmerkezi.com.tr/favicon.svg</image:loc>
+      <image:title>Yönetim Merkezi Logo</image:title>
+    </image:image>
   </url>
+
+  <!-- Kapsamlı Özellikler ve 20 Güçlü Modül -->
   <url>
-    <loc>https://www.yonetimmerkezi.com.tr/#ozellikler</loc>
-    <lastmod>2026-09-03</lastmod>
+    <loc>https://www.yonetimmerkezi.com.tr/ozellikler</loc>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://www.yonetimmerkezi.com.tr/og-image.svg</image:loc>
+      <image:title>Yönetim Merkezi Özellikleri ve Finansal Modülleri</image:title>
+      <image:caption>Aidat borçlandırma, QR makbuz, çift cari, sayaç paylaşımı ve kasa-banka virman yönetimi</image:caption>
+    </image:image>
+  </url>
+
+  <!-- 634 Sayılı Kat Mülkiyeti Kanunu (KMK) Hukuki Mevzuat Rehberi -->
+  <url>
+    <loc>https://www.yonetimmerkezi.com.tr/kmk-mevzuat-rehberi</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://www.yonetimmerkezi.com.tr/og-image.svg</image:loc>
+      <image:title>KMK Hukuki Mevzuat Rehberi · Madde 20, Madde 37 ve Yasal Faiz</image:title>
+      <image:caption>Kat Mülkiyeti Kanunu ortak gider paylaşımı, %5 yasal gecikme faizi ve işletme projesi rehberi</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Tasarruf Hesaplama & Rakip Karşılaştırma Simülatörü -->
+  <url>
+    <loc>https://www.yonetimmerkezi.com.tr/tasarruf-hesapla</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Türkiye Geneli 81 İl GEO Yerel Hizmet Ağı -->
   <url>
-    <loc>https://www.yonetimmerkezi.com.tr/#canli-kokpit</loc>
-    <lastmod>2026-09-03</lastmod>
+    <loc>https://www.yonetimmerkezi.com.tr/turkiye-geneli-hizmet</loc>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://www.yonetimmerkezi.com.tr/og-image.svg</image:loc>
+      <image:title>Türkiye Geneli 81 İl Apartman ve Site Yönetimi Ağı</image:title>
+      <image:caption>İstanbul, Ankara, İzmir, Bursa, Antalya ve 81 ilde apartman yönetimi desteği</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Sıkça Sorulan Sorular (S.S.S.) -->
+  <url>
+    <loc>https://www.yonetimmerkezi.com.tr/sss</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- İletişim, 7/24 Canlı WhatsApp ve Destek -->
   <url>
-    <loc>https://www.yonetimmerkezi.com.tr/#tasarruf</loc>
-    <lastmod>2026-09-03</lastmod>
+    <loc>https://www.yonetimmerkezi.com.tr/iletisim</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Kullanıcı ve Yönetici Giriş Sayfası -->
+  <url>
+    <loc>https://www.yonetimmerkezi.com.tr/giris</loc>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.yonetimmerkezi.com.tr/#karsilastirma</loc>
-    <lastmod>2026-09-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.yonetimmerkezi.com.tr/#sss</loc>
-    <lastmod>2026-09-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
 </urlset>

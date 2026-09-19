@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useLocation } from "wouter";
 import {
   Building2, Sparkles, ShieldCheck, CheckCircle2, ArrowRight,
   TrendingUp, ReceiptText, HandCoins, Users, CreditCard,
@@ -13,14 +14,21 @@ import {
 import { formatCurrency } from "@/utils/formatters";
 import { useAuth } from "@/contexts/AuthContext";
 import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
+import SeoHead from "@/components/SeoHead";
 
 interface LandingPageProps {
-  onGoToApp: () => void;
-  onOpenLogin: () => void;
+  onGoToApp?: () => void;
+  onOpenLogin?: () => void;
 }
 
 export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps) {
   const { isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleGoToApp = onGoToApp || (() => setLocation("/app"));
+  const handleOpenLogin = onOpenLogin || (() => setLocation("/giris"));
 
   // Interactive Live Cockpit Tab State
   const [activeTab, setActiveTab] = useState<"dashboard" | "dues" | "aging" | "portal" | "budget">("dashboard");
@@ -250,7 +258,13 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
 
   return (
     <div className="min-h-screen bg-[#f8faf8] text-[#172b2b] font-sans selection:bg-[#b8edb7] selection:text-[#172b2b] antialiased overflow-x-hidden">
-      
+      <SeoHead
+        title="Apartman ve Site Yönetimi · %100 Ücretsiz Bulut Platformu"
+        description="Türkiye'nin %100 ücretsiz, Kat Mülkiyeti Kanunu (KMK) tam uyumlu apartman ve site yönetim platformu. Toplu aidat tahakkuku, yasal %5 gecikme faizi, QR makbuz ve sakin portalı."
+        canonicalPath="/"
+        keywords="apartman yönetimi, site yönetim programı, ücretsiz apartman yönetimi, bina yönetim yazılımı, aidat takip programı, yönetim merkezi, kmk gecikme faizi, online aidat ödeme, kat mülkiyeti kanunu"
+      />
+
       {/* ======================= BACKGROUND LIGHT MESH EFFECTS ======================= */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-emerald-100/60 via-teal-50/40 to-transparent rounded-full blur-3xl" />
@@ -261,88 +275,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </div>
 
       {/* ======================= TOP NAVIGATION (LIGHT GLASS) ======================= */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[#e4eae3] px-4 sm:px-8 lg:px-12 py-3.5 transition-all shadow-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          
-          {/* Brand Logo */}
-          <div className="flex items-center gap-3.5">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#172b2b] to-[#284947] text-[#b8edb7] flex items-center justify-center font-black text-2xl shadow-md transform -rotate-3 transition hover:rotate-0">
-                Y
-              </div>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-white animate-pulse" />
-            </div>
-            
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-black tracking-tight text-[#172b2b] flex items-center gap-1">
-                  Yönetim<span className="text-emerald-700">Merkezi</span>
-                </span>
-                <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider shadow-2xs">
-                  %100 ÜCRETSİZ
-                </span>
-              </div>
-              <p className="text-[10px] text-[#5e7773] font-bold tracking-wide">
-                Bulut Tabanlı Apartman & Site Platformu
-              </p>
-            </div>
-          </div>
-
-          {/* Center Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs font-bold text-[#445b57]">
-            <a href="#ozellikler" className="hover:text-emerald-700 transition-colors py-1">Özellikler</a>
-            <a href="#canli-kokpit" className="hover:text-emerald-700 transition-colors py-1 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-              Canlı Önizleme
-            </a>
-            <a href="#tasarruf" className="hover:text-emerald-700 transition-colors py-1 text-emerald-800 font-extrabold">Tasarruf Hesapla</a>
-            <a href="#neden-ucretsiz" className="hover:text-emerald-700 transition-colors py-1">Neden Ücretsiz?</a>
-            <a href="#karsilastirma" className="hover:text-emerald-700 transition-colors py-1">Karşılaştırma</a>
-            <a href="#sss" className="hover:text-emerald-700 transition-colors py-1">S.S.S.</a>
-          </nav>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* WhatsApp Quick Line */}
-            <a
-              href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20hakk%C4%B1nda%20bilgi%20ve%20destek%20almak%20istiyorum."
-              target="_blank"
-              rel="noreferrer"
-              className="hidden md:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border border-emerald-200 text-xs font-bold transition shadow-2xs cursor-pointer group"
-              title="7/24 WhatsApp Destek & Kurulum Hattı"
-            >
-              <MessageCircle size={15} className="text-[#25D366] group-hover:scale-110 transition-transform" />
-              <span className="font-mono text-[11px] font-extrabold">0532 055 09 45</span>
-            </a>
-
-            {isAuthenticated ? (
-              <button
-                onClick={onGoToApp}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#172b2b] hover:bg-[#254643] text-white text-xs font-black shadow-md transition transform hover:scale-105 active:scale-95 cursor-pointer"
-              >
-                <LayoutDashboard size={15} className="text-[#b8edb7]" /> Yönetim Paneline Geç <ArrowRight size={15} />
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={onOpenLogin}
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-[#2d4744] hover:text-[#172b2b] hover:bg-slate-100 transition cursor-pointer border border-[#d6e0d8]"
-                >
-                  <LogIn size={14} /> Giriş Yap
-                </button>
-                <button
-                  onClick={onGoToApp}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#172b2b] via-[#213f3d] to-[#172b2b] hover:from-[#213f3d] hover:to-[#2e5754] text-white text-xs font-black shadow-md transition transform hover:scale-105 active:scale-95 cursor-pointer"
-                >
-                  <Zap size={14} className="fill-[#b8edb7] text-[#b8edb7]" />
-                  <span>Ücretsiz Başla</span>
-                  <ArrowRight size={14} />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <PublicNavbar />
 
       {/* ======================= HERO SECTION (LIGHT LUXURY) ======================= */}
       <section className="relative pt-12 sm:pt-20 pb-16 sm:pb-24 px-4 sm:px-8 lg:px-12 z-10">
@@ -1321,66 +1254,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
       </section>
 
       {/* ======================= FOOTER (LIGHT) ======================= */}
-      <footer className="py-12 px-4 sm:px-8 lg:px-12 bg-white border-t border-[#e2eae3] text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto space-y-8">
-          
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#172b2b] to-[#254643] text-[#b8edb7] flex items-center justify-center font-black text-xl shadow-md">
-                Y
-              </div>
-              <div>
-                <strong className="text-[#172b2b] block text-base font-black font-heading">Yönetim Merkezi</strong>
-                <span className="text-[11px] text-slate-500 font-semibold">Kat Mülkiyeti Kanunu (KMK) Uyumlu %100 Ücretsiz SaaS Platformu</span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-6 text-slate-700 font-bold">
-              <a href="#ozellikler" className="hover:text-emerald-700 transition">Özellikler</a>
-              <a href="#canli-kokpit" className="hover:text-emerald-700 transition">Canlı Önizleme</a>
-              <a href="#tasarruf" className="hover:text-emerald-700 transition">Tasarruf Hesapla</a>
-              <a href="#karsilastirma" className="hover:text-emerald-700 transition">Karşılaştırma</a>
-              <a href="#sss" className="hover:text-emerald-700 transition">S.S.S.</a>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-            <div className="flex flex-wrap items-center gap-4">
-              <span>© 2026 Yönetim Merkezi. Tüm Hakları Saklıdır.</span>
-              <span>·</span>
-              <span className="text-emerald-700 font-bold">Ömür Boyu %100 Ücretsiz</span>
-              <span>·</span>
-              <a
-                href="https://www.yonetimmerkezi.com.tr"
-                className="hover:text-emerald-700 transition flex items-center gap-1 font-semibold"
-              >
-                <Globe size={13} className="text-emerald-600" />
-                <span>www.yonetimmerkezi.com.tr</span>
-              </a>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-5 font-semibold">
-              <a
-                href="mailto:info@yonetimmerkezi.com.tr"
-                className="text-slate-700 hover:text-emerald-700 flex items-center gap-1.5 transition font-bold"
-              >
-                <Mail size={14} className="text-emerald-600" />
-                <span>info@yonetimmerkezi.com.tr</span>
-              </a>
-              <a
-                href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20destek%20talebi."
-                target="_blank"
-                rel="noreferrer"
-                className="text-emerald-700 hover:underline flex items-center gap-1.5 font-bold"
-              >
-                <MessageCircle size={14} className="text-[#25D366]" />
-                <span>WhatsApp: 0532 055 09 45</span>
-              </a>
-            </div>
-          </div>
-
-        </div>
-      </footer>
+      <PublicFooter />
 
       {/* FLOATING WHATSAPP BUTTON (7/24 SUPPORT) */}
       <WhatsAppFloatingButton phoneNumber="905320550945" />

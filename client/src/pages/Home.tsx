@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "wouter";
 import {
   LayoutDashboard, Building2, Users, Receipt, HandCoins,
   ShieldAlert, ArrowUpRight, Landmark, Handshake, PieChart,
@@ -42,7 +43,11 @@ import CommandPalette from "@/components/CommandPalette";
 import ApartmentVerificationModal from "@/components/ApartmentVerificationModal";
 import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
 
-export default function Home() {
+interface HomeProps {
+  initialShowLanding?: boolean;
+}
+
+export default function Home({ initialShowLanding = false }: HomeProps) {
   const {
     sites, activeSite, activeSiteId, setActiveSiteId,
     activeSiteUnits, activeSiteCollections, activeSiteExpenses,
@@ -56,7 +61,7 @@ export default function Home() {
   } = useAuth();
 
   const [activeModule, setActiveModule] = useState<AppModule>("DASHBOARD");
-  const [showLandingPage, setShowLandingPage] = useState(true);
+  const [showLandingPage, setShowLandingPage] = useState(initialShowLanding);
   const [isSiteDropdownOpen, setIsSiteDropdownOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -400,13 +405,13 @@ export default function Home() {
             </button>
 
             {/* Tanıtım Sitesi Butonu */}
-            <button
-              onClick={() => setShowLandingPage(true)}
+            <Link
+              href="/"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50/80 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold transition shadow-2xs cursor-pointer"
             >
               <Globe size={14} className="text-emerald-600" />
               <span className="hidden sm:inline">Tanıtım Sitesi</span>
-            </button>
+            </Link>
 
             {/* Quick Search Button (Command Palette) */}
             <button
