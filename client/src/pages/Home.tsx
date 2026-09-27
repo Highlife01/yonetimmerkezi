@@ -4,15 +4,12 @@ import {
   LayoutDashboard, Building2, Users, Receipt, HandCoins,
   ShieldAlert, ArrowUpRight, Landmark, Handshake, PieChart,
   FileText, LifeBuoy, Bell, Wrench, UserCheck, ShieldCheck,
-  Gauge, Vote, Settings, ChevronDown, Check, LogOut, LogIn,
-  Search, Plus, Sparkles, User, HelpCircle, Layers, CheckCircle2,
-  CalendarDays, Wallet, CreditCard, ArrowRightLeft, Eye, RefreshCcw,
-  Globe
+  Gauge, Vote, Settings, ChevronDown, Check, LogOut,
+  Search, Plus, Sparkles, Eye,
 } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppModule, UserRole } from "@/types";
-import { formatCurrency } from "@/utils/formatters";
 import { toast } from "sonner";
 import LoginModal from "@/components/LoginModal";
 import LoginPage from "./LoginPage";
@@ -50,8 +47,7 @@ interface HomeProps {
 export default function Home({ initialShowLanding = false }: HomeProps) {
   const {
     sites, activeSite, activeSiteId, setActiveSiteId,
-    activeSiteUnits, activeSiteCollections, activeSiteExpenses,
-    activeSiteRequests
+    activeSiteUnits, activeSiteRequests
   } = useApp();
 
   const {
@@ -63,7 +59,7 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
   const [activeModule, setActiveModule] = useState<AppModule>("DASHBOARD");
   const [showLandingPage, setShowLandingPage] = useState(initialShowLanding);
   const [isSiteDropdownOpen, setIsSiteDropdownOpen] = useState(false);
-  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
@@ -95,54 +91,56 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
     setActiveModule(module);
   };
 
-  // Nav categories
+  // Simplified nav: short labels, flat grouping
   const navCategories = [
     {
-      title: "GENEL BAKIŞ",
+      title: "Genel",
       items: [
-        { id: "DASHBOARD" as AppModule, label: "Yönetici Kokpiti", icon: LayoutDashboard },
-        { id: "RESIDENT_PORTAL" as AppModule, label: "Sakin Portalı", icon: Sparkles, badge: "Sakin Görünümü" },
+        { id: "DASHBOARD" as AppModule, label: "Kokpit", icon: LayoutDashboard },
+        { id: "RESIDENT_PORTAL" as AppModule, label: "Sakin Portalı", icon: Sparkles },
       ]
     },
     {
-      title: "MÜLK & SAKİN YÖNETİMİ",
+      title: "Mülk & Sakin",
       items: [
-        { id: "UNITS" as AppModule, label: "Bağımsız Bölümler (Daireler)", icon: Building2 },
-        { id: "RESIDENTS" as AppModule, label: "Kat Malikleri & Kiracılar", icon: Users },
+        { id: "UNITS" as AppModule, label: "Daireler", icon: Building2 },
+        { id: "RESIDENTS" as AppModule, label: "Sakinler", icon: Users },
       ]
     },
     {
-      title: "FİNANS & MUHASEBE",
+      title: "Finans",
       items: [
         { id: "DUES_TAHAKKUK" as AppModule, label: "Aidat & Borçlandırma", icon: Receipt },
-        { id: "COLLECTIONS" as AppModule, label: "Tahsilat & Makbuzlar", icon: HandCoins },
-        { id: "DEBTORS_AGING" as AppModule, label: "Borçlu Takibi & Yaşlandırma", icon: ShieldAlert, alertCount: activeSiteUnits.filter(u => u.currentBalance > 0).length },
-        { id: "INCOME_EXPENSE" as AppModule, label: "Gelir - Gider & Faturalar", icon: ArrowUpRight },
-        { id: "CASH_BANK" as AppModule, label: "Kasa & Banka (Virman)", icon: Landmark },
-        { id: "VENDORS" as AppModule, label: "Tedarikçi Carileri", icon: Handshake },
-        { id: "BUDGET" as AppModule, label: "İşletme Projesi (Bütçe)", icon: PieChart },
-        { id: "REPORTS" as AppModule, label: "Raporlar & Mali Dökümler", icon: FileText },
+        { id: "COLLECTIONS" as AppModule, label: "Tahsilat & Makbuz", icon: HandCoins },
+        { id: "DEBTORS_AGING" as AppModule, label: "Borçlu Takibi", icon: ShieldAlert, alertCount: activeSiteUnits.filter(u => u.currentBalance > 0).length },
+        { id: "INCOME_EXPENSE" as AppModule, label: "Gelir - Gider", icon: ArrowUpRight },
+        { id: "CASH_BANK" as AppModule, label: "Kasa & Banka", icon: Landmark },
+        { id: "VENDORS" as AppModule, label: "Tedarikçiler", icon: Handshake },
+        { id: "BUDGET" as AppModule, label: "Bütçe", icon: PieChart },
+        { id: "REPORTS" as AppModule, label: "Raporlar", icon: FileText },
       ]
     },
     {
-      title: "OPERASYON & TESİS",
+      title: "Operasyon",
       items: [
-        { id: "REQUESTS" as AppModule, label: "Arıza & Servis Talepleri", icon: LifeBuoy, alertCount: activeSiteRequests.filter(r => r.status !== "TAMAMLANDI").length },
-        { id: "ANNOUNCEMENTS" as AppModule, label: "Duyurular & Bildirimler", icon: Bell },
-        { id: "MAINTENANCE" as AppModule, label: "Teknik Bakım & Demirbaş", icon: Wrench },
-        { id: "STAFF" as AppModule, label: "Personel & Vardiyalar", icon: UserCheck },
-        { id: "SECURITY" as AppModule, label: "Güvenlik, Ziyaretçi & Kargo", icon: ShieldCheck },
-        { id: "METERS" as AppModule, label: "Sayaç Okuma & Paylaşım", icon: Gauge },
-        { id: "MEETINGS_POLLS" as AppModule, label: "Genel Kurul, Anket & Belge", icon: Vote },
+        { id: "REQUESTS" as AppModule, label: "Arıza Talepleri", icon: LifeBuoy, alertCount: activeSiteRequests.filter(r => r.status !== "TAMAMLANDI").length },
+        { id: "ANNOUNCEMENTS" as AppModule, label: "Duyurular", icon: Bell },
+        { id: "MAINTENANCE" as AppModule, label: "Bakım & Demirbaş", icon: Wrench },
+        { id: "STAFF" as AppModule, label: "Personel", icon: UserCheck },
+        { id: "SECURITY" as AppModule, label: "Güvenlik", icon: ShieldCheck },
+        { id: "METERS" as AppModule, label: "Sayaçlar", icon: Gauge },
+        { id: "MEETINGS_POLLS" as AppModule, label: "Genel Kurul & Anket", icon: Vote },
       ]
     },
     {
-      title: "SİSTEM",
+      title: "Sistem",
       items: [
-        { id: "AUDIT_SETTINGS" as AppModule, label: "Rol Matrisi & Denetim İzi", icon: Settings },
+        { id: "AUDIT_SETTINGS" as AppModule, label: "Ayarlar & Denetim", icon: Settings },
       ]
     }
   ];
+
+  const activeModuleLabel = navCategories.flatMap(c => c.items).find(i => i.id === activeModule)?.label || "Modül";
 
   // If showing promotional landing website
   if (showLandingPage) {
@@ -176,318 +174,223 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
   }
 
   return (
-    <div className="flex h-screen bg-[#f3f6f3] font-sans antialiased text-[#172b2b] overflow-hidden select-none">
-      {/* ===================== SIDEBAR ===================== */}
-      <aside className="w-70 bg-gradient-to-b from-[#071413] via-[#0c201e] to-[#061110] text-white flex flex-col justify-between flex-shrink-0 z-20 border-r border-[#163632]/80 shadow-2xl">
-        {/* Top Logo & Active Site Switcher */}
-        <div>
-          <div className="p-4 border-b border-[#163632]/80">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 text-[#071413] flex items-center justify-center font-black text-xl shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400/30 transform -rotate-3 transition hover:rotate-0">
-                Y
-              </div>
-              <div className="leading-tight">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base font-black tracking-tight text-white block font-heading">
-                    Yönetim<span className="text-emerald-300">Merkezi</span>
-                  </span>
-                  <span className="bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full font-mono">
-                    ÜCRETSİZ
-                  </span>
-                </div>
-                <span className="text-[10px] text-emerald-400/80 font-bold tracking-wider uppercase">
-                  SaaS Apartman Platformu
-                </span>
-              </div>
+    <div className="flex h-screen bg-[#f6f8f6] font-sans antialiased text-[#172b2b] overflow-hidden select-none">
+      {/* ===================== SIDEBAR (Sade) ===================== */}
+      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20">
+        {/* Logo & Site Switcher */}
+        <div className="p-4 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-lg">
+              Y
             </div>
-
-            {/* Site Switcher Dropdown */}
-            <div className="relative mt-4">
-              <button
-                onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#112926]/90 hover:bg-[#163531] text-white transition text-xs font-semibold text-left border border-[#1d4641] shadow-inner cursor-pointer group"
-              >
-                <div className="truncate pr-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-[9px] uppercase tracking-wider text-emerald-300/80 font-black">AKTİF SİTE</span>
-                  </div>
-                  <span className="truncate block font-bold text-xs text-white group-hover:text-emerald-200 transition-colors">{activeSite.name}</span>
-                </div>
-                <ChevronDown size={14} className="text-emerald-400/80 flex-shrink-0 group-hover:translate-y-0.5 transition-transform" />
-              </button>
-
-              {isSiteDropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-30"
-                    onClick={() => setIsSiteDropdownOpen(false)}
-                  />
-                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#0e2422] border border-[#1e4843] rounded-2xl p-1.5 shadow-2xl z-40 space-y-1 backdrop-blur-xl">
-                    <span className="text-[9px] font-black text-emerald-400/80 uppercase px-2.5 py-1 block tracking-wider">
-                      YÖNETİM ŞİRKETİ PORTFÖYÜ ({sites.length} SİTE)
-                    </span>
-                    {sites.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => {
-                          setActiveSiteId(s.id);
-                          setIsSiteDropdownOpen(false);
-                          toast.success(`Aktif site değiştirildi: ${s.name}`);
-                        }}
-                        className={`w-full text-left p-2.5 rounded-xl text-xs font-medium transition flex items-center justify-between cursor-pointer ${
-                          s.id === activeSiteId
-                            ? "bg-gradient-to-r from-[#b8edb7] to-[#a0e59f] text-[#071413] font-black shadow-md shadow-emerald-500/20"
-                            : "text-slate-200 hover:bg-white/8 hover:text-white"
-                        }`}
-                      >
-                        <div className="truncate">
-                          <strong className="block truncate">{s.name}</strong>
-                          <span className="text-[10px] opacity-75">{s.totalUnits} Daire · {s.city}</span>
-                        </div>
-                        {s.id === activeSiteId && <Check size={14} className="flex-shrink-0 font-black" />}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+            <div className="leading-tight">
+              <span className="text-sm font-black tracking-tight text-[#172b2b] block font-heading">
+                Yönetim<span className="text-emerald-600">Merkezi</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold">
+                Apartman & Site Yönetimi
+              </span>
             </div>
           </div>
 
-          {/* Navigation Items */}
-          <nav className="p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-230px)] scrollbar-thin">
-            {navCategories.map((cat, idx) => (
-              <div key={idx} className="space-y-1">
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#4e7d76] px-3 block">
-                  {cat.title}
-                </span>
-
-                {cat.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeModule === item.id;
-                  const hasAccess = canAccessModule(item.id);
-
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleNavigate(item.id)}
-                      disabled={!hasAccess}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                        isActive
-                          ? "bg-gradient-to-r from-[#b8edb7] via-[#a8e8a7] to-[#91df90] text-[#071715] font-black shadow-md shadow-emerald-500/25 ring-1 ring-white/20"
-                          : hasAccess
-                          ? "text-slate-300 hover:bg-white/7 hover:text-white"
-                          : "text-slate-500 opacity-40 cursor-not-allowed"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 truncate">
-                        <Icon size={16} className={isActive ? "text-[#071715]" : "text-emerald-400/70"} />
-                        <span className="truncate">{item.label}</span>
-                      </div>
-
-                      {(item as any).alertCount !== undefined && (item as any).alertCount > 0 && (
-                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-rose-500 text-white shadow-sm">
-                          {(item as any).alertCount}
-                        </span>
-                      )}
-
-                      {(item as any).badge && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#13302c] text-emerald-300 border border-[#1e4b45]">
-                          {(item as any).badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+          {/* Site Switcher */}
+          <div className="relative mt-3">
+            <button
+              onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
+              className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-left transition text-xs font-semibold cursor-pointer border border-slate-200"
+            >
+              <div className="truncate pr-2">
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Aktif Site</span>
+                <span className="truncate block font-bold text-xs text-[#172b2b]">{activeSite.name}</span>
               </div>
-            ))}
-          </nav>
+              <ChevronDown size={14} className="text-slate-400 flex-shrink-0" />
+            </button>
+
+            {isSiteDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setIsSiteDropdownOpen(false)} />
+                <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl p-1.5 shadow-lg z-40 space-y-0.5">
+                  {sites.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => {
+                        setActiveSiteId(s.id);
+                        setIsSiteDropdownOpen(false);
+                        toast.success(`Aktif site değiştirildi: ${s.name}`);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-lg text-xs font-medium transition flex items-center justify-between cursor-pointer ${s.id === activeSiteId
+                        ? "bg-emerald-50 text-emerald-900 font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
+                        }`}
+                    >
+                      <div className="truncate">
+                        <strong className="block truncate">{s.name}</strong>
+                        <span className="text-[10px] opacity-75">{s.totalUnits} Daire · {s.city}</span>
+                      </div>
+                      {s.id === activeSiteId && <Check size={14} className="flex-shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Sidebar Footer with Active Role Indicator */}
-        <div className="p-3.5 border-t border-[#163632]/80 bg-[#050f0e]/95 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2.5 truncate">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-400 text-[#071413] font-black flex items-center justify-center text-xs flex-shrink-0 shadow-sm shadow-emerald-500/25">
+        {/* Navigation */}
+        <nav className="flex-1 p-3 space-y-3 overflow-y-auto scrollbar-thin">
+          {navCategories.map((cat, idx) => (
+            <div key={idx} className="space-y-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 block mb-1">
+                {cat.title}
+              </span>
+
+              {cat.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeModule === item.id;
+                const hasAccess = canAccessModule(item.id);
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleNavigate(item.id)}
+                    disabled={!hasAccess}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[13px] transition cursor-pointer ${isActive
+                      ? "bg-emerald-600 text-white font-bold"
+                      : hasAccess
+                        ? "text-slate-600 hover:bg-slate-100 hover:text-[#172b2b]"
+                        : "text-slate-300 cursor-not-allowed"
+                      }`}
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <Icon size={16} className={isActive ? "text-white" : "text-slate-400"} />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+
+                    {(item as any).alertCount !== undefined && (item as any).alertCount > 0 && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500 text-white">
+                        {(item as any).alertCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-3 border-t border-slate-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
                 {currentUser.name.split(" ").map(n => n[0]).join("")}
               </div>
               <div className="truncate leading-tight">
-                <strong className="block text-white text-xs truncate font-bold">{currentUser.name}</strong>
-                <span className="text-[10px] text-emerald-400/90 font-semibold block truncate">
+                <strong className="block text-[#172b2b] text-xs truncate font-bold">{currentUser.name}</strong>
+                <span className="text-[10px] text-slate-400 font-semibold block truncate">
                   {roleDef.name}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  setActiveModule("RESIDENT_PORTAL");
-                  toast.info("Sakin portalı görünümüne geçildi.");
-                }}
-                title="Sakin Portalı Olarak Gör"
-                className="p-1.5 rounded-lg bg-[#142f2c] hover:bg-[#1a3c39] text-emerald-300 transition cursor-pointer border border-[#214944]"
-              >
-                <Eye size={14} />
-              </button>
-
-              <button
-                onClick={async () => {
-                  await logout();
-                  setShowLandingPage(true);
-                  toast.success("Oturum güvenli bir şekilde kapatıldı.");
-                }}
-                title="Güvenli Çıkış Yap"
-                className="p-1.5 rounded-lg bg-[#142f2c] hover:bg-rose-950/80 text-rose-300 hover:text-white transition cursor-pointer border border-[#214944]"
-              >
-                <LogOut size={14} />
-              </button>
-            </div>
+            <button
+              onClick={async () => {
+                await logout();
+                setShowLandingPage(true);
+                toast.success("Oturum güvenli bir şekilde kapatıldı.");
+              }}
+              title="Çıkış Yap"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer flex-shrink-0"
+            >
+              <LogOut size={15} />
+            </button>
           </div>
         </div>
       </aside>
 
-      {/* ===================== MAIN CONTENT WRAPPER ===================== */}
+      {/* ===================== MAIN CONTENT ===================== */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* TOPBAR */}
-        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 px-6 flex items-center justify-between flex-shrink-0 z-10 shadow-xs">
-          {/* Breadcrumb / Slogans */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-              <span className="font-extrabold text-[#0e211f] font-heading">{activeSite.name}</span>
-              {activeSite.isVerified ? (
-                <button
-                  type="button"
-                  onClick={() => setIsVerificationModalOpen(true)}
-                  title="Resmi KMK Doğrulaması Yapılmıştır. Bilgileri görüntülemek/güncellemek için tıklayın."
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold cursor-pointer hover:bg-emerald-100 transition shadow-2xs"
-                >
-                  <ShieldCheck size={13} className="text-emerald-600" />
-                  <span>Doğrulanmış Apartman</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsVerificationModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300 text-[10px] font-extrabold cursor-pointer hover:bg-amber-100 transition animate-pulse shadow-2xs"
-                >
-                  <ShieldAlert size={13} className="text-amber-600" />
-                  <span>Apartmanı Doğrula</span>
-                </button>
-              )}
-              <span className="text-slate-300">/</span>
-              <span className="text-emerald-900 font-extrabold bg-emerald-50/80 px-2.5 py-0.5 rounded-lg border border-emerald-200/60">
-                {navCategories.flatMap(c => c.items).find(i => i.id === activeModule)?.label || "Modül"}
-              </span>
-            </div>
-
-            {/* Slogans badge */}
-            <div className="hidden xl:flex items-center gap-2 text-[11px] text-slate-600 bg-slate-50/90 px-3.5 py-1 rounded-full border border-slate-200/80 shadow-2xs">
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
-                %100 ÜCRETSİZ
-              </span>
-              <Sparkles size={13} className="text-emerald-600" />
-              <span className="font-medium">Aidattan Yönetime, Her Şey Tek Yerde.</span>
-              <span className="text-slate-300">·</span>
-              <span className="font-bold text-emerald-800">Siteniz Kontrol Altında</span>
-            </div>
+        {/* TOPBAR (Sade) */}
+        <header className="h-14 bg-white border-b border-slate-200 px-5 flex items-center justify-between flex-shrink-0 z-10">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 min-w-0">
+            <span className="font-bold text-[#172b2b] truncate">{activeSite.name}</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-emerald-700 font-bold truncate">{activeModuleLabel}</span>
+            {activeSite.isVerified ? (
+              <button
+                type="button"
+                onClick={() => setIsVerificationModalOpen(true)}
+                title="Apartman bilgilerini görüntüle"
+                className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold cursor-pointer hover:bg-emerald-100 transition"
+              >
+                <ShieldCheck size={12} />
+                Doğrulanmış
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsVerificationModalOpen(true)}
+                title="Apartmanı doğrula"
+                className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 text-[10px] font-bold cursor-pointer hover:bg-amber-100 transition"
+              >
+                <ShieldAlert size={12} />
+                Doğrula
+              </button>
+            )}
           </div>
 
-          {/* Quick Actions, Search, Login & Role Switcher */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Apartman Doğrula Butonu */}
-            <button
-              onClick={() => setIsVerificationModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold transition shadow-2xs cursor-pointer"
-            >
-              <ShieldCheck size={14} className="text-emerald-600" />
-              <span className="hidden md:inline">Apartman Doğrulama</span>
-            </button>
-
-            {/* Tanıtım Sitesi Butonu */}
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50/80 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold transition shadow-2xs cursor-pointer"
-            >
-              <Globe size={14} className="text-emerald-600" />
-              <span className="hidden sm:inline">Tanıtım Sitesi</span>
-            </Link>
-
-            {/* Quick Search Button (Command Palette) */}
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            {/* Search */}
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-600 transition shadow-2xs cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-600 transition cursor-pointer"
             >
-              <Search size={14} className="text-emerald-600" />
-              <span>Hızlı Arama</span>
-              <kbd className="text-[10px] font-mono bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-400">Ctrl+K</kbd>
+              <Search size={14} />
+              <span className="hidden sm:inline">Ara</span>
+              <kbd className="hidden md:inline text-[10px] font-mono bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-400">Ctrl+K</kbd>
             </button>
 
-            {/* Quick module action button */}
+            {/* Quick action on dashboard */}
             {activeModule === "DASHBOARD" && (
               <button
                 onClick={() => {
                   setActiveModule("DUES_TAHAKKUK");
                   setOpenModalSignal(true);
                 }}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:from-emerald-500 hover:to-teal-500 transition shadow-sm shadow-emerald-600/20 cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition cursor-pointer"
               >
-                <Plus size={14} /> Toplu Borçlandır
+                <Plus size={14} /> Borçlandır
               </button>
             )}
 
-            {/* Google / E-Posta Giriş Butonu */}
-            <button
-              onClick={() => setIsLoginModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-800 text-xs font-bold transition shadow-2xs cursor-pointer"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                />
-              </svg>
-              Giriş / Hesap
-            </button>
-
-            {/* Notification Bell */}
+            {/* Notifications */}
             <div className="relative">
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 transition relative"
+                className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 transition relative border border-slate-200"
               >
-                <Bell size={16} />
+                <Bell size={15} />
                 <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-1.5 right-1.5 ring-2 ring-white" />
               </button>
 
               {isNotificationsOpen && (
                 <>
                   <div className="fixed inset-0 z-30" onClick={() => setIsNotificationsOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-[#e4eae3] p-4 z-40 space-y-3">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#f0f4f1]">
-                      <h4 className="text-xs font-bold text-[#172b2b]">Sistem Bildirimleri</h4>
-                      <span className="text-[10px] text-slate-400">Canlı Akış</span>
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-200 p-4 z-40 space-y-2">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <h4 className="text-xs font-bold text-[#172b2b]">Bildirimler</h4>
+                      <span className="text-[10px] text-slate-400">Canlı</span>
                     </div>
                     <div className="space-y-2 text-xs">
-                      <div className="p-2 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-100">
+                      <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-100">
                         <strong className="block font-bold">Aidat Tahsilatı: ₺2.500</strong>
-                        <span className="text-[11px] text-emerald-700">A Blok D:18 Mehmet Kaya online kart ile ödedi.</span>
+                        <span className="text-[11px] text-emerald-700">A Blok D:18 Mehmet Kaya online ödedi.</span>
                       </div>
-                      <div className="p-2 rounded-xl bg-blue-50 text-blue-900 border border-blue-100">
+                      <div className="p-2.5 rounded-lg bg-blue-50 text-blue-900 border border-blue-100">
                         <strong className="block font-bold">Yeni Servis Talebi</strong>
-                        <span className="text-[11px] text-blue-700">B Blok D:14 asansör arıza bildirimi açtı.</span>
+                        <span className="text-[11px] text-blue-700">B Blok D:14 asansör arıza bildirimi.</span>
                       </div>
                     </div>
                   </div>
@@ -495,60 +398,95 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
               )}
             </div>
 
-            {/* 10 RBAC ROLE SWITCHER POPOVER */}
+            {/* Unified User Menu */}
             <div className="relative">
               <button
-                onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-[#f4f6f2] hover:bg-[#eaece8] border border-[#e4eae3] transition text-xs font-semibold"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center gap-2 p-1.5 pr-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition"
               >
-                <div className="w-7 h-7 rounded-lg bg-[#172b2b] text-[#b8edb7] flex items-center justify-center font-bold text-xs">
+                <div className="w-7 h-7 rounded-lg bg-[#172b2b] text-emerald-300 flex items-center justify-center font-bold text-xs">
                   {currentUser.role[0]}
                 </div>
-                <div className="text-left hidden md:block">
-                  <span className="text-[10px] text-[#7c8a87] block uppercase font-bold leading-none">TEST ROLÜ DEĞİŞTİR</span>
-                  <span className="font-bold text-[#172b2b] leading-tight block">{roleDef.name}</span>
-                </div>
-                <ChevronDown size={13} className="text-slate-400 ml-1" />
+                <span className="hidden md:block text-xs font-bold text-[#172b2b] max-w-28 truncate">{currentUser.name}</span>
+                <ChevronDown size={13} className="text-slate-400" />
               </button>
 
-              {isRoleDropdownOpen && (
+              {isUserMenuOpen && (
                 <>
-                  <div className="fixed inset-0 z-30" onClick={() => setIsRoleDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-[#e4eae3] p-2 z-40 space-y-1">
-                    <div className="px-3 py-2 border-b border-[#f0f4f1]">
-                      <span className="text-[10px] font-bold text-[#7c8a87] uppercase tracking-wider block">
-                        KULLANICI & ROL TEST MERKEZİ (10 ROL)
-                      </span>
-                      <p className="text-[11px] text-[#556360] mt-0.5">
-                        Farklı rollerin yetki ve ekran kısıtlamalarını anında test edin.
-                      </p>
-                    </div>
+                  <div className="fixed inset-0 z-30" onClick={() => setIsUserMenuOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 p-2 z-40 space-y-1">
+                    {/* Account actions */}
+                    <button
+                      onClick={() => {
+                        setIsLoginModalOpen(true);
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                    >
+                      Hesap & Giriş Ayarları
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsVerificationModalOpen(true);
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                    >
+                      Apartman Doğrulama
+                    </button>
+                    <Link
+                      href="/"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="w-full flex items-center px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                    >
+                      Tanıtım Sitesi
+                    </Link>
 
-                    <div className="max-h-72 overflow-y-auto space-y-1 scrollbar-thin p-1">
-                      {allUsers.map((user) => (
-                        <button
-                          key={user.id}
-                          onClick={() => {
-                            switchUser(user.id);
-                            setIsRoleDropdownOpen(false);
-                            toast.success(`Kullanıcı ve Rol Değiştirildi: ${user.name} (${user.role})`);
-                            if (user.role === "OWNER" || user.role === "TENANT") {
-                              setActiveModule("RESIDENT_PORTAL");
-                            }
-                          }}
-                          className={`w-full text-left p-2.5 rounded-xl text-xs transition flex items-center justify-between ${
-                            user.id === currentUser.id
-                              ? "bg-emerald-50 text-emerald-900 font-bold border border-emerald-200"
+                    {/* Resident portal preview */}
+                    <button
+                      onClick={() => {
+                        setActiveModule("RESIDENT_PORTAL");
+                        setIsUserMenuOpen(false);
+                        toast.info("Sakin portalı görünümüne geçildi.");
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center gap-2"
+                    >
+                      <Eye size={13} /> Sakin Portalını Gör
+                    </button>
+
+                    {/* Role switcher */}
+                    <div className="pt-2 mt-1 border-t border-slate-100">
+                      <span className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Rol Değiştir (Test)
+                      </span>
+                      <div className="max-h-56 overflow-y-auto space-y-0.5 scrollbar-thin">
+                        {allUsers.map((user) => (
+                          <button
+                            key={user.id}
+                            onClick={() => {
+                              switchUser(user.id);
+                              setIsUserMenuOpen(false);
+                              toast.success(`Kullanıcı değiştirildi: ${user.name} (${user.role})`);
+                              if (user.role === "OWNER" || user.role === "TENANT") {
+                                setActiveModule("RESIDENT_PORTAL");
+                              } else {
+                                // Yönetici rolüne dönüldüğünde sakin portal görünümünden çık
+                                setActiveModule("DASHBOARD");
+                              }
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-xs transition flex items-center justify-between ${user.id === currentUser.id
+                              ? "bg-emerald-50 text-emerald-900 font-bold"
                               : "hover:bg-slate-50 text-slate-700"
-                          }`}
-                        >
-                          <div>
-                            <strong className="block text-xs">{user.name}</strong>
-                            <span className="text-[10px] text-slate-500">{(user as any).siteName || activeSite.name} · {user.role}</span>
-                          </div>
-                          {user.id === currentUser.id && <CheckCircle2 size={15} className="text-emerald-700" />}
-                        </button>
-                      ))}
+                              }`}
+                          >
+                            <div className="truncate">
+                              <strong className="block text-xs truncate">{user.name}</strong>
+                              <span className="text-[10px] text-slate-500">{user.role}</span>
+                            </div>
+                            {user.id === currentUser.id && <Check size={14} className="text-emerald-700 flex-shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </>
@@ -570,8 +508,8 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
           onClose={() => setIsLoginModalOpen(false)}
         />
 
-        {/* SCROLLABLE MODULE VIEW CONTAINER */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 scrollbar-thin">
+        {/* SCROLLABLE MODULE VIEW */}
+        <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
           {activeModule === "DASHBOARD" && (
             <DashboardView
               onNavigate={(mod) => handleNavigate(mod as AppModule)}
