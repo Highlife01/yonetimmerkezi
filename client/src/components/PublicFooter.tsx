@@ -25,13 +25,13 @@ export default function PublicFooter() {
                   Yönetim Merkezi
                 </strong>
                 <span className="text-[11px] text-emerald-800 font-extrabold block">
-                  %100 Ücretsiz Apartman &amp; Site Yönetimi
+                  KMK Uyumlu Apartman &amp; Site Yönetimi
                 </span>
               </div>
             </Link>
 
             <p className="text-xs text-slate-600 leading-relaxed font-medium max-w-sm">
-              Kat Mülkiyeti Kanunu (KMK) 20. ve 37. maddelerine tam uyumlu, aidat tahakkuku, %5 yasal gecikme faizi, QR kodlu makbuz ve sakin mobil portalı sunan Türkiye'nin ilk ömür boyu ücretsiz bulut platformu.
+              Kat Mülkiyeti Kanunu (KMK) 20. ve 37. maddelerine tam uyumlu, aidat tahakkuku, %5 yasal gecikme faizi, QR kodlu makbuz ve sakin mobil portalı sunan yeni nesil bulut yönetim platformu.
             </p>
 
             <div className="flex items-center gap-2 pt-1 text-emerald-900 font-bold">
@@ -132,7 +132,7 @@ export default function PublicFooter() {
           <div className="flex flex-wrap items-center gap-4">
             <span>© 2026 Yönetim Merkezi. Tüm Hakları Saklıdır.</span>
             <span>·</span>
-            <span className="text-emerald-700 font-bold">Ömür Boyu %100 Ücretsiz</span>
+            <span className="text-emerald-700 font-bold">KMK Uyumlu Bulut Yönetim</span>
             <span>·</span>
             <a
               href="https://www.yonetimmerkezi.com.tr"

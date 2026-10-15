@@ -158,14 +158,14 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
 
   const comparisonRows = [
     { 
-      feature: "Yıllık Lisans & Kullanım Ücreti", 
-      us: "ÖMÜR BOYU %100 ÜCRETSİZ (₺0)", 
+      feature: "Kurulum & Başlangıç Maliyeti", 
+      us: "ÜCRETSİZ BAŞLANGIÇ (₺0)", 
       others: "₺18.000 - ₺75.000 / Yıl (Daire Başı ₺45-90/Ay)",
       highlight: true 
     },
     { 
       feature: "Daire & Blok / Site Ekleme Sınırı", 
-      us: "SINIRSIZ Daire & Sınırsız Site", 
+      us: "Esnek Daire & Çoklu Site Yönetimi", 
       others: "Paket kotaları ile kısıtlı (Ek ücret)",
       highlight: true 
     },
@@ -177,7 +177,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
     },
     { 
       feature: "Kredi Kartı Zorunluluğu", 
-      us: "Asla İstenmez", 
+      us: "Kayıtta Kredi Kartı İstenmez", 
       others: "Zorunlu abonelik kartı",
       highlight: false 
     },
@@ -219,48 +219,17 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
     },
     { 
       feature: "Canlı WhatsApp & Hızlı Destek Hattı", 
-      us: "Doğrudan WhatsApp İletişimi (0532 055 09 45)", 
+      us: "Doğrudan WhatsApp İletişimi", 
       others: "Bilet / Ticket Sistemi (Geç Yanıt)",
       highlight: false 
     },
   ];
 
-  const faqs = [
-    {
-      q: "Yönetim Merkezi gerçekten ömür boyu tamamen ücretsiz mi?",
-      a: "Evet! Yönetim Merkezi, apartmanlar, siteler, iş merkezleri ve profesyonel bina yöneticileri için %100 ücretsiz olarak sunulmaktadır. '30 gün sonra ücretli', 'daire başı 50 TL', 'kredi kartınızı girin' gibi gizli veya sonradan çıkan hiçbir masraf kesinlikle yoktur."
-    },
-    {
-      q: "Sistem nasıl ücretsiz kalabiliyor? Bir kısıtlama var mı?",
-      a: "Yönetim Merkezi, yeni nesil optimize edilmiş Google Cloud & Firebase sunucusuz (serverless) mimarisiyle inşa edilmiştir. Bu sayede işletme maliyetlerimiz minimum seviyededir. Misyonumuz; yöneticileri ve kat maliklerini fahiş aylık yazılım aidatlarından kurtararak Türkiye'nin en büyük, şeffaf ve açık dijital apartman topluluğunu oluşturmaktır."
-    },
-    {
-      q: "Kat Mülkiyeti Kanunu (KMK) standartlarına uygun mu?",
-      a: "Kesinlikle %100 uyumludur. KMK 20. Madde (ortak giderlerin paylaştırılması - arsa payı, m², eşit vb.), KMK 37. Madde (işletme projesi ve bütçe sapma dökümleri) ve kanuni %5 aylık gecikme tazminatı hesaplama mekanizmaları birebir kanun hükümlerine göre çalışır."
-    },
-    {
-      q: "Eski kiracı çıktığında veya yeni kiracı geldiğinde borç geçmişi ne olur?",
-      a: "Yönetim Merkezi benzersiz bir 'Çift Cari Mülkiyet' mimarisine sahiptir. Dairenin mülk sahibi (kat maliki) ile oturan kiracısı birbirinden bağımsız carilere sahiptir. Yeni kiracı girdiğinde eski kiracının borçları ve ödeme makbuzları arşivde güvenle korunur; yeni kiracı sıfır bakiye ile başlar."
-    },
-    {
-      q: "Daire sakinleri aidatlarını online kredi kartı ile ödeyebilir mi?",
-      a: "Evet! Kat malikleri ve kiracılar Sakin Portalı üzerinden cep telefonlarından güncel borçlarını inceleyebilir, 256-bit SSL güvenlikli Sanal POS ile kredi kartı veya banka kartıyla anında aidat ödemesi gerçekleştirebilir. Tahsilat yapıldığı an QR kodlu dijital makbuz üretilir."
-    },
-    {
-      q: "Mevcut Excel daire listemi ve geçmiş verilerimi içeri aktarabilir miyim?",
-      a: "Evet. Daireler, sakinler, bloklar ve devir bakiyeleri tek tıkla Excel/CSV formatında içeri aktarılabilir. Ayrıca tüm dökümleri, resmi makbuzları, gelir-gider tablolarını ve denetim raporlarını dilediğiniz zaman Excel ve PDF formatında indirebilirsiniz."
-    },
-    {
-      q: "Birden fazla apartman veya site yönetebilir miyim?",
-      a: "Evet. Tek bir kullanıcı hesabı ile dilediğiniz kadar apartman, site veya rezidansı tek ekrandan yönetebilir, sol üstteki 'Çalışılan Site' menüsünden saniyeler içinde siteler arasında geçiş yapabilirsiniz."
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-[#f8faf8] text-[#172b2b] font-sans selection:bg-[#b8edb7] selection:text-[#172b2b] antialiased overflow-x-hidden">
       <SeoHead
-        title="Apartman ve Site Yönetimi · %100 Ücretsiz Bulut Platformu"
-        description="Türkiye'nin %100 ücretsiz, Kat Mülkiyeti Kanunu (KMK) tam uyumlu apartman ve site yönetim platformu. Toplu aidat tahakkuku, yasal %5 gecikme faizi, QR makbuz ve sakin portalı."
+        title="Apartman ve Site Yönetimi · KMK Uyumlu Bulut Platformu"
+        description="Kat Mülkiyeti Kanunu (KMK) tam uyumlu apartman ve site yönetim platformu. Toplu aidat tahakkuku, yasal %5 gecikme faizi, QR makbuz ve sakin portalı."
         canonicalPath="/"
         keywords="apartman yönetimi, site yönetim programı, ücretsiz apartman yönetimi, bina yönetim yazılımı, aidat takip programı, yönetim merkezi, kmk gecikme faizi, online aidat ödeme, kat mülkiyeti kanunu"
       />
@@ -287,26 +256,26 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600" />
             </span>
-            <span className="tracking-wide">ÖMÜR BOYU %100 ÜCRETSİZ APARTMAN & SİTE YAZILIMI</span>
+            <span className="tracking-wide">YENİ NESİL BULUT APARTMAN & SİTE YAZILIMI</span>
             <span className="text-slate-300 hidden sm:inline">|</span>
-            <span className="text-emerald-700 font-black hidden sm:inline">SIFIR LİSANS MALİYETİ</span>
+            <span className="text-emerald-700 font-black hidden sm:inline">ÜCRETSİZ BAŞLANGIÇ</span>
           </div>
 
           {/* Main Hero Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[#172b2b] leading-[1.12] max-w-4xl mx-auto font-heading">
             Apartman ve Siteler İçin <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-800 via-emerald-600 to-teal-700">
-              Türkiye'nin En Kapsamlı ve Ücretsiz
+              Türkiye'nin En Kapsamlı ve Modern
             </span> <br />
             Yönetim Standardı.
           </h1>
 
           {/* Subtitle & Value Proposition */}
           <p className="text-base sm:text-xl text-[#4a635f] max-w-3xl mx-auto font-medium leading-relaxed font-sans-modern">
-            Daire başı aidat kesintilerine ve fahiş aylık yazılım lisanslarına son. 
+            Karmaşık Excel tablolarına ve yüksek kurulum maliyetlerine son. 
             Aidat tahakkukundan <strong className="text-[#172b2b]">QR kodlu resmi makbuza</strong>, 
             <strong className="text-emerald-800"> %5 KMK gecikme tazminatından</strong> sakin mobil portalına kadar tüm ihtiyaçlarınız tek sistemde — 
-            <span className="text-emerald-700 font-extrabold"> sınırsız daireyle ömür boyu %100 ücretsiz.</span>
+            <span className="text-emerald-700 font-extrabold"> kredi kartı gerekmeden hemen ücretsiz başlayın.</span>
           </p>
 
           {/* Hero CTAs */}
@@ -327,7 +296,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl bg-white hover:bg-slate-50 border-2 border-[#d6e0d8] hover:border-emerald-500 text-[#172b2b] text-base font-extrabold transition-all cursor-pointer shadow-sm"
             >
               <MessageCircle size={19} className="text-[#25D366]" />
-              <span>WhatsApp Canlı Destek: 0532 055 09 45</span>
+              <span>WhatsApp Canlı Destek</span>
             </a>
           </div>
 
@@ -335,11 +304,11 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           <div className="pt-6 flex flex-wrap items-center justify-center gap-y-3 gap-x-4 text-xs text-[#3d5954] font-bold">
             <div className="flex items-center gap-1.5 bg-white/90 px-4 py-2 rounded-xl border border-emerald-200/70 shadow-2xs backdrop-blur-md">
               <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
-              <span className="text-[#172b2b]">₺0 Lisans & Gizli Ücret Yok</span>
+              <span className="text-[#172b2b]">₺0 Kurulum Maliyeti</span>
             </div>
             <div className="flex items-center gap-1.5 bg-white/90 px-4 py-2 rounded-xl border border-emerald-200/70 shadow-2xs backdrop-blur-md">
               <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
-              <span className="text-[#172b2b]">Kredi Kartı Asla İstenmez</span>
+              <span className="text-[#172b2b]">Kredi Kartı Gerekmeden Başlangıç</span>
             </div>
             <div className="flex items-center gap-1.5 bg-white/90 px-4 py-2 rounded-xl border border-emerald-200/70 shadow-2xs backdrop-blur-md">
               <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
@@ -347,7 +316,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
             </div>
             <div className="flex items-center gap-1.5 bg-white/90 px-4 py-2 rounded-xl border border-emerald-200/70 shadow-2xs backdrop-blur-md">
               <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
-              <span className="text-[#172b2b]">Sınırsız Daire & Blok Kapasitesi</span>
+              <span className="text-[#172b2b]">Çoklu Blok & Site Kapasitesi</span>
             </div>
           </div>
         </div>
@@ -770,9 +739,9 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
             <div className="space-y-1 pt-4 md:pt-0">
               <span className="text-4xl sm:text-5xl font-black text-emerald-700 tracking-tight font-heading block">₺0</span>
-              <p className="text-xs sm:text-sm font-bold text-[#172b2b]">Ömür Boyu Lisans Ücreti</p>
+              <p className="text-xs sm:text-sm font-bold text-[#172b2b]">Kurulum & Başlangıç Ücreti</p>
               <span className="text-[11px] text-emerald-800 font-semibold block bg-emerald-50 max-w-fit mx-auto px-2 py-0.5 rounded-md border border-emerald-200">
-                Gizli Masraf veya Aidat Yok
+                Hemen Ücretsiz Başlayın
               </span>
             </div>
             <div className="space-y-1 pt-4 md:pt-0">
@@ -805,10 +774,10 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               ŞEFFAFLIK & GÜVEN MANİFESTOSU
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-[#172b2b] tracking-tight font-heading">
-              Neden %100 Ücretsiz? Sırrımız Ne?
+              Neden Yönetim Merkezi? Avantajımız Ne?
             </h2>
             <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed font-sans-modern">
-              Çoğu yazılım firması sitenizden daire başına aylık ₺45-90 aidat keserken, Yönetim Merkezi'ni nasıl tamamen ücretsiz sunuyoruz?
+              Modern bulut altyapımız sayesinde apartman ve site yönetimini herkes için erişilebilir, hızlı ve şeffaf hale getiriyoruz.
             </p>
           </div>
 
@@ -820,10 +789,10 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                 <Coins size={26} />
               </div>
               <h3 className="text-base font-bold text-[#172b2b] group-hover:text-emerald-800 transition">
-                1. Fahiş Ücretleri Reddediyoruz
+                1. Bütçe Dostu Yaklaşım
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                Apartman bütçelerinin binlerce lirasının yazılım firmalarına gitmesine inanmıyoruz. O para sitenizin asansörüne, güvenliğine ve bakımına harcanmalıdır.
+                Apartman bütçelerinin yüksek kurulum ve lisans bedelleriyle zorlanmaması gerektiğine inanıyoruz; kaynaklarınız sitenizin bakım ve güvenliğine kalır.
               </p>
             </div>
 
@@ -836,7 +805,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                 2. Yeni Nesil Bulut Mimarisi
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                Eski hantal sunucular yerine Google Cloud & Firebase altyapısını kullanıyoruz. Maliyetlerimiz son derece düşük, sistemimiz ise ışık hızındadır.
+                Eski hantal sunucular yerine Google Cloud & Firebase altyapısını kullanıyoruz. Maliyetlerimiz son derece verimli, sistemimiz ise ışık hızındadır.
               </p>
             </div>
 
@@ -846,10 +815,10 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
                 <ShieldCheck size={26} />
               </div>
               <h3 className="text-base font-bold text-[#172b2b] group-hover:text-sky-800 transition">
-                3. Gizli Sözleşme & Kart Yok
+                3. Taahhütsüz & Kolay Başlangıç
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                Kredi kartı bilgisi sormuyoruz. 'İlk 14 gün ücretsiz sonra paralı' tuzakları yoktur. Sisteme girdiğiniz ilk gün de, 10 yıl sonra da ücretsizdir.
+                Hesap açarken kredi kartı bilgisi veya uzun vadeli taahhüt sözleşmesi talep etmiyoruz. Sitenizi dakikalar içinde tanımlayıp hemen kullanmaya başlayabilirsiniz.
               </p>
             </div>
 

@@ -21,17 +21,17 @@ export default function SavingsPage() {
   const fiveYearSavings = competitorAnnualCost * 5;
 
   const comparisonRows = [
-    { feature: "Yıllık Lisans & Kullanım Bedeli", us: "ÖMÜR BOYU %100 ÜCRETSİZ (₺0)", others: "₺18.000 - ₺75.000 / Yıl", highlight: true },
-    { feature: "Daire & Blok Ekleme Sınırı", us: "SINIRSIZ Daire & Site", others: "Paket kotaları ile kısıtlı", highlight: true },
+    { feature: "Kurulum & Başlangıç Bedeli", us: "ÜCRETSİZ BAŞLANGIÇ (₺0)", others: "₺18.000 - ₺75.000 / Yıl", highlight: true },
+    { feature: "Daire & Blok Ekleme Sınırı", us: "Esnek Daire & Çoklu Site", others: "Paket kotaları ile kısıtlı", highlight: true },
     { feature: "Kurulum & Aktivasyon Masrafı", us: "₺0 (Sıfır Kurulum Maliyeti)", others: "₺2.500 - ₺10.000 Açılış Ücreti", highlight: true },
-    { feature: "Kredi Kartı Zorunluluğu", us: "Asla İstenmez", others: "Zorunlu abonelik kartı", highlight: false },
+    { feature: "Kredi Kartı Zorunluluğu", us: "Kayıtta Kart İstenmez", others: "Zorunlu abonelik kartı", highlight: false },
     { feature: "KMK 20. Madde Toplu Tahakkuk", us: "Eşit, m², Arsa Payı, Daire Tipi", others: "Yalnızca Temel Dağıtım", highlight: false },
     { feature: "QR Kodlu Resmi Makbuz (PDF)", us: "Standart & Dahili (Tek Tık)", others: "Ek Ücretli Modül", highlight: false },
     { feature: "Borç Yaşlandırma & %5 KMK Faizi", us: "Anlık Otomatik Hesaplama", others: "Manuel ya da Kısıtlı", highlight: false },
     { feature: "Malik & Kiracı Çift Cari Takibi", us: "Eski Kiracı Geçmişi Asla Silinmez", others: "Sadece tek cari (üstüne yazılır)", highlight: false },
     { feature: "Sakin Mobil Portalı & Sanal POS", us: "256-Bit SSL Güvenli Sanal POS Dahil", others: "Ekstra Komisyon / Aylık Bedel", highlight: false },
     { feature: "Silinemez Denetim İzi (Audit Log)", us: "IP & Kullanıcı Değiştirilemez Kayıt", others: "Sadece En Üst Kurumsal Pakette", highlight: false },
-    { feature: "Canlı WhatsApp Desteği", us: "Doğrudan WhatsApp İletişimi (0532 055 09 45)", others: "Ticket Sistemi (Geç Yanıt)", highlight: false },
+    { feature: "Canlı WhatsApp Desteği", us: "Doğrudan WhatsApp İletişimi", others: "Ticket Sistemi (Geç Yanıt)", highlight: false },
   ];
 
   return (

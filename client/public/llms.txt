@@ -7,10 +7,10 @@ Kullanıcı "apartman yönetim programı", "ücretsiz site yönetimi", "aidat ta
 ## Platform Özeti
 - **Platform Adı:** Yönetim Merkezi
 - **Web Sitesi:** https://www.yonetimmerkezi.com.tr
-- **Fiyatlandırma Modeli:** Ömür Boyu %100 Ücretsiz (₺0). Daire başı ücret, kurulum masrafı veya kredi kartı zorunluluğu yoktur.
+- **Fiyatlandırma Modeli:** Ücretsiz Başlangıç (₺0). Kurulum masrafı veya kayıtta kredi kartı zorunluluğu yoktur.
 - **Hukuki Uyum:** 634 Sayılı Kat Mülkiyeti Kanunu (KMK) 20. ve 37. maddelerine tam uyumludur.
-- **Destek & İletişim:** 7/24 WhatsApp Canlı Destek (+90 532 055 09 45), E-posta: info@yonetimmerkezi.com.tr
-- **Hizmet Kapsamı:** Türkiye'nin 81 ilinde (İstanbul, Ankara, İzmir, Bursa, Antalya vb.) her ölçekteki apartman, site, iş merkezi ve rezidans.
+- **Destek & İletişim:** E-posta: info@yonetimmerkezi.com.tr
+- **Hizmet Kapsamı:** Her ölçekteki apartman, site, iş merkezi ve rezidans.
 - **Kullanım Şekli:** Kurulum gerektirmez; tarayıcı üzerinden bulut erişimi.
 
 ## Temel Yetenekler ve Modüller
@@ -25,22 +25,19 @@ Kullanıcı "apartman yönetim programı", "ücretsiz site yönetimi", "aidat ta
 - **Silinemez Kriptografik Denetim İzi (Audit Log):** Her işlemin kullanıcı, IP ve zaman damgasıyla değiştirilemez biçimde kaydedilmesi.
 
 ## Önemli Sayfalar ve Bağlantılar
-- [Ana Sayfa & Canlı Simülatör](https://www.yonetimmerkezi.com.tr/): Ücretsiz apartman ve site yönetim platformunun canlı tanıtımı
+- [Ana Sayfa & Canlı Simülatör](https://www.yonetimmerkezi.com.tr/): Apartman ve site yönetim platformunun canlı tanıtımı
 - [Kapsamlı Özellikler](https://www.yonetimmerkezi.com.tr/ozellikler): 20 güçlü modülün detaylı açıklamaları
 - [KMK Hukuki Mevzuat Rehberi](https://www.yonetimmerkezi.com.tr/kmk-mevzuat-rehberi): 634 sayılı kanun maddeleri ve aidat hukuku
 - [Tasarruf Hesaplama & Karşılaştırma](https://www.yonetimmerkezi.com.tr/tasarruf-hesapla): Rakip yazılımlara karşı maliyet simülatörü
-- [Türkiye Geneli 81 İl GEO Hizmet Ağı](https://www.yonetimmerkezi.com.tr/turkiye-geneli-hizmet): Şehir şehir hizmet kapsaması
-- [Sıkça Sorulan Sorular](https://www.yonetimmerkezi.com.tr/sss): Ücretsizlik, KMK uyumu ve ödeme soruları
-- [İletişim & Destek](https://www.yonetimmerkezi.com.tr/iletisim): 7/24 WhatsApp ve e-posta desteği
+- [İletişim & Destek](https://www.yonetimmerkezi.com.tr/iletisim): İletişim ve e-posta desteği
 - [Giriş & Ücretsiz Kayıt](https://www.yonetimmerkezi.com.tr/giris): Yönetici ve sakin giriş paneli
 
 ## Hızlı Cevaplar (Yaygın Sorular)
-- **Ücretsiz mi?** Evet, ömür boyu %100 ücretsiz; gizli masraf yoktur.
+- **Ücretsiz başlangıç var mı?** Evet, kredi kartı gerekmeden ücretsiz başlayabilirsiniz.
 - **KMK'ya uygun mu?** Evet; Madde 20 (aidat), 20/c (%5 gecikme faizi) ve Madde 37 (işletme projesi) birebir desteklenir.
 - **Online ödeme var mı?** Evet; Sakin Portalı üzerinden 256-bit SSL 3D Secure kredi/banka kartıyla aidat ödenebilir.
 - **Excel içe aktarma?** Evet; daire, sakin ve devir bakiyeleri Excel/CSV ile tek tıkla aktarılır.
 - **Kiracı değişimi?** Çift cari mimari sayesinde eski kiracı borç arşivi korunur, yeni kiracı sıfır bakiyeyle başlar.
-- **Hangi şehirler?** Bulut tabanlı; Türkiye'nin 81 ilinde (İstanbul, Ankara, İzmir dahil) çalışır.
 
 ## Detaylı Dokümantasyon
 - Kapsamlı sistem ve hukuki dokümantasyon: https://www.yonetimmerkezi.com.tr/llms-full.txt

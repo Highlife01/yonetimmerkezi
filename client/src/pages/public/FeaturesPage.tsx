@@ -253,7 +253,7 @@ export default function FeaturesPage() {
       <section className="py-20 px-4 sm:px-8 lg:px-12 bg-gradient-to-b from-[#f4f7f4] to-white">
         <div className="max-w-5xl mx-auto bg-gradient-to-r from-[#172b2b] via-[#224441] to-[#122826] rounded-3xl p-8 sm:p-14 text-white text-center space-y-6 shadow-2xl border border-[#2d5551]">
           <span className="bg-[#b8edb7] text-[#172b2b] text-xs font-black uppercase px-4 py-1.5 rounded-full inline-block">
-            ÖMÜR BOYU %100 ÜCRETSİZ
+            HEMEN ÜCRETSİZ BAŞLAYIN
           </span>
 
           <h2 className="text-2xl sm:text-4xl font-black font-heading text-white max-w-2xl mx-auto">
