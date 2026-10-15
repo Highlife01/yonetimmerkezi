@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   ReceiptText, Plus, Search, Filter, CalendarDays, CheckCircle2,
   AlertTriangle, XCircle, ArrowUpRight, Download, Users, Building2,
-  Sparkles, Layers, RefreshCw, X, ShieldAlert
+  Sparkles, Layers, RefreshCw, X, ShieldAlert, Percent
 } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,16 +27,19 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [isWizardOpen, setIsWizardOpen] = useState(initialOpenWizard || initialOpenModal);
   const [selectedTahakkukForDetail, setSelectedTahakkukForDetail] = useState<TahakkukRecord | null>(null);
+  const [cancellingTahakkuk, setCancellingTahakkuk] = useState<TahakkukRecord | null>(null);
+  const [cancelReason, setCancelReason] = useState("Yönetim kurulu düzeltme kararı");
 
   // Wizard form state
   const [wizardData, setWizardData] = useState({
-    title: "Eylül 2026 Aylık İşletme Aidatı",
-    period: "2026-09",
+    title: "Ekim 2026 Aylık İşletme Aidatı",
+    period: "2026-10",
     category: "AIDAT" as DuesCategory,
-    dueDate: "2026-09-10",
+    dueDate: "2026-10-10",
     distributionMethod: "EQUAL" as DistributionMethod,
     amountInput: 2500, // Daire başı veya toplam bütçe
     targetBlockId: "", // Boş = Tüm site
+    responsibilityMode: "AUTO_KMK" as "AUTO_KMK" | "CUSTOM_RATIO" | "OCCUPANT_ONLY" | "OWNER_ONLY",
   });
 
   const filteredTahakkuklar = activeSiteTahakkuklar.filter((t) => {
@@ -56,6 +59,42 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
     ? wizardData.amountInput * targetUnits.length
     : wizardData.amountInput;
 
+  // Duplicate period/category warning check
+  const duplicatePeriodTahakkuk = activeSiteTahakkuklar.find(
+    (t) =>
+      t.status === "ACTIVE" &&
+      t.period === wizardData.period &&
+      t.category === wizardData.category
+  );
+
+  // Calculate Kiracı vs Kat Maliki split preview
+  const isExtraCategory = ["DEMIRBAS", "BAKIM_ONARIM", "EK_BUTCE"].includes(wizardData.category);
+  const previewSplit = targetUnits.reduce(
+    (acc, u) => {
+      const unitAmt =
+        wizardData.distributionMethod === "EQUAL"
+          ? wizardData.amountInput
+          : Math.round(previewTotal / (targetUnits.length || 1));
+      const r = u.paymentRatio || {
+        duesTenantRatio: 100,
+        duesOwnerRatio: 0,
+        extraTenantRatio: 0,
+        extraOwnerRatio: 100,
+      };
+      let tRatio = 0;
+      if (u.tenantId && u.residentType === "KIRACI_OTURUYOR") {
+        if (wizardData.responsibilityMode === "OWNER_ONLY") tRatio = 0;
+        else if (wizardData.responsibilityMode === "OCCUPANT_ONLY") tRatio = 100;
+        else tRatio = isExtraCategory ? r.extraTenantRatio : r.duesTenantRatio;
+      }
+      const tAmt = Math.round((unitAmt * tRatio) / 100);
+      acc.tenantTotal += tAmt;
+      acc.ownerTotal += unitAmt - tAmt;
+      return acc;
+    },
+    { tenantTotal: 0, ownerTotal: 0 }
+  );
+
   const handleExecuteBatch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!wizardData.title || wizardData.amountInput <= 0) {
@@ -71,6 +110,7 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
       distributionMethod: wizardData.distributionMethod,
       totalAmountOrPerUnit: wizardData.amountInput,
       targetBlockId: wizardData.targetBlockId || undefined,
+      responsibilityMode: wizardData.responsibilityMode,
     });
 
     setIsWizardOpen(false);
@@ -78,10 +118,17 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
   };
 
   const handleExportCSV = (t: TahakkukRecord) => {
-    const headers = ["Daire", "Sakin", "Tahakkuk Tutarı (TL)", "Tahsil Edilen (TL)", "Durum"];
+    const headers = [
+      "Daire", "Muhatap (Sakin)", "Sorumlu Taraf",
+      "Kiracı Payı (TL)", "Kat Maliki Payı (TL)",
+      "Tahakkuk Tutarı (TL)", "Tahsil Edilen (TL)", "Durum"
+    ];
     const rows = t.allocations.map(a => [
       a.unitName,
       a.personName,
+      a.payerType === "KIRACI" ? "Kiracı" : a.payerType === "ORTAK" ? "Ortak (K+M)" : "Kat Maliki",
+      a.tenantAmount ?? (a.payerType === "KIRACI" ? a.amount : 0),
+      a.ownerAmount ?? (a.payerType === "KIRACI" ? 0 : a.amount),
       a.amount,
       a.paidAmount,
       a.isPaid ? "Ödendi" : "Ödenmedi"
@@ -98,7 +145,7 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
           <div>
             <h2 className="text-xl font-bold text-[#172b2b] tracking-tight">Aidat & Toplu Tahakkuk Yönetimi</h2>
             <p className="text-xs text-[#7c8a87] mt-0.5">
-              KMK uyumlu dağıtım modelleriyle (Eşit, m², Arsa Payı) tek tıkla 100+ daireye toplu borçlandırma ve aidat tahakkuku.
+              KMK uyumlu dağıtım modelleri (Eşit, m², Arsa Payı) ve Kiracı / Ev Sahibi borç paylaşım oranlarıyla toplu borçlandırma.
             </p>
           </div>
 
@@ -177,6 +224,15 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
                         {tahakkuk.period} Dönemi
                       </span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        ["DEMIRBAS", "BAKIM_ONARIM", "EK_BUTCE"].includes(tahakkuk.category)
+                          ? "bg-amber-50 text-amber-800 border border-amber-200"
+                          : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                      }`}>
+                        {["DEMIRBAS", "BAKIM_ONARIM", "EK_BUTCE"].includes(tahakkuk.category)
+                          ? "Demirbaş / Ekstra Borç"
+                          : "İşletme / Aidat"}
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         tahakkuk.status === "CANCELLED" ? "bg-rose-100 text-rose-800" :
                         tahakkuk.status === "COMPLETED" ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"
                       }`}>
@@ -225,11 +281,8 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
                     {tahakkuk.status === "ACTIVE" && hasPermission("canCreateTahakkuk") && (
                       <button
                         onClick={() => {
-                          const reason = prompt("Bu tahakkuku iptal etmek istediğinize emin misiniz? İptal gerekçesini giriniz:");
-                          if (reason) {
-                            cancelTahakkuk(tahakkuk.id, reason);
-                            toast.success("Tahakkuk iptal edildi ve daire bakiyelerinden düşüldü.");
-                          }
+                          setCancellingTahakkuk(tahakkuk);
+                          setCancelReason("Yönetim kurulu düzeltme kararı");
                         }}
                         className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition"
                         title="Tahakkuku İptal Et"
@@ -245,6 +298,50 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
         })}
       </div>
 
+      {/* CANCEL TAHAKKUK MODAL */}
+      {cancellingTahakkuk && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" role="dialog">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e4eae3]">
+              <h3 className="text-base font-bold text-rose-700">Tahakkuk İptal Onayı</h3>
+              <button onClick={() => setCancellingTahakkuk(null)} className="text-slate-400 hover:text-slate-600">
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-xs text-[#7c8a87]">
+              <strong>{cancellingTahakkuk.title}</strong> ({cancellingTahakkuk.period}) tahakkukunu iptal etmek üzeresiniz. İlgili tutarlar daire bakiyelerinden düşülecektir.
+            </p>
+            <div className="text-xs">
+              <label className="font-bold text-[#172b2b] block mb-1">İptal Gerekçesi *</label>
+              <input
+                type="text"
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-[#e4eae3] focus:outline-none focus:border-rose-500"
+              />
+            </div>
+            <div className="pt-3 border-t border-[#e4eae3] flex justify-end gap-2 text-xs">
+              <button
+                onClick={() => setCancellingTahakkuk(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold"
+              >
+                Vazgeç
+              </button>
+              <button
+                onClick={() => {
+                  cancelTahakkuk(cancellingTahakkuk.id, cancelReason);
+                  toast.success("Tahakkuk iptal edildi ve daire bakiyelerinden düşüldü.");
+                  setCancellingTahakkuk(null);
+                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold hover:bg-rose-700"
+              >
+                Tahakkuku İptal Et
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* BATCH ACCRUAL WIZARD MODAL */}
       {isWizardOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" role="dialog">
@@ -256,13 +353,25 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-[#172b2b]">Toplu Borçlandırma & Aidat Sihirbazı</h3>
-                  <p className="text-xs text-[#7c8a87]">Tüm dairelere tek işlemle KMK esaslarına göre aidat veya ek borç oluşturun.</p>
+                  <p className="text-xs text-[#7c8a87]">Tüm dairelere tek işlemle KMK esaslarına ve Kiracı/Malik oranlarına göre tahakkuk oluşturun.</p>
                 </div>
               </div>
               <button onClick={() => setIsWizardOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X size={18} />
               </button>
             </div>
+
+            {duplicatePeriodTahakkuk && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-900">
+                <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="font-bold block">Mükerrer Dönem Uyarısı</strong>
+                  <span>
+                    <strong>{wizardData.period}</strong> dönemi için zaten aktif bir <strong>{duplicatePeriodTahakkuk.title}</strong> kaydı bulunuyor. Ek tahakkuk yapmak istiyorsanız başlığı özelleştirebilirsiniz.
+                  </span>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleExecuteBatch} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
@@ -334,6 +443,56 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
                 </div>
               </div>
 
+              {/* Kiracı / Ev Sahibi Borç Sorumluluk Seçimi */}
+              <div>
+                <label className="font-bold text-[#172b2b] block mb-1.5 flex items-center gap-1.5">
+                  <Percent size={13} className="text-emerald-700" />
+                  Kiracı / Kat Maliki (Ev Sahibi) Borç Paylaşım Kuralı
+                </label>
+                <div className="grid grid-cols-3 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setWizardData({ ...wizardData, responsibilityMode: "AUTO_KMK" })}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      wizardData.responsibilityMode === "AUTO_KMK"
+                        ? "bg-emerald-50 border-emerald-400 text-emerald-900 shadow-xs"
+                        : "bg-white border-[#e4eae3] text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <strong className="text-xs font-bold block">Daire Oranları & KMK</strong>
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">
+                      {isExtraCategory ? "Demirbaş oranına göre (Varsayılan %100 Malik)" : "Aidat oranına göre (Varsayılan %100 Kiracı)"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setWizardData({ ...wizardData, responsibilityMode: "OCCUPANT_ONLY" })}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      wizardData.responsibilityMode === "OCCUPANT_ONLY"
+                        ? "bg-emerald-50 border-emerald-400 text-emerald-900 shadow-xs"
+                        : "bg-white border-[#e4eae3] text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <strong className="text-xs font-bold block">%100 Oturan Sakin</strong>
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">Kiracı varsa tamamı kiracıya yansır</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setWizardData({ ...wizardData, responsibilityMode: "OWNER_ONLY" })}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      wizardData.responsibilityMode === "OWNER_ONLY"
+                        ? "bg-emerald-50 border-emerald-400 text-emerald-900 shadow-xs"
+                        : "bg-white border-[#e4eae3] text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <strong className="text-xs font-bold block">%100 Kat Maliki</strong>
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">Yatırım/Demirbaş doğrudan ev sahibine</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Dağıtım Yöntemi Seçimi */}
               <div>
                 <label className="font-bold text-[#172b2b] block mb-1.5">KMK Borç Dağıtım Yöntemi *</label>
@@ -398,20 +557,26 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
               </div>
 
               {/* CANLI HESAPLAMA ÖZETİ */}
-              <div className="p-4 rounded-xl bg-[#edf3eb] border border-[#dce7da] flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold uppercase text-[#7a8a84]">TOPLAM TAHAKKUK HEDEFİ</span>
-                  <h4 className="text-2xl font-extrabold text-[#172b2b]">{formatCurrency(previewTotal)}</h4>
-                  <span className="text-[11px] text-[#7a8a84]">
-                    {targetUnits.length} daireye yansıtılacak toplam alacak
-                  </span>
-                </div>
+              <div className="p-4 rounded-xl bg-[#edf3eb] border border-[#dce7da] space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase text-[#7a8a84]">TOPLAM TAHAKKUK HEDEFİ</span>
+                    <h4 className="text-2xl font-extrabold text-[#172b2b]">{formatCurrency(previewTotal)}</h4>
+                    <span className="text-[11px] text-[#7a8a84]">
+                      {targetUnits.length} daireye yansıtılacak toplam alacak
+                    </span>
+                  </div>
 
-                <div className="text-right text-xs">
-                  <span className="text-slate-500 block">Daire Başı Ortalama</span>
-                  <strong className="text-emerald-800 font-bold text-sm">
-                    {formatCurrency(previewTotal / (targetUnits.length || 1))}
-                  </strong>
+                  <div className="text-right text-xs">
+                    <span className="text-slate-500 block">Daire Başı Ortalama</span>
+                    <strong className="text-emerald-800 font-bold text-sm">
+                      {formatCurrency(previewTotal / (targetUnits.length || 1))}
+                    </strong>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-[#dce7da] flex items-center justify-between text-[11px] text-[#294342]">
+                  <span>Kiracı Sorumluluğu Toplamı: <strong>{formatCurrency(previewSplit.tenantTotal)}</strong></span>
+                  <span>Kat Maliki Sorumluluğu Toplamı: <strong>{formatCurrency(previewSplit.ownerTotal)}</strong></span>
                 </div>
               </div>
 
@@ -442,7 +607,7 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
             <div className="flex items-center justify-between pb-3 border-b border-[#e4eae3]">
               <div>
                 <h3 className="text-base font-bold text-[#172b2b]">{selectedTahakkukForDetail.title}</h3>
-                <p className="text-xs text-[#7c8a87]">Daire bazında borçlandırma ve tahsilat dökümü.</p>
+                <p className="text-xs text-[#7c8a87]">Daire bazında Kiracı / Kat Maliki borçlandırma ve tahsilat dökümü.</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -463,6 +628,7 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
                   <tr>
                     <th className="py-2.5 px-3">Bağımsız Bölüm</th>
                     <th className="py-2.5 px-3">Muhatap (Sakin)</th>
+                    <th className="py-2.5 px-3">Sorumlu Taraf</th>
                     <th className="py-2.5 px-3 text-right">Tahakkuk Tutarı</th>
                     <th className="py-2.5 px-3 text-right">Tahsil Edilen</th>
                     <th className="py-2.5 px-3 text-center">Durum</th>
@@ -473,6 +639,21 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
                     <tr key={idx} className="hover:bg-slate-50">
                       <td className="py-2.5 px-3 font-bold text-[#172b2b]">{alloc.unitName}</td>
                       <td className="py-2.5 px-3 text-slate-700">{alloc.personName}</td>
+                      <td className="py-2.5 px-3">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          alloc.payerType === "KIRACI"
+                            ? "bg-blue-50 text-blue-800"
+                            : alloc.payerType === "ORTAK"
+                            ? "bg-purple-50 text-purple-800"
+                            : "bg-emerald-50 text-emerald-800"
+                        }`}>
+                          {alloc.payerType === "KIRACI"
+                            ? "Kiracı"
+                            : alloc.payerType === "ORTAK"
+                            ? `Ortak (K:₺${alloc.tenantAmount} / M:₺${alloc.ownerAmount})`
+                            : "Kat Maliki"}
+                        </span>
+                      </td>
                       <td className="py-2.5 px-3 text-right font-bold text-[#172b2b]">{formatCurrency(alloc.amount)}</td>
                       <td className="py-2.5 px-3 text-right font-bold text-emerald-700">{formatCurrency(alloc.paidAmount)}</td>
                       <td className="py-2.5 px-3 text-center">
@@ -503,3 +684,4 @@ export default function DuesTahakkukView({ initialOpenWizard = false, initialOpe
     </div>
   );
 }
+

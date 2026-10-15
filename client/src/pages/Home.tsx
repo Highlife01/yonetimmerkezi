@@ -64,6 +64,7 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [openModalSignal, setOpenModalSignal] = useState(false);
+  const [collectionUnitId, setCollectionUnitId] = useState<string | undefined>(undefined);
 
   // Quick Action Modal states for triggering inside views
   const [quickActionModal, setQuickActionModal] = useState<string | null>(null);
@@ -88,6 +89,7 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
       toast.error(`"${roleDef.name}" rolünüz bu modüle (${module}) erişim yetkisine sahip değildir.`);
       return;
     }
+    setCollectionUnitId(undefined);
     setActiveModule(module);
   };
 
@@ -174,7 +176,7 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
   }
 
   return (
-    <div className="flex h-screen bg-[#f6f8f6] font-sans antialiased text-[#172b2b] overflow-hidden select-none">
+    <div className="flex h-screen bg-[#f6f8f6] font-sans antialiased text-[#172b2b] overflow-hidden">
       {/* ===================== SIDEBAR (Sade) ===================== */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20">
         {/* Logo & Site Switcher */}
@@ -532,10 +534,23 @@ export default function Home({ initialShowLanding = false }: HomeProps) {
             />
           )}
 
-          {activeModule === "UNITS" && <UnitsView />}
+          {activeModule === "UNITS" && (
+            <UnitsView
+              onOpenCollectionForUnit={(unitId) => {
+                setCollectionUnitId(unitId);
+                setActiveModule("COLLECTIONS");
+              }}
+            />
+          )}
           {activeModule === "RESIDENTS" && <ResidentsView />}
           {activeModule === "DUES_TAHAKKUK" && <DuesTahakkukView initialOpenModal={openModalSignal} />}
-          {activeModule === "COLLECTIONS" && <CollectionsView initialOpenModal={openModalSignal} />}
+          {activeModule === "COLLECTIONS" && (
+            <CollectionsView
+              key={collectionUnitId || "collections"}
+              initialOpenModal={openModalSignal}
+              preselectedUnitId={collectionUnitId}
+            />
+          )}
           {activeModule === "DEBTORS_AGING" && <DebtorsAgingView />}
           {activeModule === "INCOME_EXPENSE" && <IncomeExpenseView initialOpenModal={openModalSignal} />}
           {activeModule === "CASH_BANK" && <CashBankView />}

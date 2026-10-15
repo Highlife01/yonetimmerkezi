@@ -121,6 +121,13 @@ export interface Block {
 
 export type UnitType = "1+1" | "2+1" | "3+1" | "4+1" | "5+1" | "Dubleks" | "Villa" | "Dükkan" | "Ofis";
 
+export interface UnitPaymentRatio {
+  duesTenantRatio: number;  // Aylık Aidat Kiracı Payı % (Varsayılan: 100)
+  duesOwnerRatio: number;   // Aylık Aidat Ev Sahibi (Malik) Payı % (Varsayılan: 0)
+  extraTenantRatio: number; // Demirbaş / Ekstra Borç Kiracı Payı % (Varsayılan: 0)
+  extraOwnerRatio: number;  // Demirbaş / Ekstra Borç Ev Sahibi Payı % (Varsayılan: 100)
+}
+
 export interface Unit {
   id: string;
   siteId: string;
@@ -138,6 +145,9 @@ export interface Unit {
   vehiclePlates: string[];
   parkingLotNumber?: string;
   currentBalance: number; // Pozitif: Borç, Negatif: Fazla Ödeme / Avans
+  tenantBalance?: number; // Kiracı Sorumluluğundaki Kalan Borç
+  ownerBalance?: number;  // Ev Sahibi (Kat Maliki) Sorumluluğundaki Kalan Borç
+  paymentRatio?: UnitPaymentRatio; // Kiracı / Malik Aidat & Ekstra Borç Paylaşım Oranları
   notes?: string;
 }
 
@@ -213,6 +223,11 @@ export interface TahakkukRecord {
     unitName: string;
     personId: string;
     personName: string;
+    payerType?: "KIRACI" | "MALIK" | "ORTAK";
+    tenantAmount?: number;
+    ownerAmount?: number;
+    paidTenantAmount?: number;
+    paidOwnerAmount?: number;
     amount: number;
     paidAmount: number;
     isPaid: boolean;
@@ -253,6 +268,7 @@ export interface Collection {
   unitName: string;
   personId: string;
   personName: string;
+  payerType?: "KIRACI" | "MALIK";
   amount: number;
   paymentDate: string;
   paymentMethod: PaymentMethod;
@@ -565,3 +581,36 @@ export interface AuditLogEntry {
   financialAmount?: number;
   ipAddress?: string;
 }
+
+// -----------------------------------------------------------------------------
+// WHATSAPP OTOMASYON & BİLDİRİM LOG MERKEZİ
+// -----------------------------------------------------------------------------
+
+export interface WhatsAppConfig {
+  siteId: string;
+  enabled: boolean;
+  provider: "META_CLOUD_API" | "WHATSAPP_WEB";
+  phoneNumberId: string;
+  wabaId: string;
+  templateName: string;
+  autoReminderDay: number; // Her ayın kaçıncı günü (1-28)
+  autoReminderTime: string; // "10:00"
+  messageTemplate: string;
+}
+
+export interface WhatsAppLogEntry {
+  id: string;
+  siteId: string;
+  timestamp: string;
+  type: "TEST" | "AIDAT_HATIRLATMA" | "EKSTRA_BORC" | "GECIKME_IHBAR";
+  unitId?: string;
+  unitName: string;
+  recipientName: string;
+  phone: string;
+  period: string;
+  amount: number;
+  messagePreview: string;
+  status: "BASARILI" | "KUYRUKTA" | "HATA";
+  httpCode: number;
+}
+

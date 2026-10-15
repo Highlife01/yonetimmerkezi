@@ -26,7 +26,7 @@ export default function DashboardView({
   const {
     activeSite, activeSiteUnits, activeSiteTahakkuklar,
     activeSiteCollections, activeSiteExpenses, activeSiteAccounts,
-    activeSiteRequests, activeSiteAssets
+    activeSiteRequests, activeSiteAssets, activeSiteStaff
   } = useApp();
   const { currentUser } = useAuth();
 
@@ -50,6 +50,40 @@ export default function DashboardView({
     time: c.paymentDate.split(" ")[1] || "09:30",
     receiptNo: c.receiptNumber,
   }));
+
+  // ---- Blok karnesi (Yoneticim: Site/Details) ----
+  const blockStats = Array.from(new Set(activeSiteUnits.map(u => u.blockName))).map(blockName => {
+    const units = activeSiteUnits.filter(u => u.blockName === blockName);
+    const debt = units.reduce((s, u) => s + (u.currentBalance > 0 ? u.currentBalance : 0), 0);
+    const debtors = units.filter(u => u.currentBalance > 0).length;
+    const blockUnitIds = new Set(units.map(u => u.id));
+    const paid = activeSiteCollections
+      .filter(c => blockUnitIds.has(c.unitId))
+      .reduce((s, c) => s + c.amount, 0);
+    return { blockName, unitCount: units.length, debtors, debt, paid };
+  });
+
+  // ---- Kiracı / Malik / Boş dağılımı (apartman-yonetim-sistemi: dashboard) ----
+  const occupancy = {
+    owner: activeSiteUnits.filter(u => u.residentType === "MALIK_OTURUYOR").length,
+    tenant: activeSiteUnits.filter(u => u.residentType === "KIRACI_OTURUYOR").length,
+    empty: activeSiteUnits.filter(u => u.residentType === "BOS").length,
+  };
+  const tenantDebt = activeSiteUnits.reduce((s, u) => s + Math.max(0, u.tenantBalance ?? 0), 0);
+  const ownerDebt = activeSiteUnits.reduce((s, u) => s + Math.max(0, u.ownerBalance ?? 0), 0);
+  const occupancyTotal = Math.max(1, occupancy.owner + occupancy.tenant + occupancy.empty);
+
+  // ---- Net durum (Kar / Zarar) ----
+  const totalExpenses = activeSiteExpenses.reduce((s, e) => s + e.amount, 0);
+  const netResult = totalCollections - totalExpenses;
+
+  // ---- Personel dağılımı ----
+  const activeStaff = activeSiteStaff.filter(s => s.status !== "AYRILDI");
+  const staffByRole = activeStaff.reduce<Record<string, number>>((acc, s) => {
+    acc[s.roleTitle] = (acc[s.roleTitle] || 0) + 1;
+    return acc;
+  }, {});
+  const monthlyPayroll = activeStaff.reduce((s, m) => s + m.salary, 0);
 
   return (
     <div className="space-y-6">
@@ -392,6 +426,119 @@ export default function DashboardView({
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ===================== BLOK KARNESİ + NET DURUM ===================== */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Blok finansal karnesi */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-[#172b2b] font-heading">Blok Finansal Karnesi</h3>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">Blok bazında tahsilat ve ödenmeyen borç</p>
+            </div>
+            <button
+              onClick={() => onNavigate("UNITS")}
+              className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 transition cursor-pointer"
+            >
+              Bloklar <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
+              <thead className="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100">
+                <tr>
+                  <th className="py-2 pr-3">Blok</th>
+                  <th className="py-2 px-3 text-right">Daire</th>
+                  <th className="py-2 px-3 text-right">Borçlu</th>
+                  <th className="py-2 px-3 text-right">Ödenen Aidat</th>
+                  <th className="py-2 pl-3 text-right">Ödenmeyen Borç</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {blockStats.map(b => (
+                  <tr key={b.blockName} className="hover:bg-slate-50">
+                    <td className="py-2.5 pr-3 font-bold text-[#172b2b]">{b.blockName}</td>
+                    <td className="py-2.5 px-3 text-right text-slate-600">{b.unitCount}</td>
+                    <td className="py-2.5 px-3 text-right text-slate-600">{b.debtors}</td>
+                    <td className="py-2.5 px-3 text-right font-bold text-emerald-700">{formatCurrency(b.paid)}</td>
+                    <td className="py-2.5 pl-3 text-right font-bold text-rose-600">{formatCurrency(b.debt)}</td>
+                  </tr>
+                ))}
+                {blockStats.length === 0 && (
+                  <tr><td colSpan={5} className="py-6 text-center text-slate-400">Henüz blok / daire tanımlanmadı.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Net durum */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <h3 className="text-base font-bold text-[#172b2b] font-heading mb-4">Net Durum (Kar / Zarar)</h3>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between"><span className="text-slate-500 font-semibold">Toplam Gelir (Tahsilat)</span><strong className="text-emerald-700">{formatCurrency(totalCollections)}</strong></div>
+              <div className="flex justify-between"><span className="text-slate-500 font-semibold">Toplam Gider</span><strong className="text-rose-600">{formatCurrency(totalExpenses)}</strong></div>
+            </div>
+          </div>
+          <div className={`mt-4 p-3.5 rounded-xl flex items-center gap-2.5 ${netResult >= 0 ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"}`}>
+            {netResult >= 0 ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
+            <div>
+              <span className="text-[10px] font-bold uppercase block">{netResult >= 0 ? "Net Fazla" : "Net Açık"}</span>
+              <strong className="text-lg font-black font-heading">{formatCurrency(Math.abs(netResult))}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===================== DOLULUK / BORÇ SORUMLULUĞU + PERSONEL ===================== */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
+          <h3 className="text-base font-bold text-[#172b2b] font-heading mb-4">Doluluk & Borç Sorumluluğu</h3>
+          <div className="flex h-3 rounded-full overflow-hidden bg-slate-100 mb-3">
+            <div className="bg-emerald-500" style={{ width: `${(occupancy.owner / occupancyTotal) * 100}%` }} />
+            <div className="bg-sky-500" style={{ width: `${(occupancy.tenant / occupancyTotal) * 100}%` }} />
+            <div className="bg-slate-300" style={{ width: `${(occupancy.empty / occupancyTotal) * 100}%` }} />
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-xs mb-4">
+            <div><span className="flex items-center gap-1.5 text-slate-500 font-semibold"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />Malik Oturuyor</span><strong className="text-lg font-black font-heading">{occupancy.owner}</strong></div>
+            <div><span className="flex items-center gap-1.5 text-slate-500 font-semibold"><span className="w-2.5 h-2.5 rounded-full bg-sky-500" />Kiracı Oturuyor</span><strong className="text-lg font-black font-heading">{occupancy.tenant}</strong></div>
+            <div><span className="flex items-center gap-1.5 text-slate-500 font-semibold"><span className="w-2.5 h-2.5 rounded-full bg-slate-300" />Boş Daire</span><strong className="text-lg font-black font-heading">{occupancy.empty}</strong></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="p-3 rounded-xl bg-sky-50 border border-sky-100">
+              <span className="text-[10px] font-bold uppercase text-sky-700 block">Kiracı Sorumluluğundaki Borç</span>
+              <strong className="text-base font-black text-sky-900">{formatCurrency(tenantDebt)}</strong>
+            </div>
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-100">
+              <span className="text-[10px] font-bold uppercase text-amber-700 block">Kat Maliki Sorumluluğundaki Borç</span>
+              <strong className="text-base font-black text-amber-900">{formatCurrency(ownerDebt)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-bold text-[#172b2b] font-heading">Personel</h3>
+            <button
+              onClick={() => onNavigate("STAFF")}
+              className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 transition cursor-pointer"
+            >
+              Yönet <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="space-y-2 text-xs">
+            {Object.entries(staffByRole).map(([role, count]) => (
+              <div key={role} className="flex justify-between"><span className="text-slate-600 font-semibold">{role}</span><strong>{count}</strong></div>
+            ))}
+            {activeStaff.length === 0 && <p className="text-slate-400">Kayıtlı personel yok.</p>}
+          </div>
+          <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between text-xs">
+            <span className="text-slate-500 font-semibold">Aylık Maaş Yükü</span>
+            <strong className="text-[#172b2b]">{formatCurrency(monthlyPayroll)}</strong>
           </div>
         </div>
       </div>

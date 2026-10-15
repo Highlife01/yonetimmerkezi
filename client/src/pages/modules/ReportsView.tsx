@@ -20,7 +20,8 @@ type ReportType =
   | "TEDARIKCI_CARI"
   | "BUTCE_GERCEKLESME"
   | "GECIKME_FAIZI"
-  | "SAYAC_TUKETIM";
+  | "SAYAC_TUKETIM"
+  | "BLOK_KARNE";
 
 export default function ReportsView() {
   const {
@@ -33,9 +34,34 @@ export default function ReportsView() {
   const [activeReport, setActiveReport] = useState<ReportType>("BORCLULAR");
   const [selectedPeriod, setSelectedPeriod] = useState("2026-08");
 
+  // Blok karnesi (Yoneticim / apartman-yonetim-sistemi ilhamlı)
+  const blockReportRows = Array.from(new Set(activeSiteUnits.map(u => u.blockName))).map(blockName => {
+    const units = activeSiteUnits.filter(u => u.blockName === blockName);
+    const ids = new Set(units.map(u => u.id));
+    return {
+      blockName,
+      unitCount: units.length,
+      ownerOccupied: units.filter(u => u.residentType === "MALIK_OTURUYOR").length,
+      tenantOccupied: units.filter(u => u.residentType === "KIRACI_OTURUYOR").length,
+      empty: units.filter(u => u.residentType === "BOS").length,
+      paid: activeSiteCollections.filter(c => ids.has(c.unitId)).reduce((s, c) => s + c.amount, 0),
+      tenantDebt: units.reduce((s, u) => s + Math.max(0, u.tenantBalance ?? 0), 0),
+      ownerDebt: units.reduce((s, u) => s + Math.max(0, u.ownerBalance ?? 0), 0),
+      totalDebt: units.reduce((s, u) => s + Math.max(0, u.currentBalance), 0),
+    };
+  });
+  const reportTotalIncome = activeSiteCollections.reduce((s, c) => s + c.amount, 0);
+  const reportTotalExpense = activeSiteExpenses.reduce((s, e) => s + e.amount, 0);
+
   // Export handlers for each report
   const handleExportCurrentReport = () => {
-    if (activeReport === "BORCLULAR") {
+    if (activeReport === "BLOK_KARNE") {
+      const headers = ["Blok", "Daire", "Malik Oturuyor", "Kiracı Oturuyor", "Boş", "Ödenen Aidat (TL)", "Kiracı Borcu (TL)", "Malik Borcu (TL)", "Toplam Borç (TL)"];
+      const rows = blockReportRows.map(b => [
+        b.blockName, b.unitCount, b.ownerOccupied, b.tenantOccupied, b.empty, b.paid, b.tenantDebt, b.ownerDebt, b.totalDebt
+      ]);
+      exportToCSV(`${activeSite.name}_Blok_Karnesi_Raporu`, headers, rows);
+    } else if (activeReport === "BORCLULAR") {
       const debtors = activeSiteUnits.filter(u => u.currentBalance > 0);
       const headers = ["Blok", "Daire No", "Kat Maliki", "Kiracı", "Telefon", "Borç Tutarı (TL)"];
       const rows = debtors.map(u => {
@@ -136,6 +162,7 @@ export default function ReportsView() {
         {/* Report Selector Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-2 border-t border-[#f0f4f1]">
           {[
+            { id: "BLOK_KARNE", label: "Blok Karnesi & Kiracı/Malik Özeti", icon: Building2 },
             { id: "BORCLULAR", label: "Borçlu Listesi & Yaşlandırma", icon: Wallet },
             { id: "TAHSILAT", label: "Tahsilat Raporu", icon: HandCoins },
             { id: "GELIR_GIDER", label: "Gelir & Gider Denge Tablosu", icon: ArrowUpRight },
@@ -169,6 +196,7 @@ export default function ReportsView() {
           <div>
             <span className="text-[10px] uppercase font-bold text-[#7c8a87] tracking-widest">{activeSite.name} RESMİ RAPORU</span>
             <h3 className="text-lg font-bold text-[#172b2b]">
+              {activeReport === "BLOK_KARNE" && "Blok Finansal Karnesi, Kiracı / Kat Maliki Borç Sorumluluğu ve Net Durum"}
               {activeReport === "BORCLULAR" && "Ayrıntılı Borçlu Listesi ve Yaşlandırma Dökümü"}
               {activeReport === "TAHSILAT" && "Dönemsel Tahsilatlar ve Makbuz Listesi"}
               {activeReport === "GELIR_GIDER" && "Gelir ve Gider Denge Tablosu (Mizan)"}
@@ -184,6 +212,59 @@ export default function ReportsView() {
         </div>
 
         {/* Report Table based on selection */}
+        {activeReport === "BLOK_KARNE" && (
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#f8faf7] border-b border-[#e4eae3] text-[#7c8a87] text-[10px] uppercase font-bold">
+                  <tr>
+                    <th className="py-2.5 px-3">Blok</th>
+                    <th className="py-2.5 px-3 text-right">Daire</th>
+                    <th className="py-2.5 px-3 text-right">Malik Oturuyor</th>
+                    <th className="py-2.5 px-3 text-right">Kiracı Oturuyor</th>
+                    <th className="py-2.5 px-3 text-right">Boş</th>
+                    <th className="py-2.5 px-3 text-right">Ödenen Aidat</th>
+                    <th className="py-2.5 px-3 text-right">Kiracı Borcu</th>
+                    <th className="py-2.5 px-3 text-right">Malik Borcu</th>
+                    <th className="py-2.5 px-3 text-right">Toplam Borç</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#f0f4f1]">
+                  {blockReportRows.map(b => (
+                    <tr key={b.blockName} className="hover:bg-slate-50">
+                      <td className="py-2.5 px-3 font-bold text-[#172b2b]">{b.blockName}</td>
+                      <td className="py-2.5 px-3 text-right">{b.unitCount}</td>
+                      <td className="py-2.5 px-3 text-right">{b.ownerOccupied}</td>
+                      <td className="py-2.5 px-3 text-right">{b.tenantOccupied}</td>
+                      <td className="py-2.5 px-3 text-right">{b.empty}</td>
+                      <td className="py-2.5 px-3 text-right font-bold text-emerald-700">{formatCurrency(b.paid)}</td>
+                      <td className="py-2.5 px-3 text-right text-sky-800 font-semibold">{formatCurrency(b.tenantDebt)}</td>
+                      <td className="py-2.5 px-3 text-right text-amber-800 font-semibold">{formatCurrency(b.ownerDebt)}</td>
+                      <td className="py-2.5 px-3 text-right font-bold text-rose-600">{formatCurrency(b.totalDebt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="border border-[#e4eae3] rounded-xl p-4 bg-[#f8faf7]">
+                <span className="text-[10px] uppercase font-bold text-[#7c8a87] block">Toplam Gelir</span>
+                <strong className="text-base text-emerald-800">{formatCurrency(reportTotalIncome)}</strong>
+              </div>
+              <div className="border border-[#e4eae3] rounded-xl p-4 bg-[#f8faf7]">
+                <span className="text-[10px] uppercase font-bold text-[#7c8a87] block">Toplam Gider</span>
+                <strong className="text-base text-rose-800">{formatCurrency(reportTotalExpense)}</strong>
+              </div>
+              <div className={`border rounded-xl p-4 ${reportTotalIncome - reportTotalExpense >= 0 ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200"}`}>
+                <span className="text-[10px] uppercase font-bold text-[#7c8a87] block">
+                  {reportTotalIncome - reportTotalExpense >= 0 ? "Net Fazla" : "Net Açık"}
+                </span>
+                <strong className="text-base text-[#172b2b]">{formatCurrency(Math.abs(reportTotalIncome - reportTotalExpense))}</strong>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeReport === "BORCLULAR" && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">

@@ -6,7 +6,8 @@ import {
   ServiceRequest, Announcement, Poll, MeetingMinute,
   DocumentArchiveItem, AssetFixture, StaffMember, VisitorLog,
   ParcelLog, MeterReading, AuditLogEntry, ManagementCompany,
-  PaymentMethod, DuesCategory, DistributionMethod, RequestStatus, RequestPriority
+  PaymentMethod, DuesCategory, DistributionMethod, RequestStatus, RequestPriority,
+  WhatsAppConfig, WhatsAppLogEntry
 } from "@/types";
 import {
   INITIAL_COMPANY, INITIAL_SITES, INITIAL_BLOCKS, INITIAL_PEOPLE,
@@ -36,10 +37,13 @@ interface AppContextType {
 
   // Blocks & Units
   blocks: Block[];
+  addBlock: (blockData: Omit<Block, "id">) => Promise<void>;
+  deleteBlock: (blockId: string) => Promise<void>;
   units: Unit[];
   activeSiteUnits: Unit[];
   addUnit: (unitData: Omit<Unit, "id">) => Promise<void>;
   updateUnit: (unitId: string, unitData: Partial<Unit>) => Promise<void>;
+  deleteUnit: (unitId: string) => Promise<void>;
   bulkImportUnitsAndPeople: (items: Array<{
     blockName: string;
     unitNumber: string;
@@ -75,6 +79,7 @@ interface AppContextType {
     distributionMethod: DistributionMethod;
     totalAmountOrPerUnit: number;
     targetBlockId?: string;
+    responsibilityMode?: "AUTO_KMK" | "CUSTOM_RATIO" | "OCCUPANT_ONLY" | "OWNER_ONLY";
   }) => Promise<void>;
   cancelTahakkuk: (tahakkukId: string, reason?: string) => Promise<void>;
 
@@ -89,6 +94,7 @@ interface AppContextType {
     description: string;
     referenceNo?: string;
     settledTahakkukId?: string;
+    payerType?: "KIRACI" | "MALIK";
   }) => Collection;
 
   // Ledger Items
@@ -170,12 +176,53 @@ interface AppContextType {
   activeSiteAuditLogs: AuditLogEntry[];
   addAuditLog: (actionType: AuditLogEntry["actionType"], module: string, description: string, financialAmount?: number) => void;
 
+  // WhatsApp Automation & Logs
+  whatsappConfig: WhatsAppConfig;
+  updateWhatsAppConfig: (updates: Partial<WhatsAppConfig>) => void;
+  whatsappLogs: WhatsAppLogEntry[];
+  activeSiteWhatsAppLogs: WhatsAppLogEntry[];
+  logWhatsAppMessage: (entry: Omit<WhatsAppLogEntry, "id" | "siteId" | "timestamp" | "httpCode" | "status">) => WhatsAppLogEntry;
+  sendBulkWhatsAppReminders: () => number;
+
   // Reset
   resetDemoData: () => void;
   resetToDefaults: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+
+const INITIAL_WHATSAPP_LOGS: WhatsAppLogEntry[] = [
+  {
+    id: "walog-1",
+    siteId: "site-1",
+    timestamp: "2026-10-14 10:02:14",
+    type: "AIDAT_HATIRLATMA",
+    unitId: "u-3",
+    unitName: "A Blok D:3",
+    recipientName: "Selim Aksoy",
+    phone: "0532 411 22 33",
+    period: "2026-10",
+    amount: 6400,
+    messagePreview: "Sayın Selim Aksoy, Zümrüt Vadisi Konakları A Blok D:3 dairenize ait 2026-10 dönemi 6.400 TL aidat borcunuz bulunmaktadır.",
+    status: "BASARILI",
+    httpCode: 200,
+  },
+  {
+    id: "walog-2",
+    siteId: "site-1",
+    timestamp: "2026-10-12 14:30:05",
+    type: "EKSTRA_BORC",
+    unitId: "u-5",
+    unitName: "B Blok D:1",
+    recipientName: "Kaan Demir",
+    phone: "0544 822 19 00",
+    period: "2026-10",
+    amount: 9600,
+    messagePreview: "Sayın Kaan Demir, B Blok D:1 dairenize ait gecikmiş demirbaş ve aidat borcunuz 9.600 TL'dir. Lütfen ödeme yapınız.",
+    status: "BASARILI",
+    httpCode: 200,
+  },
+];
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const { currentUser } = useAuth();
@@ -206,6 +253,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [parcels, setParcels] = useState<ParcelLog[]>([]);
   const [meters, setMeters] = useState<MeterReading[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+  const [whatsappConfig, setWhatsappConfig] = useState<WhatsAppConfig>({
+    siteId: "site-1",
+    enabled: true,
+    provider: "META_CLOUD_API",
+    phoneNumberId: "104928374651920",
+    wabaId: "994827162534102",
+    templateName: "aidat_hatirlatma_tr",
+    autoReminderDay: 10,
+    autoReminderTime: "10:00",
+    messageTemplate: "Sayın {ad_soyad}, {site_adi} {daire_no} numaralı bağımsız bölümünüze ait {donem} dönemi toplam {borc} ₺ bakiye bulunmaktadır. Son ödeme tarihi: {son_odeme_tarihi}. IBAN: {iban}",
+  });
+  const [whatsappLogs, setWhatsappLogs] = useState<WhatsAppLogEntry[]>(INITIAL_WHATSAPP_LOGS);
 
   // =========================================================================
   // Firestore Live Real-Time Data Synchronization
@@ -546,12 +605,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addAuditLog("UPDATE", "Site & Banka Ayarları", `${siteData.name || "Site"} ayarları ve IBAN bilgileri güncellendi.`);
   };
 
+  // Blocks CRUD
+  const addBlock = async (blockData: Omit<Block, "id">) => {
+    const newId = "block-" + Date.now();
+    const newBlock: Block = {
+      ...blockData,
+      id: newId,
+    };
+    setBlocks((prev) => [...prev, newBlock]);
+    try {
+      await setDoc(doc(db, "blocks", newId), newBlock);
+    } catch (e) {}
+    addAuditLog("CREATE", "Blok Yönetimi", `Yeni blok tanımlandı: ${newBlock.name} (${newBlock.floorsCount} Kat, ${newBlock.unitsCount} Daire)`);
+  };
+
+  const deleteBlock = async (blockId: string) => {
+    const targetBlock = blocks.find((b) => b.id === blockId);
+    setBlocks((prev) => prev.filter((b) => b.id !== blockId));
+    try {
+      await deleteDoc(doc(db, "blocks", blockId));
+    } catch (e) {}
+    if (targetBlock) {
+      addAuditLog("DELETE", "Blok Yönetimi", `${targetBlock.name} kaydı silindi.`);
+    }
+  };
+
   // Units CRUD
   const addUnit = async (unitData: Omit<Unit, "id">) => {
     const newId = "unit-" + Date.now();
+    const defaultRatio = unitData.paymentRatio || {
+      duesTenantRatio: 100,
+      duesOwnerRatio: 0,
+      extraTenantRatio: 0,
+      extraOwnerRatio: 100,
+    };
     const newUnit: Unit = {
       ...unitData,
       id: newId,
+      paymentRatio: defaultRatio,
     };
     setUnits((prev) => [...prev, newUnit]);
     try {
@@ -568,6 +659,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await updateDoc(doc(db, "units", unitId), unitData);
     } catch (e) {}
     addAuditLog("UPDATE", "Bağımsız Bölümler", `Daire bilgileri güncellendi (ID: ${unitId})`);
+  };
+
+  const deleteUnit = async (unitId: string) => {
+    const targetUnit = units.find((u) => u.id === unitId);
+    setUnits((prev) => prev.filter((u) => u.id !== unitId));
+    try {
+      await deleteDoc(doc(db, "units", unitId));
+    } catch (e) {}
+    if (targetUnit) {
+      addAuditLog("DELETE", "Bağımsız Bölümler", `${targetUnit.blockName} No:${targetUnit.unitNumber} bağımsız bölüm kaydı silindi.`);
+    }
   };
 
   const bulkImportUnitsAndPeople = async (items: Array<{
@@ -647,6 +749,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ownerId,
         tenantId,
         currentBalance: Number(item.initialBalance || 0),
+        paymentRatio: {
+          duesTenantRatio: 100,
+          duesOwnerRatio: 0,
+          extraTenantRatio: 0,
+          extraOwnerRatio: 100,
+        },
       });
     });
 
@@ -732,7 +840,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addAuditLog("UPDATE", "Kiracı İşlemleri", `${unit.blockName} D:${unit.unitNumber} dairesi tahliye edildi (boşa çıkarıldı)`);
   };
 
-  // Batch Tahakkuk
+  // Batch Tahakkuk (Kiracı / Ev Sahibi Borç Paylaşım Oranları Destekli)
   const createBatchTahakkuk = async (params: {
     title: string;
     period: string;
@@ -741,6 +849,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     distributionMethod: DistributionMethod;
     totalAmountOrPerUnit: number;
     targetBlockId?: string;
+    responsibilityMode?: "AUTO_KMK" | "CUSTOM_RATIO" | "OCCUPANT_ONLY" | "OWNER_ONLY";
   }) => {
     const targetUnits = units.filter((u) => {
       if (u.siteId !== activeSiteId) return false;
@@ -750,59 +859,87 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (targetUnits.length === 0) return;
 
-    let allocations: TahakkukRecord["allocations"] = [];
+    const totalSqm = targetUnits.reduce((sum, u) => sum + (u.grossSquareMeters || 100), 0);
+    const totalLandShare = targetUnits.reduce((sum, u) => sum + (u.shareOfLand || 10), 0);
+    const isExtraOrFixture = ["DEMIRBAS", "BAKIM_ONARIM", "EK_BUTCE"].includes(params.category);
+    const mode = params.responsibilityMode || "AUTO_KMK";
+
     let totalTarget = 0;
 
-    if (params.distributionMethod === "EQUAL") {
-      const perUnit = params.totalAmountOrPerUnit;
-      allocations = targetUnits.map((u) => {
-        const owner = people.find((p) => p.id === u.ownerId);
-        const occupant = u.tenantId ? people.find((p) => p.id === u.tenantId) : owner;
-        return {
-          unitId: u.id,
-          unitName: `${u.blockName} D:${u.unitNumber}`,
-          personId: occupant?.id || u.ownerId,
-          personName: occupant?.fullName || "Bilinmiyor",
-          amount: perUnit,
-          paidAmount: 0,
-          isPaid: false,
-        };
-      });
-      totalTarget = perUnit * targetUnits.length;
-    } else if (params.distributionMethod === "SQM") {
-      const totalSqm = targetUnits.reduce((sum, u) => sum + (u.grossSquareMeters || 100), 0);
-      const totalBudget = params.totalAmountOrPerUnit;
-      allocations = targetUnits.map((u) => {
-        const share = (u.grossSquareMeters || 100) / totalSqm;
-        const amount = Math.round(totalBudget * share);
-        const occupant = u.tenantId ? people.find((p) => p.id === u.tenantId) : people.find((p) => p.id === u.ownerId);
-        return {
-          unitId: u.id,
-          unitName: `${u.blockName} D:${u.unitNumber}`,
-          personId: occupant?.id || u.ownerId,
-          personName: occupant?.fullName || "Bilinmiyor",
-          amount,
-          paidAmount: 0,
-          isPaid: false,
-        };
-      });
-      totalTarget = totalBudget;
-    } else {
-      const perUnit = params.totalAmountOrPerUnit;
-      allocations = targetUnits.map((u) => {
-        const occupant = u.tenantId ? people.find((p) => p.id === u.tenantId) : people.find((p) => p.id === u.ownerId);
-        return {
-          unitId: u.id,
-          unitName: `${u.blockName} D:${u.unitNumber}`,
-          personId: occupant?.id || u.ownerId,
-          personName: occupant?.fullName || "Bilinmiyor",
-          amount: perUnit,
-          paidAmount: 0,
-          isPaid: false,
-        };
-      });
-      totalTarget = perUnit * targetUnits.length;
-    }
+    const allocations: TahakkukRecord["allocations"] = targetUnits.map((u) => {
+      let unitAmount = params.totalAmountOrPerUnit;
+      if (params.distributionMethod === "SQM") {
+        const share = (u.grossSquareMeters || 100) / (totalSqm || 1);
+        unitAmount = Math.round(params.totalAmountOrPerUnit * share);
+      } else if (params.distributionMethod === "LAND_SHARE") {
+        const share = (u.shareOfLand || 10) / (totalLandShare || 1);
+        unitAmount = Math.round(params.totalAmountOrPerUnit * share);
+      }
+      totalTarget += unitAmount;
+
+      const owner = people.find((p) => p.id === u.ownerId);
+      const tenant = u.tenantId ? people.find((p) => p.id === u.tenantId) : undefined;
+      const ratio = u.paymentRatio || {
+        duesTenantRatio: 100,
+        duesOwnerRatio: 0,
+        extraTenantRatio: 0,
+        extraOwnerRatio: 100,
+      };
+
+      let tenantRatio = 0;
+      let ownerRatio = 100;
+
+      if (tenant && u.residentType === "KIRACI_OTURUYOR") {
+        if (mode === "OWNER_ONLY") {
+          tenantRatio = 0;
+          ownerRatio = 100;
+        } else if (mode === "OCCUPANT_ONLY") {
+          tenantRatio = 100;
+          ownerRatio = 0;
+        } else {
+          // AUTO_KMK or CUSTOM_RATIO uses unit's configured ratios
+          tenantRatio = isExtraOrFixture ? ratio.extraTenantRatio : ratio.duesTenantRatio;
+          ownerRatio = isExtraOrFixture ? ratio.extraOwnerRatio : ratio.duesOwnerRatio;
+        }
+      }
+
+      const tenantAmount = Math.round((unitAmount * tenantRatio) / 100);
+      const ownerAmount = unitAmount - tenantAmount;
+
+      let payerType: "KIRACI" | "MALIK" | "ORTAK" = "MALIK";
+      let primaryPerson = owner;
+
+      if (tenantRatio === 100 && tenant) {
+        payerType = "KIRACI";
+        primaryPerson = tenant;
+      } else if (tenantRatio > 0 && ownerRatio > 0 && tenant) {
+        payerType = "ORTAK";
+        primaryPerson = tenant;
+      } else {
+        payerType = "MALIK";
+        primaryPerson = owner;
+      }
+
+      const displayPersonName =
+        payerType === "ORTAK"
+          ? `${tenant?.fullName || "Kiracı"} (%${tenantRatio}) / ${owner?.fullName || "Malik"} (%${ownerRatio})`
+          : primaryPerson?.fullName || "Bilinmiyor";
+
+      return {
+        unitId: u.id,
+        unitName: `${u.blockName} D:${u.unitNumber}`,
+        personId: primaryPerson?.id || u.ownerId,
+        personName: displayPersonName,
+        payerType,
+        tenantAmount,
+        ownerAmount,
+        paidTenantAmount: 0,
+        paidOwnerAmount: 0,
+        amount: unitAmount,
+        paidAmount: 0,
+        isPaid: false,
+      };
+    });
 
     const newTahakkukId = "tahakkuk-" + Date.now();
     const newTahakkuk: TahakkukRecord = {
@@ -833,7 +970,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const alloc = allocations.find((a) => a.unitId === u.id);
         if (alloc) {
           const newBal = u.currentBalance + alloc.amount;
+          const newTenantBal = (u.tenantBalance ?? (u.tenantId ? u.currentBalance : 0)) + (alloc.tenantAmount || 0);
+          const newOwnerBal = (u.ownerBalance ?? (u.tenantId ? 0 : u.currentBalance)) + (alloc.ownerAmount || 0);
           const ledId = "led-" + Date.now() + "-" + u.id;
+          const payerLabel = alloc.payerType === "ORTAK"
+            ? `[K:₺${alloc.tenantAmount} / M:₺${alloc.ownerAmount}]`
+            : alloc.payerType === "KIRACI"
+            ? "[Kiracı]"
+            : "[Kat Maliki]";
           const ledItem: UnitAccountLedgerItem = {
             id: ledId,
             siteId: activeSiteId,
@@ -841,7 +985,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             date: nowStr,
             type: "BORC",
             category: params.category,
-            description: `${params.title} (${params.period})`,
+            description: `${params.title} (${params.period}) ${payerLabel}`,
             debtAmount: alloc.amount,
             creditAmount: 0,
             balanceAfter: newBal,
@@ -850,8 +994,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           };
           newLedgerRows.push(ledItem);
           setDoc(doc(db, "ledger_items", ledId), ledItem).catch(() => {});
-          updateDoc(doc(db, "units", u.id), { currentBalance: newBal }).catch(() => {});
-          return { ...u, currentBalance: newBal };
+          updateDoc(doc(db, "units", u.id), {
+            currentBalance: newBal,
+            tenantBalance: newTenantBal,
+            ownerBalance: newOwnerBal,
+          }).catch(() => {});
+          return {
+            ...u,
+            currentBalance: newBal,
+            tenantBalance: newTenantBal,
+            ownerBalance: newOwnerBal,
+          };
         }
         return u;
       })
@@ -913,12 +1066,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     description: string;
     referenceNo?: string;
     settledTahakkukId?: string;
+    payerType?: "KIRACI" | "MALIK";
   }): Collection => {
     const unit = units.find((u) => u.id === params.unitId);
     const targetAcc = accounts.find((a) => a.id === params.targetAccountId);
-    const occupant = unit?.tenantId
-      ? people.find((p) => p.id === unit.tenantId)
-      : people.find((p) => p.id === unit?.ownerId);
+    const owner = people.find((p) => p.id === unit?.ownerId);
+    const tenant = unit?.tenantId ? people.find((p) => p.id === unit.tenantId) : undefined;
+
+    const effectivePayerType: "KIRACI" | "MALIK" =
+      params.payerType || (tenant ? "KIRACI" : "MALIK");
+    const payerPerson = effectivePayerType === "KIRACI" && tenant ? tenant : owner;
 
     const receiptNumber = `MKB-${new Date().getFullYear()}-${String(collections.length + 843).padStart(5, "0")}`;
     const now = new Date();
@@ -932,8 +1089,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       receiptNumber,
       unitId: params.unitId,
       unitName: unit ? `${unit.blockName} · Daire ${unit.unitNumber}` : "Daire",
-      personId: occupant?.id || unit?.ownerId || "unknown",
-      personName: occupant?.fullName || "Bilinmiyor",
+      personId: payerPerson?.id || unit?.ownerId || "unknown",
+      personName: payerPerson?.fullName || "Bilinmiyor",
+      payerType: effectivePayerType,
       amount: params.amount,
       paymentDate: ts,
       paymentMethod: params.paymentMethod,
@@ -953,7 +1111,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Update Unit balance & Ledger
     const oldBalance = unit?.currentBalance || 0;
     const newBalance = oldBalance - params.amount;
-    updateUnit(params.unitId, { currentBalance: newBalance });
+    const currentTenantBal = unit?.tenantBalance ?? (unit?.tenantId ? oldBalance : 0);
+    const currentOwnerBal = unit?.ownerBalance ?? (unit?.tenantId ? 0 : oldBalance);
+
+    const updatedTenantBal =
+      effectivePayerType === "KIRACI"
+        ? Math.max(0, currentTenantBal - params.amount)
+        : currentTenantBal;
+    const updatedOwnerBal =
+      effectivePayerType === "MALIK"
+        ? Math.max(0, currentOwnerBal - params.amount)
+        : currentOwnerBal;
+
+    updateUnit(params.unitId, {
+      currentBalance: newBalance,
+      tenantBalance: updatedTenantBal,
+      ownerBalance: updatedOwnerBal,
+    });
 
     const newLedgerItem: UnitAccountLedgerItem = {
       id: "led-" + Date.now(),
@@ -962,7 +1136,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       date: ts.split(" ")[0],
       type: "ALACAK",
       category: "Tahsilat",
-      description: `${params.description || "Tahsilat"} (${receiptNumber})`,
+      description: `${params.description || "Tahsilat"} [${effectivePayerType === "KIRACI" ? "Kiracı" : "Kat Maliki"}] (${receiptNumber})`,
       debtAmount: 0,
       creditAmount: params.amount,
       balanceAfter: newBalance,
@@ -990,7 +1164,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         type: "GIRIS",
         amount: params.amount,
         category: "Aidat Tahsilatı",
-        description: `${newCol.unitName} - ${newCol.personName} Tahsilat (${receiptNumber})`,
+        description: `${newCol.unitName} - ${newCol.personName} (${effectivePayerType === "KIRACI" ? "Kiracı" : "Malik"}) Tahsilat (${receiptNumber})`,
         relatedEntityName: newCol.unitName,
         balanceAfter: newAccBal,
         createdBy: currentUser.name,
@@ -1006,7 +1180,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addAuditLog(
       "COLLECT",
       "Tahsilatlar",
-      `${newCol.unitName} (${newCol.personName}) ${params.amount.toLocaleString("tr-TR")} TL tahsilat yapıldı. Makbuz: ${receiptNumber}`,
+      `${newCol.unitName} (${newCol.personName} - ${effectivePayerType === "KIRACI" ? "Kiracı" : "Kat Maliki"}) ${params.amount.toLocaleString("tr-TR")} TL tahsilat yapıldı. Makbuz: ${receiptNumber}`,
       params.amount
     );
 
@@ -1397,6 +1571,92 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addAuditLog("CREATE", "Sayaç Okuma", `${newMeter.unitName} için ${newMeter.meterType} endeksi girildi: Tüketim ${consumption}`);
   };
 
+  // WhatsApp Automation & Logs
+  const activeSiteWhatsAppLogs = whatsappLogs.filter((l) => l.siteId === activeSiteId);
+
+  const updateWhatsAppConfig = (updates: Partial<WhatsAppConfig>) => {
+    setWhatsappConfig((prev) => ({ ...prev, ...updates, siteId: activeSiteId }));
+    addAuditLog("UPDATE", "WhatsApp Otomasyon", "WhatsApp bildirim şablonu ve zamanlama ayarları güncellendi.");
+  };
+
+  const logWhatsAppMessage = (
+    entry: Omit<WhatsAppLogEntry, "id" | "siteId" | "timestamp" | "httpCode" | "status">
+  ): WhatsAppLogEntry => {
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+    const newLog: WhatsAppLogEntry = {
+      ...entry,
+      id: "walog-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+      siteId: activeSiteId,
+      timestamp: ts,
+      status: "BASARILI",
+      httpCode: 200,
+    };
+
+    setWhatsappLogs((prev) => [newLog, ...prev]);
+    addAuditLog(
+      "SYSTEM",
+      "WhatsApp Bildirim",
+      `${newLog.recipientName} (${newLog.unitName}) kişisine WhatsApp bildirimi iletildi [200 OK].`,
+      newLog.amount
+    );
+    return newLog;
+  };
+
+  const sendBulkWhatsAppReminders = (): number => {
+    const debtors = activeSiteUnits.filter((u) => u.currentBalance > 0);
+    if (debtors.length === 0) return 0;
+
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const currentPeriod = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+
+    const newEntries: WhatsAppLogEntry[] = debtors.map((u, idx) => {
+      const occupant = u.tenantId
+        ? people.find((p) => p.id === u.tenantId)
+        : people.find((p) => p.id === u.ownerId);
+      const recipientName = occupant?.fullName || "Daire Sakini";
+      const phone = occupant?.phone || "0500 000 00 00";
+      const unitLabel = `${u.blockName} D:${u.unitNumber}`;
+
+      const renderedMsg = whatsappConfig.messageTemplate
+        .replace(/\{ad_soyad\}/g, recipientName)
+        .replace(/\{daire_no\}/g, unitLabel)
+        .replace(/\{borc\}/g, u.currentBalance.toLocaleString("tr-TR"))
+        .replace(/\{donem\}/g, currentPeriod)
+        .replace(/\{site_adi\}/g, activeSite.name)
+        .replace(/\{son_odeme_tarihi\}/g, `Her ayın ${activeSite.monthlyDuesDueDay}. günü`)
+        .replace(/\{iban\}/g, activeSite.bankIban || "");
+
+      return {
+        id: `walog-bulk-${Date.now()}-${idx}`,
+        siteId: activeSiteId,
+        timestamp: ts,
+        type: "AIDAT_HATIRLATMA",
+        unitId: u.id,
+        unitName: unitLabel,
+        recipientName,
+        phone,
+        period: currentPeriod,
+        amount: u.currentBalance,
+        messagePreview: renderedMsg,
+        status: "BASARILI",
+        httpCode: 200,
+      };
+    });
+
+    setWhatsappLogs((prev) => [...newEntries, ...prev]);
+    addAuditLog(
+      "SYSTEM",
+      "WhatsApp Otomasyon",
+      `${newEntries.length} borçlu daireye toplu WhatsApp aidat hatırlatma mesajı gönderildi.`
+    );
+    return newEntries.length;
+  };
+
   // Reset to live initial seeds
   const resetDemoData = () => {
     INITIAL_SITES.forEach(s => setDoc(doc(db, "sites", s.id), s).catch(() => {}));
@@ -1419,10 +1679,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addSite,
         updateSite,
         blocks,
+        addBlock,
+        deleteBlock,
         units,
         activeSiteUnits,
         addUnit,
         updateUnit,
+        deleteUnit,
         bulkImportUnitsAndPeople,
         people,
         activeSitePeople,
@@ -1486,6 +1749,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         auditLogs,
         activeSiteAuditLogs,
         addAuditLog,
+        whatsappConfig,
+        updateWhatsAppConfig,
+        whatsappLogs,
+        activeSiteWhatsAppLogs,
+        logWhatsAppMessage,
+        sendBulkWhatsAppReminders,
         resetDemoData,
         resetToDefaults,
       }}
@@ -1502,3 +1771,4 @@ export function useApp() {
   }
   return context;
 }
+

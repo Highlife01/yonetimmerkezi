@@ -30,12 +30,14 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
   const [selectedCollectionForPrint, setSelectedCollectionForPrint] = useState<Collection | null>(null);
 
   // New Collection Form
+  const initialUnit = activeSiteUnits.find((u) => u.id === preselectedUnitId) || activeSiteUnits[0];
   const [newColData, setNewColData] = useState({
-    unitId: preselectedUnitId || activeSiteUnits[0]?.id || "",
-    amount: 2500,
+    unitId: initialUnit?.id || "",
+    payerType: (initialUnit?.tenantId ? "KIRACI" : "MALIK") as "KIRACI" | "MALIK",
+    amount: initialUnit && initialUnit.currentBalance > 0 ? initialUnit.currentBalance : 2500,
     paymentMethod: "HAVALE_EFT" as PaymentMethod,
     targetAccountId: activeSiteAccounts[0]?.id || "",
-    description: "Eylül 2026 Aidat Ödemesi",
+    description: "Ekim 2026 Aidat Ödemesi",
     referenceNo: "",
     settledTahakkukId: activeSiteTahakkuklar[0]?.id || "",
   });
@@ -54,10 +56,32 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
 
   const handleUnitChange = (unitId: string) => {
     const unit = activeSiteUnits.find((u) => u.id === unitId);
+    const defaultPayer: "KIRACI" | "MALIK" = unit?.tenantId ? "KIRACI" : "MALIK";
     setNewColData({
       ...newColData,
       unitId,
+      payerType: defaultPayer,
       amount: unit && unit.currentBalance > 0 ? unit.currentBalance : 2500,
+    });
+  };
+
+  const handlePayerTypeChange = (payerType: "KIRACI" | "MALIK") => {
+    const unit = activeSiteUnits.find((u) => u.id === newColData.unitId);
+    let suggestedAmt = newColData.amount;
+    if (unit) {
+      if (payerType === "KIRACI" && unit.tenantBalance && unit.tenantBalance > 0) {
+        suggestedAmt = unit.tenantBalance;
+      } else if (payerType === "MALIK" && unit.ownerBalance && unit.ownerBalance > 0) {
+        suggestedAmt = unit.ownerBalance;
+      } else if (unit.currentBalance > 0) {
+        suggestedAmt = unit.currentBalance;
+      }
+    }
+    setNewColData({
+      ...newColData,
+      payerType,
+      amount: suggestedAmt,
+      description: payerType === "MALIK" ? "Demirbaş / Kat Maliki Ödemesi" : "Aylık Aidat (Kiracı) Ödemesi",
     });
   };
 
@@ -70,6 +94,7 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
 
     const createdCol = addCollection({
       unitId: newColData.unitId,
+      payerType: newColData.payerType,
       amount: Number(newColData.amount),
       paymentMethod: newColData.paymentMethod,
       targetAccountId: newColData.targetAccountId,
@@ -101,7 +126,7 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
 
         <div style="background:#f8faf7; padding:14px; border-radius:6px; margin: 15px 0; font-size:13px; line-height:1.6;">
           <div><strong>Bağımsız Bölüm:</strong> ${col.unitName}</div>
-          <div><strong>Ödeyen (Sakin):</strong> ${col.personName}</div>
+          <div><strong>Ödeyen (Sakin):</strong> ${col.personName} (${col.payerType === 'KIRACI' ? 'Kiracı' : 'Kat Maliki'})</div>
           <div><strong>Ödeme Yöntemi:</strong> ${
             col.paymentMethod === 'NAKIT' ? 'Nakit (Ofis Kasası)' :
             col.paymentMethod === 'HAVALE_EFT' ? 'Banka Havalesi / EFT' :
@@ -135,7 +160,7 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
 
   const handleExportCSV = () => {
     const headers = [
-      "Makbuz No", "Tarih", "Daire", "Sakin", "Tutar (TL)",
+      "Makbuz No", "Tarih", "Daire", "Sakin", "Ödeyen Tipi", "Tutar (TL)",
       "Ödeme Yöntemi", "Hesap / Kasa", "Açıklama", "Dekont / Ref No", "Tahsil Eden"
     ];
     const rows = filteredCollections.map((c) => [
@@ -143,6 +168,7 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
       c.paymentDate,
       c.unitName,
       c.personName,
+      c.payerType === "KIRACI" ? "Kiracı" : "Kat Maliki",
       c.amount,
       c.paymentMethod,
       c.targetAccountName,
@@ -154,6 +180,12 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
     toast.success("Tahsilatlar listesi Excel (CSV) olarak indirildi.");
   };
 
+  const selectedUnitObj = activeSiteUnits.find((u) => u.id === newColData.unitId);
+  const selectedUnitOwner = people.find((p) => p.id === selectedUnitObj?.ownerId);
+  const selectedUnitTenant = selectedUnitObj?.tenantId
+    ? people.find((p) => p.id === selectedUnitObj.tenantId)
+    : undefined;
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -162,7 +194,7 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
           <div>
             <h2 className="text-xl font-bold text-[#172b2b] tracking-tight">Tahsilat Yönetimi ve Makbuzlar</h2>
             <p className="text-xs text-[#7c8a87] mt-0.5">
-              Nakit, Havale, Kredi Kartı ve Sanal POS aidat tahsilatları, cariye mahsup ve resmi makbuz dökümü.
+              Nakit, Havale, Kredi Kartı ve Sanal POS aidat tahsilatları, Kiracı/Malik ayrımı, cariye mahsup ve resmi makbuz dökümü.
             </p>
           </div>
 
@@ -247,7 +279,16 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
                       {col.unitName}
                     </td>
                     <td className="py-3.5 px-4 text-slate-800 font-medium">
-                      {col.personName}
+                      <div className="flex items-center gap-1.5">
+                        <span>{col.personName}</span>
+                        {col.payerType && (
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                            col.payerType === "KIRACI" ? "bg-blue-50 text-blue-700" : "bg-emerald-50 text-emerald-700"
+                          }`}>
+                            {col.payerType === "KIRACI" ? "Kiracı" : "Malik"}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${
@@ -331,6 +372,51 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
                     );
                   })}
                 </select>
+              </div>
+
+              {/* KİM ÖDÜYOR? (KİRACI / KAT MALİKİ SEÇİMİ - mumindonmez17-cell esinlenmesi) */}
+              <div>
+                <label className="font-bold text-[#172b2b] block mb-1.5">Kim Ödüyor? (Borç Sorumlusu)</label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    disabled={!selectedUnitTenant}
+                    onClick={() => handlePayerTypeChange("KIRACI")}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      newColData.payerType === "KIRACI"
+                        ? "bg-blue-50 border-blue-400 text-blue-900 shadow-xs"
+                        : !selectedUnitTenant
+                        ? "bg-slate-50 border-slate-200 text-slate-400 opacity-60 cursor-not-allowed"
+                        : "bg-white border-[#e4eae3] text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <strong className="text-xs font-bold">Kiracı Ödüyor</strong>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">Kiracı</span>
+                    </div>
+                    <span className="text-[11px] block mt-1 truncate">
+                      {selectedUnitTenant ? selectedUnitTenant.fullName : "Bu dairede kiracı yok"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handlePayerTypeChange("MALIK")}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      newColData.payerType === "MALIK"
+                        ? "bg-emerald-50 border-emerald-400 text-emerald-900 shadow-xs"
+                        : "bg-white border-[#e4eae3] text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <strong className="text-xs font-bold">Ev Sahibi Ödüyor</strong>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Kat Maliki</span>
+                    </div>
+                    <span className="text-[11px] block mt-1 truncate">
+                      {selectedUnitOwner?.fullName || "Kat Maliki"}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -427,3 +513,4 @@ export default function CollectionsView({ initialOpenModal = false, preselectedU
     </div>
   );
 }
+

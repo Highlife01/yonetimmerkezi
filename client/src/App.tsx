@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,21 +7,22 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AppProvider } from "./contexts/AppContext";
 
-// Multi-Page Views
-import LandingPage from "./pages/LandingPage";
-import FeaturesPage from "./pages/public/FeaturesPage";
-import KmkGuidePage from "./pages/public/KmkGuidePage";
-import SavingsPage from "./pages/public/SavingsPage";
-import GeoCoveragePage from "./pages/public/GeoCoveragePage";
-import FaqPage from "./pages/public/FaqPage";
-import ContactPage from "./pages/public/ContactPage";
-import LoginPage from "./pages/LoginPage";
-import Home from "./pages/Home";
+// Multi-Page Views (lazy-loaded for smaller initial bundle)
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+const FeaturesPage = lazy(() => import("./pages/public/FeaturesPage"));
+const KmkGuidePage = lazy(() => import("./pages/public/KmkGuidePage"));
+const SavingsPage = lazy(() => import("./pages/public/SavingsPage"));
+const GeoCoveragePage = lazy(() => import("./pages/public/GeoCoveragePage"));
+const FaqPage = lazy(() => import("./pages/public/FaqPage"));
+const ContactPage = lazy(() => import("./pages/public/ContactPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const Home = lazy(() => import("./pages/Home"));
 
 function Router() {
   const [, setLocation] = useLocation();
 
   return (
+    <Suspense fallback={<div className="min-h-screen" />}>
     <Switch>
       <Route path="/">
         {() => <LandingPage />}
@@ -63,6 +65,7 @@ function Router() {
         {() => <LandingPage />}
       </Route>
     </Switch>
+    </Suspense>
   );
 }
 

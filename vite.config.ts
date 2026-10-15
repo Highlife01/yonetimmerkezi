@@ -219,6 +219,19 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("firebase")) return "vendor-firebase";
+          if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+          if (id.includes("framer-motion")) return "vendor-motion";
+          if (id.includes("@radix-ui")) return "vendor-radix";
+          if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return "vendor-react";
+        },
+      },
+    },
   },
   server: {
     port: 3000,
