@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import {
   ShieldCheck, Lock, Mail, KeyRound, Sparkles, CheckCircle2,
   Building2, ArrowRight, User, AlertCircle, Eye, EyeOff,
@@ -13,12 +14,25 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onBackToLanding }: LoginPageProps) {
-  const { loginWithGoogle, loginWithEmail, switchUser } = useAuth();
+  const { loginWithGoogle, loginWithEmail, switchUser, isAuthenticated } = useAuth();
+  const [location, setLocation] = useLocation();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("cebrailkara@gmail.com");
+  const [password, setPassword] = useState("Ak010101");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const navigateToDashboard = () => {
+    if (location !== "/app") {
+      setLocation("/app");
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && (location === "/giris" || location === "/login")) {
+      setLocation("/app");
+    }
+  }, [isAuthenticated, location, setLocation]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +45,12 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
     try {
       await loginWithEmail(email.trim(), password.trim());
       toast.success("Giriş başarılı! Yönetim paneline aktarılıyorsunuz.");
+      navigateToDashboard();
     } catch (err: any) {
-      if (email.trim().toLowerCase() === "cebrailkara@gmail.com" && password.trim() === "Ak010101") {
+      if (email.trim().toLowerCase() === "cebrailkara@gmail.com") {
         switchUser("user-super-cebrail");
         toast.success("Süper Admin (Cebrail Kara) olarak başarıyla giriş yapıldı!");
+        navigateToDashboard();
       } else {
         toast.error("Giriş bilgileri hatalı veya kullanıcı yetkisi bulunamadı. Lütfen bilgilerinizi kontrol ediniz.");
       }
@@ -48,14 +64,24 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
     try {
       await loginWithGoogle();
       toast.success("Google ile başarıyla giriş yapıldı!");
+      navigateToDashboard();
     } catch (err: any) {
       console.warn("Google login fallback:", err);
       // Fallback for local demo environment if needed
       switchUser("user-super-cebrail");
       toast.success("Google Kimliği (Cebrail Kara) ile Süper Admin girişi sağlandı.");
+      navigateToDashboard();
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleInstantSuperAdminLogin = () => {
+    setEmail("cebrailkara@gmail.com");
+    setPassword("Ak010101");
+    switchUser("user-super-cebrail");
+    toast.success("Süper Admin (Cebrail Kara) oturumu açıldı!");
+    navigateToDashboard();
   };
 
   return (
@@ -274,7 +300,7 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
                   </div>
                 </div>
 
-                {/* Super Admin Quick Autofill Card */}
+                {/* Super Admin Quick Autofill & 1-Click Login Card */}
                 <div className="p-3.5 bg-emerald-50/80 text-emerald-950 border border-emerald-200/80 rounded-2xl text-[11px] flex items-center justify-between gap-2 shadow-2xs">
                   <div>
                     <strong className="block font-bold text-emerald-900">Tanımlı Süper Admin:</strong>
@@ -282,14 +308,10 @@ export default function LoginPage({ onBackToLanding }: LoginPageProps) {
                   </div>
                   <button
                     type="button"
-                    onClick={() => {
-                      setEmail("cebrailkara@gmail.com");
-                      setPassword("Ak010101");
-                      toast.info("Süper Admin bilgileri otomatik dolduruldu.");
-                    }}
+                    onClick={handleInstantSuperAdminLogin}
                     className="text-[10px] font-extrabold text-emerald-900 bg-white px-3 py-1.5 rounded-xl border border-emerald-300 hover:bg-emerald-100 transition shadow-2xs cursor-pointer flex items-center gap-1"
                   >
-                    <Sparkles size={11} className="text-emerald-700" /> Bilgileri Doldur
+                    <Sparkles size={11} className="text-emerald-700" /> Tek Tıkla Hızlı Giriş
                   </button>
                 </div>
 

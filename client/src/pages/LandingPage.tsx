@@ -312,7 +312,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
           {/* Hero CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 pt-3">
             <button
-              onClick={onGoToApp}
+              onClick={handleGoToApp}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#172b2b] via-[#213f3d] to-[#172b2b] hover:from-[#213f3d] hover:to-[#2e5754] text-white text-base font-black shadow-xl shadow-emerald-950/20 transition-all transform hover:scale-105 active:scale-95 cursor-pointer border border-[#2d5250] glow-emerald"
             >
               <Zap size={20} className="fill-[#b8edb7] text-[#b8edb7]" />
@@ -753,7 +753,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               </div>
 
               <button
-                onClick={onGoToApp}
+                onClick={handleGoToApp}
                 className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#172b2b] hover:bg-[#254643] text-white text-xs font-black transition-all shadow-sm cursor-pointer whitespace-nowrap"
               >
                 Ücretsiz Demoyu Başlat →
@@ -967,7 +967,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               </div>
 
               <button
-                onClick={onGoToApp}
+                onClick={handleGoToApp}
                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#b8edb7] to-[#91e78f] hover:from-[#a7efa5] hover:to-[#7fe07d] text-[#172b2b] text-xs font-black shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 Bu Tasarrufu Sitenize Kazandırın →
@@ -1226,7 +1226,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
-                onClick={onGoToApp}
+                onClick={handleGoToApp}
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-[#b8edb7] to-[#8ae588] hover:from-[#a4eda3] hover:to-[#73d771] text-[#172b2b] text-sm font-black shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2 font-heading"
               >
                 <Zap size={18} className="fill-[#172b2b]" />
