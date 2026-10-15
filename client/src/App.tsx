@@ -12,8 +12,6 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 const FeaturesPage = lazy(() => import("./pages/public/FeaturesPage"));
 const KmkGuidePage = lazy(() => import("./pages/public/KmkGuidePage"));
 const SavingsPage = lazy(() => import("./pages/public/SavingsPage"));
-const GeoCoveragePage = lazy(() => import("./pages/public/GeoCoveragePage"));
-const FaqPage = lazy(() => import("./pages/public/FaqPage"));
 const ContactPage = lazy(() => import("./pages/public/ContactPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const Home = lazy(() => import("./pages/Home"));
@@ -35,12 +33,6 @@ function Router() {
       </Route>
       <Route path="/tasarruf-hesapla">
         {() => <SavingsPage />}
-      </Route>
-      <Route path="/turkiye-geneli-hizmet">
-        {() => <GeoCoveragePage />}
-      </Route>
-      <Route path="/sss">
-        {() => <FaqPage />}
       </Route>
       <Route path="/iletisim">
         {() => <ContactPage />}

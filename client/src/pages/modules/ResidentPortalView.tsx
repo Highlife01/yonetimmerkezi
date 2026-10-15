@@ -16,19 +16,30 @@ interface ResidentPortalViewProps {
 
 export default function ResidentPortalView({ onBackToManager }: ResidentPortalViewProps) {
   const {
-    activeSite, activeSiteUnits, activeSiteAnnouncements,
+    activeSite, activeSiteUnits, activeSiteAccounts, activeSiteAnnouncements,
     activeSiteRequests, createServiceRequest, addCollection,
     getUnitLedger, people
   } = useApp();
-  const { currentUser, switchUser, allUsers } = useAuth();
+  const { currentUser, isResidentRole } = useAuth();
 
-  // Resident unit (e.g. Unit 18 or first unit)
-  const residentUnit = activeSiteUnits.find(u => u.id === currentUser.residentUnitId) || activeSiteUnits[0];
-  const unitOwner = people.find(p => p.id === residentUnit?.ownerId);
-  const unitTenant = residentUnit?.tenantId ? people.find(p => p.id === residentUnit.tenantId) : null;
+  // Authorized resident unit (strictly residentUnitId for residents, or preview unit for managers)
+  const matchedPerson = people.find(
+    (p) => p.email && currentUser.email && p.email.toLowerCase() === currentUser.email.toLowerCase()
+  );
+  const authorizedUnitId =
+    currentUser.residentUnitId ||
+    matchedPerson?.rentedUnitId ||
+    matchedPerson?.ownedUnitIds?.[0];
 
-  // Active debt
-  const currentDebt = residentUnit?.currentBalance || 2500;
+  const residentUnit =
+    activeSiteUnits.find((u) => u.id === authorizedUnitId) ||
+    (!isResidentRole ? activeSiteUnits[0] : undefined);
+
+  const unitOwner = residentUnit ? people.find((p) => p.id === residentUnit.ownerId) : undefined;
+  const unitTenant = residentUnit?.tenantId ? people.find((p) => p.id === residentUnit.tenantId) : null;
+
+  // Real active debt (no fake fallback)
+  const currentDebt = residentUnit?.currentBalance ?? 0;
   const ledger = residentUnit ? getUnitLedger(residentUnit.id) : [];
 
   // Modals
@@ -36,12 +47,12 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isLedgerModalOpen, setIsLedgerModalOpen] = useState(false);
 
-  // Card Payment Form
-  const [paymentAmount, setPaymentAmount] = useState(currentDebt > 0 ? currentDebt : 2500);
-  const [cardNumber, setCardNumber] = useState("5421 •••• •••• 8842");
-  const [cardExpiry, setCardExpiry] = useState("12/28");
-  const [cardCvv, setCardCvv] = useState("321");
-  const [cardHolder, setCardHolder] = useState(currentUser.name || "Mehmet Kaya");
+  // Card Payment Form (no fake card numbers)
+  const [paymentAmount, setPaymentAmount] = useState(currentDebt > 0 ? currentDebt : 0);
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [cardHolder, setCardHolder] = useState(currentUser.name || "");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // Request Form
@@ -54,10 +65,17 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
 
   const handleExecuteCardPayment = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!residentUnit) {
+      toast.error("Hesabınıza tanımlı yetkili bir bağımsız bölüm bulunamadı.");
+      return;
+    }
     if (paymentAmount <= 0) {
       toast.error("Lütfen geçerli bir ödeme tutarı giriniz.");
       return;
     }
+
+    const targetBankAcc =
+      activeSiteAccounts.find((a) => a.type === "BANKA") || activeSiteAccounts[0];
 
     setIsProcessingPayment(true);
     setTimeout(() => {
@@ -66,17 +84,22 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
         unitId: residentUnit.id,
         amount: Number(paymentAmount),
         paymentMethod: "ONLINE_POS",
-        targetAccountId: "acc-bank-1",
+        targetAccountId: targetBankAcc?.id || "acc-bank",
         description: `Online Kredi Kartı Ödemesi (Sanal POS) - ${residentUnit.blockName} D:${residentUnit.unitNumber}`,
-        referenceNo: `POS-${Math.floor(100000 + Math.random() * 900000)}`,
+        referenceNo: `POS-${Date.now().toString().slice(-6)}`,
+        payerType: currentUser.role === "TENANT" ? "KIRACI" : "MALIK",
       });
       setIsPaymentModalOpen(false);
       toast.success(`₺${paymentAmount.toLocaleString("tr-TR")} tutarındaki aidat ödemeniz başarıyla alındı ve borcunuzdan düşüldü.`);
-    }, 1200);
+    }, 600);
   };
 
   const handleCreateRequest = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!residentUnit) {
+      toast.error("Hesabınıza tanımlı yetkili bir bağımsız bölüm bulunamadı.");
+      return;
+    }
     if (!newReq.title || !newReq.description) {
       toast.error("Lütfen başlık ve açıklama giriniz.");
       return;
@@ -91,6 +114,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
     });
 
     setIsRequestModalOpen(false);
+    setNewReq({ category: "ELEKTRIK" as any, title: "", description: "", priority: "ORTA" as any });
     toast.success("Talebiniz site yönetimine iletildi. Durumunu buradan takip edebilirsiniz.");
   };
 
@@ -109,13 +133,14 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Role switcher back to manager */}
-          <button
-            onClick={onBackToManager}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-[#172b2b] transition"
-          >
-            <LayoutDashboard size={14} /> Yönetici Paneline Dön
-          </button>
+          {!isResidentRole && (
+            <button
+              onClick={onBackToManager}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-[#172b2b] transition"
+            >
+              <LayoutDashboard size={14} /> Yönetici Paneline Dön
+            </button>
+          )}
 
           <div className="w-9 h-9 rounded-full bg-[#f4d8a6] text-[#7c562e] font-bold text-xs flex items-center justify-center">
             {currentUser.name.split(" ").map(n => n[0]).join("")}
@@ -129,7 +154,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-widest text-[#7c8a87]">
-              {activeSite.name} · {residentUnit.blockName} · DAİRE {residentUnit.unitNumber}
+              {activeSite.name} {residentUnit ? `· ${residentUnit.blockName} · DAİRE ${residentUnit.unitNumber}` : "· Bağımsız Bölüm Atanmadı"}
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#172b2b] mt-0.5">
               Merhaba, {currentUser.name.split(" ")[0]} <span className="text-emerald-500">✦</span>
@@ -141,7 +166,9 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
             <Building2 size={20} className="text-emerald-700" />
             <div className="text-xs">
               <strong className="block text-[#172b2b]">{activeSite.name}</strong>
-              <span className="text-[11px] text-slate-500">{residentUnit.blockName} · Daire {residentUnit.unitNumber} ({residentUnit.type})</span>
+              <span className="text-[11px] text-slate-500">
+                {residentUnit ? `${residentUnit.blockName} · Daire ${residentUnit.unitNumber} (${residentUnit.type})` : "Tanımlı daire kaydı bekleniyor"}
+              </span>
             </div>
           </div>
         </div>
@@ -154,7 +181,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
               {formatCurrency(currentDebt)}
             </h3>
             <p className="text-xs text-slate-300 pt-1">
-              Son ödeme tarihi: <strong className="text-white">10 Eylül 2026</strong>
+              Son ödeme günü: <strong className="text-white">Her ayın {activeSite.monthlyDuesDueDay}. günü</strong>
             </p>
           </div>
 
@@ -167,7 +194,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
             </button>
             <button
               onClick={() => {
-                setPaymentAmount(currentDebt > 0 ? currentDebt : 2500);
+                setPaymentAmount(currentDebt > 0 ? currentDebt : 0);
                 setIsPaymentModalOpen(true);
               }}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#b8edb7] hover:bg-[#a3e5a2] text-[#172b2b] text-sm font-extrabold transition shadow-lg"
@@ -190,7 +217,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
               </div>
             </div>
             <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-              {activeSite.bankName || "Garanti BBVA"}
+              {activeSite.bankName || activeSiteAccounts.find(a => a.type === "BANKA")?.bankName || "Resmi Banka Hesabı"}
             </span>
           </div>
 
@@ -200,19 +227,22 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
               <div className="truncate">
                 <span className="text-[10px] font-bold uppercase text-[#7c8a87] block">RESMİ IBAN NUMARASI</span>
                 <strong className="text-xs sm:text-sm font-mono font-bold text-emerald-950 block truncate mt-0.5">
-                  {activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01"}
+                  {activeSite.bankIban || activeSiteAccounts.find(a => a.type === "BANKA")?.iban || "Yönetim tarafından henüz IBAN tanımlanmadı"}
                 </strong>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(activeSite.bankIban || "TR55 0006 2000 0001 2345 6789 01");
-                  toast.success("IBAN numarası panoya kopyalandı!");
-                }}
-                className="px-3 py-1.5 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white text-[11px] font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer shadow-xs"
-              >
-                <Copy size={13} /> Kopyala
-              </button>
+              {(activeSite.bankIban || activeSiteAccounts.find(a => a.type === "BANKA")?.iban) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ibanVal = activeSite.bankIban || activeSiteAccounts.find(a => a.type === "BANKA")?.iban || "";
+                    navigator.clipboard.writeText(ibanVal);
+                    toast.success("IBAN numarası panoya kopyalandı!");
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-[#172b2b] hover:bg-[#294342] text-white text-[11px] font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer shadow-xs"
+                >
+                  <Copy size={13} /> Kopyala
+                </button>
+              )}
             </div>
 
             {/* Alıcı & Açıklama Şablonu */}
@@ -223,13 +253,14 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
                   {activeSite.name} Kat Malikleri Yöneticiliği
                 </strong>
                 <span className="text-[10px] text-slate-500 block truncate">
-                  Açıklama: {residentUnit.blockName} D:{residentUnit.unitNumber} {currentUser.name}
+                  Açıklama: {residentUnit ? `${residentUnit.blockName} D:${residentUnit.unitNumber}` : "Bağımsız Bölüm"} {currentUser.name}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard.writeText(`${residentUnit.blockName} D:${residentUnit.unitNumber} ${currentUser.name} - Aidat`);
+                  const desc = `${residentUnit ? `${residentUnit.blockName} D:${residentUnit.unitNumber}` : activeSite.name} ${currentUser.name} - Aidat`;
+                  navigator.clipboard.writeText(desc);
                   toast.success("Ödeme açıklama metni kopyalandı!");
                 }}
                 className="px-3 py-1.5 rounded-xl bg-white border border-[#d2dbd7] hover:bg-slate-50 text-slate-800 text-[11px] font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
@@ -239,25 +270,27 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
             </div>
 
             {/* Apartman WhatsApp Grubu Daveti */}
-            <a
-              href={activeSite.whatsappGroupUrl || "https://chat.whatsapp.com/invite-demo"}
-              target="_blank"
-              rel="noreferrer"
-              className="p-3.5 bg-emerald-50 hover:bg-emerald-100 rounded-2xl border border-emerald-200 flex items-center justify-between gap-3 text-emerald-950 transition group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-xs">
-                  <MessageSquare size={16} />
+            {activeSite.whatsappGroupUrl && (
+              <a
+                href={activeSite.whatsappGroupUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3.5 bg-emerald-50 hover:bg-emerald-100 rounded-2xl border border-emerald-200 flex items-center justify-between gap-3 text-emerald-950 transition group cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-xs">
+                    <MessageSquare size={16} />
+                  </div>
+                  <div>
+                    <strong className="text-xs font-black block">Resmi WhatsApp Duyuru Grubu</strong>
+                    <span className="text-[10px] text-emerald-800">Acil duyurular ve yönetim bilgilendirmeleri için katılın.</span>
+                  </div>
                 </div>
-                <div>
-                  <strong className="text-xs font-black block">Resmi WhatsApp Duyuru Grubu</strong>
-                  <span className="text-[10px] text-emerald-800">Acil duyurular ve yönetim bilgilendirmeleri için katılın.</span>
-                </div>
-              </div>
-              <span className="text-[11px] font-bold bg-white text-emerald-900 px-3 py-1.5 rounded-xl border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white transition shadow-2xs">
-                Gruba Katıl →
-              </span>
-            </a>
+                <span className="text-[11px] font-bold bg-white text-emerald-900 px-3 py-1.5 rounded-xl border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white transition shadow-2xs">
+                  Gruba Katıl →
+                </span>
+              </a>
+            )}
           </div>
         </div>
 
@@ -272,7 +305,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
             </div>
             <div>
               <strong className="text-xs font-bold text-[#172b2b] block group-hover:text-emerald-800">Borçlarım</strong>
-              <span className="text-[10px] text-slate-500">{currentDebt > 0 ? "1 açık aidat borcu" : "Borcunuz bulunmuyor"}</span>
+              <span className="text-[10px] text-slate-500">{currentDebt > 0 ? `${formatCurrency(currentDebt)} açık borç` : "Borcunuz bulunmuyor"}</span>
             </div>
           </button>
 
@@ -303,7 +336,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
           </button>
 
           <button
-            onClick={() => toast.info("Yönetim İletişim: Serdar Yılmaz (0533 112 33 44)")}
+            onClick={() => toast.info(`Yönetim: ${activeSite.managerName || activeSite.name} (${activeSite.address || activeSite.city})`)}
             className="bg-white border border-[#e4eae3] hover:border-purple-300 hover:shadow-md p-4 rounded-2xl text-left transition space-y-2 group"
           >
             <div className="w-9 h-9 rounded-xl bg-[#eeebfb] text-[#8978bc] flex items-center justify-center">
@@ -311,7 +344,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
             </div>
             <div>
               <strong className="text-xs font-bold text-[#172b2b] block group-hover:text-purple-800">Yönetim İletişim</strong>
-              <span className="text-[10px] text-slate-500">Ofis & Güvenlik tel</span>
+              <span className="text-[10px] text-slate-500">{activeSite.managerName || "Site Yönetimi"}</span>
             </div>
           </button>
         </div>
@@ -360,7 +393,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
           </div>
 
           <div className="space-y-2.5">
-            {activeSiteRequests.filter(r => r.unitId === residentUnit.id).length > 0 ? (
+            {residentUnit && activeSiteRequests.filter(r => r.unitId === residentUnit.id).length > 0 ? (
               activeSiteRequests.filter(r => r.unitId === residentUnit.id).map(r => (
                 <div key={r.id} className="p-3.5 rounded-xl border border-[#e4eae3] flex items-center justify-between">
                   <div>
@@ -407,7 +440,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
               <div className="p-3 bg-[#edf3eb] rounded-2xl border border-[#dce7da] flex justify-between items-center">
                 <div>
                   <span className="text-[10px] font-bold text-slate-500 uppercase block">ÖDENECEK TUTAR</span>
-                  <span className="text-xs text-slate-600">{residentUnit.blockName} Daire {residentUnit.unitNumber}</span>
+                  <span className="text-xs text-slate-600">{residentUnit ? `${residentUnit.blockName} Daire ${residentUnit.unitNumber}` : activeSite.name}</span>
                 </div>
                 <div className="relative w-32">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400">₺</span>
@@ -507,7 +540,7 @@ export default function ResidentPortalView({ onBackToManager }: ResidentPortalVi
             <div className="flex items-center justify-between pb-3 border-b border-[#e4eae3]">
               <div>
                 <h3 className="text-base font-bold text-[#172b2b]">Hesap Hareketlerim ve Borç Dökümü</h3>
-                <p className="text-xs text-[#7c8a87]">{residentUnit.blockName} Daire {residentUnit.unitNumber}</p>
+                <p className="text-xs text-[#7c8a87]">{residentUnit ? `${residentUnit.blockName} Daire ${residentUnit.unitNumber}` : activeSite.name}</p>
               </div>
               <button onClick={() => setIsLedgerModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X size={18} />

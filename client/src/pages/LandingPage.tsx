@@ -778,7 +778,7 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
             <div className="space-y-1 pt-4 md:pt-0">
               <span className="text-4xl sm:text-5xl font-black text-[#172b2b] tracking-tight font-heading block">1.450+</span>
               <p className="text-xs sm:text-sm font-bold text-[#172b2b]">Aktif Apartman & Site</p>
-              <span className="text-[11px] text-slate-500 font-medium block">81 İl Genelinde Yönetim</span>
+              <span className="text-[11px] text-slate-500 font-medium block">Bulut Tabanlı Yönetim</span>
             </div>
             <div className="space-y-1 pt-4 md:pt-0">
               <span className="text-4xl sm:text-5xl font-black text-[#172b2b] tracking-tight font-heading block">48.000+</span>
@@ -1156,53 +1156,6 @@ export default function LandingPage({ onGoToApp, onOpenLogin }: LandingPageProps
               </p>
             </div>
 
-          </div>
-        </div>
-      </section>
-
-      {/* ======================= FAQ ACCORDION SECTION (LIGHT) ======================= */}
-      <section id="sss" className="py-24 px-4 sm:px-8 lg:px-12 bg-white border-b border-[#e2eae3] scroll-mt-20">
-        <div className="max-w-4xl mx-auto space-y-10">
-          
-          <div className="text-center space-y-3">
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-900 bg-emerald-100/90 px-4 py-1.5 rounded-full border border-emerald-300 shadow-2xs inline-block">
-              MERAK EDİLENLER
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#172b2b] font-heading tracking-tight">
-              Sıkça Sorulan Sorular
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium">
-              Aklınıza takılan tüm soruların şeffaf yanıtları.
-            </p>
-          </div>
-
-          <div className="space-y-3.5">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="bg-[#f8faf8] rounded-2xl border border-[#e2eae3] hover:border-emerald-300 overflow-hidden transition-all shadow-2xs"
-              >
-                <button
-                  onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-[#172b2b] hover:text-emerald-800 transition cursor-pointer"
-                >
-                  <span className="flex items-center gap-3">
-                    <QuestionIcon size={17} className="text-emerald-700 flex-shrink-0" />
-                    <span>{faq.q}</span>
-                  </span>
-                  <ChevronRight
-                    size={18}
-                    className={`transform transition-transform text-slate-400 flex-shrink-0 ${activeFaq === idx ? "rotate-90 text-emerald-800" : ""}`}
-                  />
-                </button>
-
-                {activeFaq === idx && (
-                  <div className="p-5 pt-0 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 animate-in fade-in duration-150 font-medium">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            ))}
           </div>
         </div>
       </section>

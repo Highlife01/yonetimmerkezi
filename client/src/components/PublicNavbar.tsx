@@ -16,8 +16,6 @@ export default function PublicNavbar() {
     { href: "/ozellikler", label: "Özellikler" },
     { href: "/kmk-mevzuat-rehberi", label: "KMK Rehberi", badge: "Mevzuat" },
     { href: "/tasarruf-hesapla", label: "Tasarruf Hesapla" },
-    { href: "/turkiye-geneli-hizmet", label: "81 İl GEO Ağı", badge: "Türkiye" },
-    { href: "/sss", label: "S.S.S." },
     { href: "/iletisim", label: "İletişim" },
   ];
 

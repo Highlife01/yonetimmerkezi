@@ -1,17 +1,11 @@
 import React from "react";
 import { Link } from "wouter";
 import {
-  Globe, Mail, MessageCircle, ShieldCheck, MapPin,
-  ChevronRight, PhoneCall, CheckCircle2, Award
+  Globe, Mail, ShieldCheck,
+  ChevronRight, CheckCircle2
 } from "lucide-react";
 
 export default function PublicFooter() {
-  const topCities = [
-    "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya",
-    "Adana", "Konya", "Gaziantep", "Kocaeli", "Mersin",
-    "Kayseri", "Eskişehir", "Diyarbakır", "Samsun", "Denizli"
-  ];
-
   return (
     <footer className="bg-white border-t border-[#e2eae3] text-xs text-slate-500 pt-16 pb-12 px-4 sm:px-8 lg:px-12 relative overflow-hidden">
       {/* Background soft glow */}
@@ -71,15 +65,9 @@ export default function PublicFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/turkiye-geneli-hizmet" className="hover:text-emerald-700 transition flex items-center gap-1.5">
+                <Link href="/iletisim" className="hover:text-emerald-700 transition flex items-center gap-1.5">
                   <ChevronRight size={12} className="text-emerald-600" />
-                  <span>81 İl Yerel Hizmet Ağı</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/sss" className="hover:text-emerald-700 transition flex items-center gap-1.5">
-                  <ChevronRight size={12} className="text-emerald-600" />
-                  <span>Sıkça Sorulan Sorular</span>
+                  <span>İletişim &amp; Destek</span>
                 </Link>
               </li>
             </ul>
@@ -114,25 +102,12 @@ export default function PublicFooter() {
             </ul>
           </div>
 
-          {/* Col 4: İletişim & GEO */}
+          {/* Col 4: İletişim */}
           <div className="space-y-3">
             <h4 className="text-xs font-black text-[#172b2b] uppercase tracking-wider font-heading">
-              Canlı Destek &amp; İletişim
+              İletişim
             </h4>
             <div className="space-y-2 font-semibold">
-              <a
-                href="https://wa.me/905320550945?text=Merhaba,%20Y%C3%B6netim%20Merkezi%20hakk%C4%B1nda%20bilgi%20ve%20destek%20almak%20istiyorum."
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100 transition"
-              >
-                <MessageCircle size={16} className="text-[#25D366] flex-shrink-0" />
-                <div>
-                  <strong className="block text-xs font-extrabold font-mono">0532 055 09 45</strong>
-                  <span className="text-[10px] text-emerald-700">7/24 WhatsApp Destek Hattı</span>
-                </div>
-              </a>
-
               <a
                 href="mailto:info@yonetimmerkezi.com.tr"
                 className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-50 text-slate-700 transition"
@@ -140,35 +115,16 @@ export default function PublicFooter() {
                 <Mail size={15} className="text-emerald-600 flex-shrink-0" />
                 <span className="truncate">info@yonetimmerkezi.com.tr</span>
               </a>
-
-              <div className="flex items-center gap-2 p-2 text-slate-600 text-[11px]">
-                <MapPin size={15} className="text-emerald-600 flex-shrink-0" />
-                <span>Türkiye Geneli (81 İl Hizmet Ağı)</span>
-              </div>
+              <Link
+                href="/iletisim"
+                className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100 transition"
+              >
+                <ChevronRight size={14} className="text-emerald-700 flex-shrink-0" />
+                <span>İletişim &amp; Destek Formu</span>
+              </Link>
             </div>
           </div>
 
-        </div>
-
-        {/* Regional Geo SEO Quick Bar */}
-        <div className="border-t border-slate-200/80 pt-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-[11px]">
-            <div className="flex items-center gap-2 text-slate-700 font-bold">
-              <MapPin size={14} className="text-emerald-600" />
-              <span>Türkiye Geneli Popüler Hizmet Bölgelerimiz:</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {topCities.map((city) => (
-                <Link
-                  key={city}
-                  href="/turkiye-geneli-hizmet"
-                  className="px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-800 border border-slate-200/70 transition font-medium text-[11px]"
-                >
-                  {city} Apartman Yönetimi
-                </Link>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Bottom copyright line */}
@@ -189,8 +145,6 @@ export default function PublicFooter() {
 
           <div className="flex flex-wrap items-center gap-4 font-semibold text-slate-600">
             <Link href="/kmk-mevzuat-rehberi" className="hover:text-emerald-700">KMK Mevzuatı</Link>
-            <span>·</span>
-            <Link href="/sss" className="hover:text-emerald-700">Sıkça Sorulan Sorular</Link>
             <span>·</span>
             <Link href="/iletisim" className="hover:text-emerald-700">İletişim &amp; Destek</Link>
           </div>

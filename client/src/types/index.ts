@@ -64,6 +64,7 @@ export interface UserProfile {
   role: UserRole;
   avatarText: string;
   avatarTone: "mint" | "blue" | "coral" | "gold" | "lavender" | "cream";
+  companyId?: string;
   companyName?: string;
   managedSiteIds: string[];
   residentUnitId?: string; // If owner/tenant
@@ -87,6 +88,7 @@ export interface ManagementCompany {
 export interface Site {
   id: string;
   companyId: string;
+  managerUid?: string;
   name: string;
   type: "SITE" | "APARTMAN" | "REZIDANS" | "IS_MERKEZI";
   address: string;

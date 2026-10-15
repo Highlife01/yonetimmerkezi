@@ -119,24 +119,6 @@ export default function ContactPage() {
                 </p>
               </div>
             </a>
-
-            {/* Geo Support Card */}
-            <div className="p-6 rounded-3xl bg-white border border-[#e2eae3] flex items-start gap-4 shadow-2xs">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0">
-                <MapPin size={22} className="text-emerald-700" />
-              </div>
-              <div>
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider font-mono block">
-                  HİZMET KAPSAMI
-                </span>
-                <strong className="text-sm font-black text-[#172b2b] block mt-0.5">
-                  Türkiye Geneli (81 İl)
-                </strong>
-                <p className="text-xs text-slate-600 mt-1 font-medium">
-                  Tüm Türkiye genelinde binlerce apartman ve site tarafından online bulut sistemi üzerinden kullanılmaktadır.
-                </p>
-              </div>
-            </div>
           </div>
 
           {/* Right 7 Cols: Contact Form */}

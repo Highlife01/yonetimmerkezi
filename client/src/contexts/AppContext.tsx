@@ -20,7 +20,7 @@ import {
 } from "@/data/mockData";
 import {
   db, collection, doc, getDocs, setDoc, addDoc, updateDoc,
-  deleteDoc, onSnapshot, writeBatch
+  deleteDoc, onSnapshot, writeBatch, query, where
 } from "@/lib/firebase";
 import { useAuth } from "./AuthContext";
 
@@ -126,6 +126,7 @@ interface AppContextType {
   // Budget
   budget: AnnualBudget;
   updateBudgetItem: (itemId: string, updates: Partial<AnnualBudget["items"][0]>) => void;
+  addBudgetItem: (item: { category: string; type: "GELIR" | "GIDER"; plannedAnnual: number; notes?: string }) => Promise<void>;
 
   // Requests / Tickets
   requests: ServiceRequest[];
@@ -191,45 +192,47 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const INITIAL_WHATSAPP_LOGS: WhatsAppLogEntry[] = [
-  {
-    id: "walog-1",
-    siteId: "site-1",
-    timestamp: "2026-10-14 10:02:14",
-    type: "AIDAT_HATIRLATMA",
-    unitId: "u-3",
-    unitName: "A Blok D:3",
-    recipientName: "Selim Aksoy",
-    phone: "0532 411 22 33",
-    period: "2026-10",
-    amount: 6400,
-    messagePreview: "Sayın Selim Aksoy, Zümrüt Vadisi Konakları A Blok D:3 dairenize ait 2026-10 dönemi 6.400 TL aidat borcunuz bulunmaktadır.",
-    status: "BASARILI",
-    httpCode: 200,
-  },
-  {
-    id: "walog-2",
-    siteId: "site-1",
-    timestamp: "2026-10-12 14:30:05",
-    type: "EKSTRA_BORC",
-    unitId: "u-5",
-    unitName: "B Blok D:1",
-    recipientName: "Kaan Demir",
-    phone: "0544 822 19 00",
-    period: "2026-10",
-    amount: 9600,
-    messagePreview: "Sayın Kaan Demir, B Blok D:1 dairenize ait gecikmiş demirbaş ve aidat borcunuz 9.600 TL'dir. Lütfen ödeme yapınız.",
-    status: "BASARILI",
-    httpCode: 200,
-  },
-];
+const EMPTY_SITE: Site = {
+  id: "",
+  companyId: "",
+  name: "Site Seçilmedi",
+  type: "SITE",
+  address: "",
+  city: "İstanbul",
+  district: "",
+  totalBlocks: 0,
+  totalUnits: 0,
+  managerName: "",
+  managerPhone: "",
+  bankIban: "",
+  bankName: "",
+  monthlyDuesDueDay: 10,
+  lateInterestRatePerMonth: 5,
+  createdAt: new Date().toISOString().split("T")[0],
+};
+
+const createEmptyBudget = (siteId: string): AnnualBudget => ({
+  id: `budget-${siteId || "default"}-${new Date().getFullYear()}`,
+  siteId: siteId || "",
+  year: new Date().getFullYear(),
+  status: "ONAYLANDI_GENEL_KURUL",
+  totalEstimatedIncome: 0,
+  totalEstimatedExpense: 0,
+  totalActualIncome: 0,
+  totalActualExpense: 0,
+  items: [],
+});
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const { currentUser } = useAuth();
+  const { currentUser, firebaseUser, isResidentRole } = useAuth();
 
-  const [company, setCompany] = useState<ManagementCompany>(INITIAL_COMPANY);
+  const [company] = useState<ManagementCompany>(() => ({
+    ...INITIAL_COMPANY,
+    id: currentUser.companyId || "comp-1",
+    name: currentUser.companyName || INITIAL_COMPANY.name,
+  }));
   const [sites, setSites] = useState<Site[]>([]);
-  const [activeSiteId, setActiveSiteId] = useState<string>("site-1");
+  const [activeSiteId, setActiveSiteId] = useState<string>(currentUser.activeSiteId || "");
 
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
@@ -241,7 +244,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [accountTransactions, setAccountTransactions] = useState<AccountTransaction[]>([]);
   const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [budget, setBudget] = useState<AnnualBudget>(INITIAL_BUDGET);
+  const [rawBudget, setRawBudget] = useState<AnnualBudget>(() => createEmptyBudget(currentUser.activeSiteId || ""));
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -254,298 +257,394 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [meters, setMeters] = useState<MeterReading[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [whatsappConfig, setWhatsappConfig] = useState<WhatsAppConfig>({
-    siteId: "site-1",
+    siteId: currentUser.activeSiteId || "",
     enabled: true,
     provider: "META_CLOUD_API",
-    phoneNumberId: "104928374651920",
-    wabaId: "994827162534102",
+    phoneNumberId: "",
+    wabaId: "",
     templateName: "aidat_hatirlatma_tr",
     autoReminderDay: 10,
     autoReminderTime: "10:00",
     messageTemplate: "Sayın {ad_soyad}, {site_adi} {daire_no} numaralı bağımsız bölümünüze ait {donem} dönemi toplam {borc} ₺ bakiye bulunmaktadır. Son ödeme tarihi: {son_odeme_tarihi}. IBAN: {iban}",
   });
-  const [whatsappLogs, setWhatsappLogs] = useState<WhatsAppLogEntry[]>(INITIAL_WHATSAPP_LOGS);
+  const [whatsappLogs, setWhatsappLogs] = useState<WhatsAppLogEntry[]>([]);
 
   // =========================================================================
-  // Firestore Live Real-Time Data Synchronization
+  // 1. Scoped Sites Synchronization (Multi-Tenant Management Isolation)
   // =========================================================================
   useEffect(() => {
     try {
-      // 1. Sites
-      const unsubSites = onSnapshot(collection(db, "sites"), (snapshot) => {
-        if (!snapshot.empty) {
-          const loaded = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Site));
-          setSites(loaded);
-        } else {
-          INITIAL_SITES.forEach(s => setDoc(doc(db, "sites", s.id), s));
-          setSites(INITIAL_SITES);
-        }
-      }, (err) => {
-        console.warn("Firestore sites sync:", err);
-        setSites(INITIAL_SITES);
-      });
+      const uid = firebaseUser?.uid || currentUser.id;
+      const userCompanyId = currentUser.companyId || "comp-1";
+      const isSuper = currentUser.role === "SUPER_ADMIN";
 
-      // 2. Blocks
-      const unsubBlocks = onSnapshot(collection(db, "blocks"), (snapshot) => {
-        if (!snapshot.empty) {
-          setBlocks(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Block)));
-        } else {
-          INITIAL_BLOCKS.forEach(b => setDoc(doc(db, "blocks", b.id), b));
-          setBlocks(INITIAL_BLOCKS);
-        }
-      }, (err) => setBlocks(INITIAL_BLOCKS));
+      const sitesQuery = isSuper
+        ? collection(db, "sites")
+        : isResidentRole && currentUser.activeSiteId
+        ? query(collection(db, "sites"), where("id", "==", currentUser.activeSiteId))
+        : query(collection(db, "sites"), where("companyId", "==", userCompanyId));
 
-      // 3. Units
-      const unsubUnits = onSnapshot(collection(db, "units"), (snapshot) => {
-        if (!snapshot.empty) {
-          setUnits(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Unit)));
-        } else {
-          INITIAL_UNITS.forEach(u => setDoc(doc(db, "units", u.id), u));
-          setUnits(INITIAL_UNITS);
+      const unsubSites = onSnapshot(
+        sitesQuery,
+        (snapshot) => {
+          const loaded = snapshot.docs.map((d) => ({ ...d.data(), id: d.id } as Site));
+          // Filter client-side as secondary defense to ensure strict tenant boundary
+          const scopedSites = loaded.filter((s) => {
+            if (isSuper) return true;
+            if (isResidentRole) return s.id === currentUser.activeSiteId;
+            return (
+              s.companyId === userCompanyId ||
+              s.managerUid === uid ||
+              currentUser.managedSiteIds?.includes(s.id)
+            );
+          });
+          setSites(scopedSites);
+          if (scopedSites.length > 0 && (!activeSiteId || !scopedSites.some((s) => s.id === activeSiteId))) {
+            setActiveSiteId(scopedSites[0].id);
+          }
+        },
+        () => {
+          setSites([]);
         }
-      }, (err) => setUnits(INITIAL_UNITS));
+      );
 
-      // 4. People
-      const unsubPeople = onSnapshot(collection(db, "people"), (snapshot) => {
-        if (!snapshot.empty) {
-          setPeople(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Person)));
-        } else {
-          INITIAL_PEOPLE.forEach(p => setDoc(doc(db, "people", p.id), p));
-          setPeople(INITIAL_PEOPLE);
-        }
-      }, (err) => setPeople(INITIAL_PEOPLE));
-
-      // 5. Tahakkuklar
-      const unsubTahakkuklar = onSnapshot(collection(db, "tahakkuklar"), (snapshot) => {
-        if (!snapshot.empty) {
-          setTahakkuklar(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as TahakkukRecord)));
-        } else {
-          INITIAL_TAHAKKUKLAR.forEach(t => setDoc(doc(db, "tahakkuklar", t.id), t));
-          setTahakkuklar(INITIAL_TAHAKKUKLAR);
-        }
-      }, (err) => setTahakkuklar(INITIAL_TAHAKKUKLAR));
-
-      // 6. Collections
-      const unsubCollections = onSnapshot(collection(db, "collections"), (snapshot) => {
-        if (!snapshot.empty) {
-          setCollections(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Collection)));
-        } else {
-          INITIAL_COLLECTIONS.forEach(c => setDoc(doc(db, "collections", c.id), c));
-          setCollections(INITIAL_COLLECTIONS);
-        }
-      }, (err) => setCollections(INITIAL_COLLECTIONS));
-
-      // 7. Ledger Items
-      const unsubLedger = onSnapshot(collection(db, "ledger_items"), (snapshot) => {
-        if (!snapshot.empty) {
-          setLedgerItems(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as UnitAccountLedgerItem)));
-        } else {
-          INITIAL_LEDGER_ITEMS.forEach(l => setDoc(doc(db, "ledger_items", l.id), l));
-          setLedgerItems(INITIAL_LEDGER_ITEMS);
-        }
-      }, (err) => setLedgerItems(INITIAL_LEDGER_ITEMS));
-
-      // 8. Accounts (Kasa & Banka)
-      const unsubAccounts = onSnapshot(collection(db, "accounts"), (snapshot) => {
-        if (!snapshot.empty) {
-          setAccounts(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as AccountEntity)));
-        } else {
-          INITIAL_ACCOUNTS.forEach(a => setDoc(doc(db, "accounts", a.id), a));
-          setAccounts(INITIAL_ACCOUNTS);
-        }
-      }, (err) => setAccounts(INITIAL_ACCOUNTS));
-
-      // 9. Account Transactions
-      const unsubTx = onSnapshot(collection(db, "account_transactions"), (snapshot) => {
-        if (!snapshot.empty) {
-          setAccountTransactions(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as AccountTransaction)));
-        } else {
-          INITIAL_ACCOUNT_TXS.forEach(tx => setDoc(doc(db, "account_transactions", tx.id), tx));
-          setAccountTransactions(INITIAL_ACCOUNT_TXS);
-        }
-      }, (err) => setAccountTransactions(INITIAL_ACCOUNT_TXS));
-
-      // 10. Expenses
-      const unsubExpenses = onSnapshot(collection(db, "expenses"), (snapshot) => {
-        if (!snapshot.empty) {
-          setExpenses(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ExpenseRecord)));
-        } else {
-          INITIAL_EXPENSES.forEach(e => setDoc(doc(db, "expenses", e.id), e));
-          setExpenses(INITIAL_EXPENSES);
-        }
-      }, (err) => setExpenses(INITIAL_EXPENSES));
-
-      // 11. Vendors
-      const unsubVendors = onSnapshot(collection(db, "vendors"), (snapshot) => {
-        if (!snapshot.empty) {
-          setVendors(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Vendor)));
-        } else {
-          INITIAL_VENDORS.forEach(v => setDoc(doc(db, "vendors", v.id), v));
-          setVendors(INITIAL_VENDORS);
-        }
-      }, (err) => setVendors(INITIAL_VENDORS));
-
-      // 12. Requests (Arıza & Hizmet)
-      const unsubRequests = onSnapshot(collection(db, "requests"), (snapshot) => {
-        if (!snapshot.empty) {
-          setRequests(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ServiceRequest)));
-        } else {
-          INITIAL_REQUESTS.forEach(r => setDoc(doc(db, "requests", r.id), r));
-          setRequests(INITIAL_REQUESTS);
-        }
-      }, (err) => setRequests(INITIAL_REQUESTS));
-
-      // 13. Announcements
-      const unsubAnnouncements = onSnapshot(collection(db, "announcements"), (snapshot) => {
-        if (!snapshot.empty) {
-          setAnnouncements(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Announcement)));
-        } else {
-          INITIAL_ANNOUNCEMENTS.forEach(a => setDoc(doc(db, "announcements", a.id), a));
-          setAnnouncements(INITIAL_ANNOUNCEMENTS);
-        }
-      }, (err) => setAnnouncements(INITIAL_ANNOUNCEMENTS));
-
-      // 14. Polls
-      const unsubPolls = onSnapshot(collection(db, "polls"), (snapshot) => {
-        if (!snapshot.empty) {
-          setPolls(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Poll)));
-        } else {
-          INITIAL_POLLS.forEach(p => setDoc(doc(db, "polls", p.id), p));
-          setPolls(INITIAL_POLLS);
-        }
-      }, (err) => setPolls(INITIAL_POLLS));
-
-      // 15. Meetings
-      const unsubMeetings = onSnapshot(collection(db, "meetings"), (snapshot) => {
-        if (!snapshot.empty) {
-          setMeetings(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as MeetingMinute)));
-        } else {
-          INITIAL_MEETINGS.forEach(m => setDoc(doc(db, "meetings", m.id), m));
-          setMeetings(INITIAL_MEETINGS);
-        }
-      }, (err) => setMeetings(INITIAL_MEETINGS));
-
-      // 16. Documents
-      const unsubDocs = onSnapshot(collection(db, "documents"), (snapshot) => {
-        if (!snapshot.empty) {
-          setDocuments(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as DocumentArchiveItem)));
-        } else {
-          INITIAL_DOCS.forEach(docItem => setDoc(doc(db, "documents", docItem.id), docItem));
-          setDocuments(INITIAL_DOCS);
-        }
-      }, (err) => setDocuments(INITIAL_DOCS));
-
-      // 17. Assets
-      const unsubAssets = onSnapshot(collection(db, "assets"), (snapshot) => {
-        if (!snapshot.empty) {
-          setAssets(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as AssetFixture)));
-        } else {
-          INITIAL_ASSETS.forEach(a => setDoc(doc(db, "assets", a.id), a));
-          setAssets(INITIAL_ASSETS);
-        }
-      }, (err) => setAssets(INITIAL_ASSETS));
-
-      // 18. Staff
-      const unsubStaff = onSnapshot(collection(db, "staff"), (snapshot) => {
-        if (!snapshot.empty) {
-          setStaff(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as StaffMember)));
-        } else {
-          INITIAL_STAFF.forEach(s => setDoc(doc(db, "staff", s.id), s));
-          setStaff(INITIAL_STAFF);
-        }
-      }, (err) => setStaff(INITIAL_STAFF));
-
-      // 19. Visitors
-      const unsubVisitors = onSnapshot(collection(db, "visitors"), (snapshot) => {
-        if (!snapshot.empty) {
-          setVisitors(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as VisitorLog)));
-        } else {
-          INITIAL_VISITORS.forEach(v => setDoc(doc(db, "visitors", v.id), v));
-          setVisitors(INITIAL_VISITORS);
-        }
-      }, (err) => setVisitors(INITIAL_VISITORS));
-
-      // 20. Parcels
-      const unsubParcels = onSnapshot(collection(db, "parcels"), (snapshot) => {
-        if (!snapshot.empty) {
-          setParcels(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ParcelLog)));
-        } else {
-          INITIAL_PARCELS.forEach(p => setDoc(doc(db, "parcels", p.id), p));
-          setParcels(INITIAL_PARCELS);
-        }
-      }, (err) => setParcels(INITIAL_PARCELS));
-
-      // 21. Meters
-      const unsubMeters = onSnapshot(collection(db, "meters"), (snapshot) => {
-        if (!snapshot.empty) {
-          setMeters(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as MeterReading)));
-        } else {
-          INITIAL_METERS.forEach(m => setDoc(doc(db, "meters", m.id), m));
-          setMeters(INITIAL_METERS);
-        }
-      }, (err) => setMeters(INITIAL_METERS));
-
-      // 22. Audit Logs
-      const unsubLogs = onSnapshot(collection(db, "audit_logs"), (snapshot) => {
-        if (!snapshot.empty) {
-          setAuditLogs(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as AuditLogEntry)));
-        } else {
-          INITIAL_AUDIT_LOGS.forEach(l => setDoc(doc(db, "audit_logs", l.id), l));
-          setAuditLogs(INITIAL_AUDIT_LOGS);
-        }
-      }, (err) => setAuditLogs(INITIAL_AUDIT_LOGS));
-
-      return () => {
-        unsubSites();
-        unsubBlocks();
-        unsubUnits();
-        unsubPeople();
-        unsubTahakkuklar();
-        unsubCollections();
-        unsubLedger();
-        unsubAccounts();
-        unsubTx();
-        unsubExpenses();
-        unsubVendors();
-        unsubRequests();
-        unsubAnnouncements();
-        unsubPolls();
-        unsubMeetings();
-        unsubDocs();
-        unsubAssets();
-        unsubStaff();
-        unsubVisitors();
-        unsubParcels();
-        unsubMeters();
-        unsubLogs();
-      };
+      return () => unsubSites();
     } catch (e) {
-      console.warn("Firestore listeners active with local fallback.");
+      setSites([]);
     }
-  }, []);
+  }, [currentUser.id, currentUser.role, currentUser.companyId, currentUser.activeSiteId, firebaseUser?.uid, isResidentRole]);
 
-  const activeSite = sites.find((s) => s.id === activeSiteId) || sites[0] || INITIAL_SITES[0];
+  // =========================================================================
+  // 2. Active Site & Resident Unit Scoped Real-Time Data Synchronization
+  // =========================================================================
+  useEffect(() => {
+    if (!activeSiteId) {
+      setBlocks([]);
+      setUnits([]);
+      setPeople([]);
+      setTahakkuklar([]);
+      setCollections([]);
+      setLedgerItems([]);
+      setAccounts([]);
+      setAccountTransactions([]);
+      setExpenses([]);
+      setVendors([]);
+      setRawBudget(createEmptyBudget(""));
+      setRequests([]);
+      setAnnouncements([]);
+      setPolls([]);
+      setMeetings([]);
+      setDocuments([]);
+      setAssets([]);
+      setStaff([]);
+      setVisitors([]);
+      setParcels([]);
+      setMeters([]);
+      setAuditLogs([]);
+      return;
+    }
+
+    const unsubs: Array<() => void> = [];
+    const residentUnitId = currentUser.residentUnitId;
+
+    try {
+      // Shared site-scoped collections (readable by site manager & site residents)
+      unsubs.push(
+        onSnapshot(
+          query(collection(db, "blocks"), where("siteId", "==", activeSiteId)),
+          (snap) => setBlocks(snap.docs.map((d) => ({ ...d.data(), id: d.id } as Block))),
+          () => setBlocks([])
+        )
+      );
+
+      unsubs.push(
+        onSnapshot(
+          query(collection(db, "announcements"), where("siteId", "==", activeSiteId)),
+          (snap) => setAnnouncements(snap.docs.map((d) => ({ ...d.data(), id: d.id } as Announcement))),
+          () => setAnnouncements([])
+        )
+      );
+
+      unsubs.push(
+        onSnapshot(
+          query(collection(db, "polls"), where("siteId", "==", activeSiteId)),
+          (snap) => setPolls(snap.docs.map((d) => ({ ...d.data(), id: d.id } as Poll))),
+          () => setPolls([])
+        )
+      );
+
+      unsubs.push(
+        onSnapshot(
+          query(collection(db, "meetings"), where("siteId", "==", activeSiteId)),
+          (snap) => setMeetings(snap.docs.map((d) => ({ ...d.data(), id: d.id } as MeetingMinute))),
+          () => setMeetings([])
+        )
+      );
+
+      unsubs.push(
+        onSnapshot(
+          query(collection(db, "documents"), where("siteId", "==", activeSiteId)),
+          (snap) => setDocuments(snap.docs.map((d) => ({ ...d.data(), id: d.id } as DocumentArchiveItem))),
+          () => setDocuments([])
+        )
+      );
+
+      unsubs.push(
+        onSnapshot(
+          query(collection(db, "accounts"), where("siteId", "==", activeSiteId)),
+          (snap) => setAccounts(snap.docs.map((d) => ({ ...d.data(), id: d.id } as AccountEntity))),
+          () => setAccounts([])
+        )
+      );
+
+      unsubs.push(
+        onSnapshot(
+          query(collection(db, "tahakkuklar"), where("siteId", "==", activeSiteId)),
+          (snap) => setTahakkuklar(snap.docs.map((d) => ({ ...d.data(), id: d.id } as TahakkukRecord))),
+          () => setTahakkuklar([])
+        )
+      );
+
+      unsubs.push(
+        onSnapshot(
+          doc(db, "budgets", activeSiteId),
+          (snap) => {
+            if (snap.exists()) {
+              setRawBudget({ ...(snap.data() as AnnualBudget), id: snap.id, siteId: activeSiteId });
+            } else {
+              setRawBudget(createEmptyBudget(activeSiteId));
+            }
+          },
+          () => setRawBudget(createEmptyBudget(activeSiteId))
+        )
+      );
+
+      // Unit-scoped collections: Residents ONLY subscribe to their own authorized unit!
+      if (isResidentRole) {
+        if (residentUnitId) {
+          unsubs.push(
+            onSnapshot(
+              doc(db, "units", residentUnitId),
+              (snap) => {
+                if (snap.exists() && (snap.data() as Unit).siteId === activeSiteId) {
+                  setUnits([{ ...(snap.data() as Unit), id: snap.id }]);
+                } else {
+                  setUnits([]);
+                }
+              },
+              () => setUnits([])
+            )
+          );
+
+          unsubs.push(
+            onSnapshot(
+              query(
+                collection(db, "collections"),
+                where("siteId", "==", activeSiteId),
+                where("unitId", "==", residentUnitId)
+              ),
+              (snap) => setCollections(snap.docs.map((d) => ({ ...d.data(), id: d.id } as Collection))),
+              () => setCollections([])
+            )
+          );
+
+          unsubs.push(
+            onSnapshot(
+              query(
+                collection(db, "ledger_items"),
+                where("siteId", "==", activeSiteId),
+                where("unitId", "==", residentUnitId)
+              ),
+              (snap) => setLedgerItems(snap.docs.map((d) => ({ ...d.data(), id: d.id } as UnitAccountLedgerItem))),
+              () => setLedgerItems([])
+            )
+          );
+
+          unsubs.push(
+            onSnapshot(
+              query(
+                collection(db, "requests"),
+                where("siteId", "==", activeSiteId),
+                where("unitId", "==", residentUnitId)
+              ),
+              (snap) => setRequests(snap.docs.map((d) => ({ ...d.data(), id: d.id } as ServiceRequest))),
+              () => setRequests([])
+            )
+          );
+        } else {
+          setUnits([]);
+          setCollections([]);
+          setLedgerItems([]);
+          setRequests([]);
+        }
+        // Residents do not subscribe to management-internal collections
+        setPeople([]);
+        setAccountTransactions([]);
+        setExpenses([]);
+        setVendors([]);
+        setAssets([]);
+        setStaff([]);
+        setVisitors([]);
+        setParcels([]);
+        setMeters([]);
+        setAuditLogs([]);
+      } else {
+        // Manager / Authorized Staff: subscribe to activeSiteId records
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "units"), where("siteId", "==", activeSiteId)),
+            (snap) => setUnits(snap.docs.map((d) => ({ ...d.data(), id: d.id } as Unit))),
+            () => setUnits([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "people"), where("siteId", "==", activeSiteId)),
+            (snap) => setPeople(snap.docs.map((d) => ({ ...d.data(), id: d.id } as Person))),
+            () => setPeople([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "collections"), where("siteId", "==", activeSiteId)),
+            (snap) => setCollections(snap.docs.map((d) => ({ ...d.data(), id: d.id } as Collection))),
+            () => setCollections([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "ledger_items"), where("siteId", "==", activeSiteId)),
+            (snap) => setLedgerItems(snap.docs.map((d) => ({ ...d.data(), id: d.id } as UnitAccountLedgerItem))),
+            () => setLedgerItems([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "account_transactions"), where("siteId", "==", activeSiteId)),
+            (snap) => setAccountTransactions(snap.docs.map((d) => ({ ...d.data(), id: d.id } as AccountTransaction))),
+            () => setAccountTransactions([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "expenses"), where("siteId", "==", activeSiteId)),
+            (snap) => setExpenses(snap.docs.map((d) => ({ ...d.data(), id: d.id } as ExpenseRecord))),
+            () => setExpenses([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "vendors"), where("siteId", "==", activeSiteId)),
+            (snap) => setVendors(snap.docs.map((d) => ({ ...d.data(), id: d.id } as Vendor))),
+            () => setVendors([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "requests"), where("siteId", "==", activeSiteId)),
+            (snap) => setRequests(snap.docs.map((d) => ({ ...d.data(), id: d.id } as ServiceRequest))),
+            () => setRequests([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "assets"), where("siteId", "==", activeSiteId)),
+            (snap) => setAssets(snap.docs.map((d) => ({ ...d.data(), id: d.id } as AssetFixture))),
+            () => setAssets([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "staff"), where("siteId", "==", activeSiteId)),
+            (snap) => setStaff(snap.docs.map((d) => ({ ...d.data(), id: d.id } as StaffMember))),
+            () => setStaff([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "visitors"), where("siteId", "==", activeSiteId)),
+            (snap) => setVisitors(snap.docs.map((d) => ({ ...d.data(), id: d.id } as VisitorLog))),
+            () => setVisitors([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "parcels"), where("siteId", "==", activeSiteId)),
+            (snap) => setParcels(snap.docs.map((d) => ({ ...d.data(), id: d.id } as ParcelLog))),
+            () => setParcels([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "meters"), where("siteId", "==", activeSiteId)),
+            (snap) => setMeters(snap.docs.map((d) => ({ ...d.data(), id: d.id } as MeterReading))),
+            () => setMeters([])
+          )
+        );
+
+        unsubs.push(
+          onSnapshot(
+            query(collection(db, "ym_audit_logs"), where("siteId", "==", activeSiteId)),
+            (snap) => setAuditLogs(snap.docs.map((d) => ({ ...d.data(), id: d.id } as AuditLogEntry))),
+            () => setAuditLogs([])
+          )
+        );
+      }
+    } catch (e) {
+      console.warn("Scoped Firestore listeners error:", e);
+    }
+
+    return () => {
+      unsubs.forEach((u) => u());
+    };
+  }, [activeSiteId, isResidentRole, currentUser.residentUnitId]);
+
+  const activeSite = sites.find((s) => s.id === activeSiteId) || sites[0] || EMPTY_SITE;
 
   // Filtered active site sub-arrays
-  const activeSiteUnits = units.filter((u) => u.siteId === activeSiteId);
-  const activeSitePeople = people.filter((p) => p.siteId === activeSiteId);
-  const activeSiteTahakkuklar = tahakkuklar.filter((t) => t.siteId === activeSiteId);
-  const activeSiteCollections = collections.filter((c) => c.siteId === activeSiteId);
-  const activeSiteAccounts = accounts.filter((a) => a.siteId === activeSiteId);
-  const activeSiteAccountTransactions = accountTransactions.filter((tx) => tx.siteId === activeSiteId);
-  const activeSiteExpenses = expenses.filter((e) => e.siteId === activeSiteId);
-  const activeSiteVendors = vendors.filter((v) => v.siteId === activeSiteId);
-  const activeSiteRequests = requests.filter((r) => r.siteId === activeSiteId);
-  const activeSiteAnnouncements = announcements.filter((a) => a.siteId === activeSiteId);
-  const activeSitePolls = polls.filter((p) => p.siteId === activeSiteId);
-  const activeSiteMeetings = meetings.filter((m) => m.siteId === activeSiteId);
-  const activeSiteDocuments = documents.filter((d) => d.siteId === activeSiteId);
-  const activeSiteAssets = assets.filter((a) => a.siteId === activeSiteId);
-  const activeSiteStaff = staff.filter((s) => s.siteId === activeSiteId);
-  const activeSiteVisitors = visitors.filter((v) => v.siteId === activeSiteId);
-  const activeSiteParcels = parcels.filter((p) => p.siteId === activeSiteId);
-  const activeSiteMeters = meters.filter((m) => m.siteId === activeSiteId);
-  const activeSiteAuditLogs = auditLogs.filter((l) => l.siteId === activeSiteId);
+  const activeSiteUnits = units.filter((u) => u.siteId === activeSite.id);
+  const activeSitePeople = people.filter((p) => p.siteId === activeSite.id);
+  const activeSiteTahakkuklar = tahakkuklar.filter((t) => t.siteId === activeSite.id);
+  const activeSiteCollections = collections.filter((c) => c.siteId === activeSite.id);
+  const activeSiteAccounts = accounts.filter((a) => a.siteId === activeSite.id);
+  const activeSiteAccountTransactions = accountTransactions.filter((tx) => tx.siteId === activeSite.id);
+  const activeSiteExpenses = expenses.filter((e) => e.siteId === activeSite.id);
+  const activeSiteVendors = vendors.filter((v) => v.siteId === activeSite.id);
+  const activeSiteRequests = requests.filter((r) => r.siteId === activeSite.id);
+  const activeSiteAnnouncements = announcements.filter((a) => a.siteId === activeSite.id);
+  const activeSitePolls = polls.filter((p) => p.siteId === activeSite.id);
+  const activeSiteMeetings = meetings.filter((m) => m.siteId === activeSite.id);
+  const activeSiteDocuments = documents.filter((d) => d.siteId === activeSite.id);
+  const activeSiteAssets = assets.filter((a) => a.siteId === activeSite.id);
+  const activeSiteStaff = staff.filter((s) => s.siteId === activeSite.id);
+  const activeSiteVisitors = visitors.filter((v) => v.siteId === activeSite.id);
+  const activeSiteParcels = parcels.filter((p) => p.siteId === activeSite.id);
+  const activeSiteMeters = meters.filter((m) => m.siteId === activeSite.id);
+  const activeSiteAuditLogs = auditLogs.filter((l) => l.siteId === activeSite.id);
+
+  // Compute live budget actuals from real collections & expenses
+  const liveTotalCollected = activeSiteCollections.reduce((s, c) => s + c.amount, 0);
+  const liveTotalExpensed = activeSiteExpenses.reduce((s, e) => s + e.amount, 0);
+  const budget: AnnualBudget = {
+    ...rawBudget,
+    siteId: activeSite.id,
+    totalEstimatedIncome: rawBudget.items.filter((i) => i.type === "GELIR").reduce((s, i) => s + i.plannedAnnual, 0),
+    totalEstimatedExpense: rawBudget.items.filter((i) => i.type === "GIDER").reduce((s, i) => s + i.plannedAnnual, 0),
+    totalActualIncome: liveTotalCollected || rawBudget.items.filter((i) => i.type === "GELIR").reduce((s, i) => s + i.actualAnnual, 0),
+    totalActualExpense: liveTotalExpensed || rawBudget.items.filter((i) => i.type === "GIDER").reduce((s, i) => s + i.actualAnnual, 0),
+  };
 
   // Helper Audit Logger
   const addAuditLog = async (
@@ -554,13 +653,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     description: string,
     financialAmount?: number
   ) => {
+    if (!activeSite.id) return;
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
     const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
     const newLog: AuditLogEntry = {
       id: "log-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
-      siteId: activeSiteId,
+      siteId: activeSite.id,
       timestamp: ts,
       userName: currentUser.name,
       userRole: currentUser.role,
@@ -572,23 +672,65 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAuditLogs((prev) => [newLog, ...prev]);
 
     try {
-      await setDoc(doc(db, "audit_logs", newLog.id), newLog);
+      await setDoc(doc(db, "ym_audit_logs", newLog.id), newLog);
     } catch (e) {}
   };
 
-  // Add new Site
+  // Add new Site (Multi-Tenant Scoped)
   const addNewSite = async (siteData: Omit<Site, "id" | "companyId" | "createdAt">) => {
     const newId = "site-" + Date.now();
+    const ownerCompanyId = currentUser.companyId || company.id || `comp-${firebaseUser?.uid || currentUser.id}`;
+    const ownerUid = firebaseUser?.uid || currentUser.id;
     const newSite: Site = {
       ...siteData,
       id: newId,
-      companyId: company.id,
+      companyId: ownerCompanyId,
+      managerUid: ownerUid,
       createdAt: new Date().toISOString().split("T")[0],
     };
     setSites((prev) => [...prev, newSite]);
     setActiveSiteId(newId);
     try {
       await setDoc(doc(db, "sites", newId), newSite);
+      // Create default Kasa & Banka accounts for the newly created site
+      const defaultKasa: AccountEntity = {
+        id: `acc-kasa-${newId}`,
+        siteId: newId,
+        type: "KASA",
+        name: "Ana Yönetim Kasası",
+        balance: 0,
+        currency: "TRY",
+        isActive: true,
+      };
+      await setDoc(doc(db, "accounts", defaultKasa.id), defaultKasa);
+      if (newSite.bankName || newSite.bankIban) {
+        const defaultBank: AccountEntity = {
+          id: `acc-bank-${newId}`,
+          siteId: newId,
+          type: "BANKA",
+          name: `${newSite.bankName || "Site"} Vadesiz Aidat Hesabı`,
+          bankName: newSite.bankName || "Banka",
+          iban: newSite.bankIban || "",
+          balance: 0,
+          currency: "TRY",
+          isActive: true,
+        };
+        await setDoc(doc(db, "accounts", defaultBank.id), defaultBank);
+      }
+      if (firebaseUser?.uid) {
+        const nextManaged = Array.from(new Set([...(currentUser.managedSiteIds || []), newId]));
+        await setDoc(
+          doc(db, "ym_profiles", firebaseUser.uid),
+          {
+            ...currentUser,
+            id: firebaseUser.uid,
+            companyId: ownerCompanyId,
+            managedSiteIds: nextManaged,
+            activeSiteId: newId,
+          },
+          { merge: true }
+        );
+      }
     } catch (e) {}
     addAuditLog("CREATE", "Site Yönetimi", `Yeni site tanımlandı: ${newSite.name}`);
   };
@@ -1356,12 +1498,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateBudgetItem = async (itemId: string, updates: Partial<AnnualBudget["items"][0]>) => {
-    const updatedItems = budget.items.map((i) => (i.id === itemId ? { ...i, ...updates } : i));
-    const newBudget = { ...budget, items: updatedItems };
-    setBudget(newBudget);
+    if (!activeSite.id) return;
+    const updatedItems = rawBudget.items.map((i) => (i.id === itemId ? { ...i, ...updates } : i));
+    const newBudget: AnnualBudget = {
+      ...rawBudget,
+      id: activeSite.id,
+      siteId: activeSite.id,
+      items: updatedItems,
+    };
+    setRawBudget(newBudget);
     try {
-      await setDoc(doc(db, "budget", budget.id), newBudget);
+      await setDoc(doc(db, "budgets", activeSite.id), newBudget);
     } catch (e) {}
+  };
+
+  const addBudgetItem = async (item: { category: string; type: "GELIR" | "GIDER"; plannedAnnual: number; notes?: string }) => {
+    if (!activeSite.id) return;
+    const newItem = {
+      id: "bi-" + Date.now(),
+      category: item.category,
+      type: item.type,
+      plannedAnnual: item.plannedAnnual,
+      actualAnnual: 0,
+      notes: item.notes,
+    };
+    const nextBudget: AnnualBudget = {
+      ...rawBudget,
+      id: activeSite.id,
+      siteId: activeSite.id,
+      items: [...rawBudget.items, newItem],
+    };
+    setRawBudget(nextBudget);
+    try {
+      await setDoc(doc(db, "budgets", activeSite.id), nextBudget);
+    } catch (e) {}
+    addAuditLog("CREATE", "Bütçe & İşletme Projesi", `Yeni bütçe kalemi eklendi: ${item.category} (${item.plannedAnnual.toLocaleString("tr-TR")} TL)`, item.plannedAnnual);
   };
 
   // Requests / Tickets
@@ -1657,13 +1828,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return newEntries.length;
   };
 
-  // Reset to live initial seeds
-  const resetDemoData = () => {
-    INITIAL_SITES.forEach(s => setDoc(doc(db, "sites", s.id), s).catch(() => {}));
-    INITIAL_UNITS.forEach(u => setDoc(doc(db, "units", u.id), u).catch(() => {}));
-    INITIAL_PEOPLE.forEach(p => setDoc(doc(db, "people", p.id), p).catch(() => {}));
-    INITIAL_ACCOUNTS.forEach(a => setDoc(doc(db, "accounts", a.id), a).catch(() => {}));
-  };
+  // Do not generate fake/demo data into Firestore
+  const resetDemoData = () => {};
 
   const resetToDefaults = resetDemoData;
 
@@ -1717,6 +1883,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         recordVendorPayment,
         budget,
         updateBudgetItem,
+        addBudgetItem,
         requests,
         activeSiteRequests,
         createServiceRequest,

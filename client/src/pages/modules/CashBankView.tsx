@@ -43,12 +43,15 @@ export default function CashBankView() {
     description: "Kasa nakit fazlasının banka hesabına yatırılması",
   });
 
-  // Bank reconciliation mock items
-  const [bankImportItems, setBankImportItems] = useState([
-    { id: "b1", date: "28.08.2026 10:14", desc: "SELIN YILMAZ A BLOK 24 AIDAT", amount: 2500, matchedUnit: "A Blok D:24", status: "MATCHED" },
-    { id: "b2", date: "28.08.2026 09:16", desc: "MEHMET KAYA B18 AIDAT EFT", amount: 5000, matchedUnit: "B Blok D:18", status: "MATCHED" },
-    { id: "b3", date: "27.08.2026 15:40", desc: "HAVALE - ALI RIZA OZKAN A02", amount: 2500, matchedUnit: "A Blok D:02", status: "PENDING" },
-  ]);
+  // Bank reconciliation items (populated from real bank statements)
+  const [bankImportItems, setBankImportItems] = useState<Array<{
+    id: string;
+    date: string;
+    desc: string;
+    amount: number;
+    matchedUnit: string;
+    status: string;
+  }>>([]);
 
   const filteredTransactions = activeSiteAccountTransactions.filter((tx) => {
     if (selectedAccountId !== "ALL" && tx.accountId !== selectedAccountId) return false;
